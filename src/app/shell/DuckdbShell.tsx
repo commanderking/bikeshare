@@ -3,10 +3,12 @@ import * as React from "react";
 import "xterm/css/xterm.css";
 
 import * as duckdb from "@duckdb/duckdb-wasm";
+
+// @ts-ignore - no types available for wasm?
 import duckdb_wasm from "@duckdb/duckdb-wasm/dist/duckdb-mvp.wasm";
+// @ts-ignore - no types available for wasm?
 import duckdb_wasm_eh from "@duckdb/duckdb-wasm/dist/duckdb-eh.wasm";
-
-
+// @ts-ignore - no types available for wasm?
 import shell_wasm from '@duckdb/duckdb-wasm-shell/dist/shell_bg.wasm';
 
 export const DUCKDB_BUNDLES: duckdb.DuckDBBundles = {
@@ -33,7 +35,6 @@ export const DUCKDB_BUNDLES: duckdb.DuckDBBundles = {
 };
 
 type SomeComponentProps = Record<string, string>;
-
 
 const Shell: React.FC<SomeComponentProps> = (props: SomeComponentProps) => {
 
