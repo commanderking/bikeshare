@@ -8,7 +8,7 @@ export const Header = ({ children, size }: { children: ReactNode, size: Size}) =
 }
 
 export const Code = ({ children }: { children: ReactNode}) => {
-    return <code className="bg-slate-200 p-2 pl-4 pr-8 inline-block" >{children}</code>
+    return <code className="bg-slate-200 p-2 pl-4 pr-8 block overflow-x-auto" >{children}</code>
 }
 
 
