@@ -48,6 +48,7 @@ const Shell: React.FC<SomeComponentProps> = (props: SomeComponentProps) => {
             shellModule: shell_wasm,
             container: term.current!,
             resolveDatabase: async () => {
+              console.log("resolving")
                 const bundle = await duckdb.selectBundle(DUCKDB_BUNDLES);
                 const logger = new duckdb.ConsoleLogger();
                 const worker = new Worker(bundle.mainWorker!);
