@@ -7,7 +7,6 @@ const nextConfig = {
 
   webpack(config) {
     config.experiments = { ...config.experiments, asyncWebAssembly: true }
-
     config.module.rules.push({
       test: /.*\.wasm$/,
       type: "asset/resource",
@@ -15,6 +14,13 @@ const nextConfig = {
         filename: "static/wasm/[name].[contenthash][ext]",
       },
     })
+
+    // There is an issue with @duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js when minimized with swc causes duplicate variables 't'. I need to investigate this further, so for now skipping minimization.
+    config.optimization = {
+      minimize: false
+    }
+
+    config
 
     return config;
   }
