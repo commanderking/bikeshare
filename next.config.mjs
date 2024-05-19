@@ -16,9 +16,11 @@ const nextConfig = {
       },
     })
 
-    config.optimization = {
-      minimize: false
-    }
+    config.devtool = 'source-map';
+
+    // config.optimization = {
+    //   minimize: false
+    // }
 
     return config;
   }
