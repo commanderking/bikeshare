@@ -16,17 +16,15 @@ import shell_wasm from '@duckdb/duckdb-wasm-shell/dist/shell_bg.wasm';
 
 type SomeComponentProps = Record<string, string>;
 
-const Shell: React.FC<SomeComponentProps> = (props: SomeComponentProps) => {
-
-    const term = React.useRef<HTMLDivElement | null>(null);
-    React.useEffect(() => {
+const bostonParquet = global.window && new URL('boston_recent_year.parquet', window.location.origin).href;
+const dcParquet = global.window && new URL('dc_recent_year.parquet', window.location.origin).href;
 
       // Most of these imports need to happen in useEffect due to server side lodaing from next.js
       const DUCKDB_BUNDLES: duckdb.DuckDBBundles = {
         mvp: {
           mainModule: duckdb_wasm,
           mainWorker:
-            new URL(
+            global.window && new URL(
               "@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js",
               import.meta.url
             ).toString(),
@@ -34,16 +32,20 @@ const Shell: React.FC<SomeComponentProps> = (props: SomeComponentProps) => {
         eh: {
           mainModule: duckdb_wasm_eh,
           mainWorker:
-            new URL(
+            global.window && new URL(
               "@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js",
               import.meta.url
             ).toString(),
         },
       };
+
+const Shell: React.FC<SomeComponentProps> = (props: SomeComponentProps) => {
+
+    const term = React.useRef<HTMLDivElement | null>(null);
+    React.useEffect(() => {
       const shell = require("@duckdb/duckdb-wasm-shell");
-      const bostonParquet = new URL('boston_recent_year.parquet', window.location.origin).href;
-      const dcParquet = new URL('dc_recent_year.parquet', window.location.origin).href;
-      
+
+
         shell.embed({
             shellModule: shell_wasm,
             container: term.current!,
