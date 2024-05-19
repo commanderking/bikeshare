@@ -7,7 +7,6 @@ const nextConfig = {
 
   webpack(config) {
     config.experiments = { ...config.experiments, asyncWebAssembly: true }
-
     config.module.rules.push({
       test: /.*\.wasm$/,
       type: "asset/resource",
@@ -16,17 +15,12 @@ const nextConfig = {
       },
     })
 
-    config.devtool = 'source-map';
-    config.module.rules.push({
-      test: /\.js$/,
-      enforce: 'pre',
-      use: ['source-map-loader'],
-      exclude: /node_modules\/(?!duckdb-browser)/, // Exclude all node_modules except duckdb-browser
-    });
+    // There is an issue with @duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js when minimized with swc causes duplicate variables 't'. I need to investigate this further, so for now skipping minimization.
+    config.optimization = {
+      minimize: false
+    }
 
-    // config.optimization = {
-    //   minimize: false
-    // }
+    config
 
     return config;
   }

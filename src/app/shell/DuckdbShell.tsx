@@ -16,42 +16,38 @@ import shell_wasm from '@duckdb/duckdb-wasm-shell/dist/shell_bg.wasm';
 
 type SomeComponentProps = Record<string, string>;
 
-const bostonParquet = global.window && new URL('boston_recent_year.parquet', window.location.origin).href;
-const dcParquet = global.window && new URL('dc_recent_year.parquet', window.location.origin).href;
-
-      // Most of these imports need to happen in useEffect due to server side lodaing from next.js
-      const DUCKDB_BUNDLES: duckdb.DuckDBBundles = {
-        mvp: {
-          mainModule: duckdb_wasm,
-          mainWorker:
-            global.window && new URL(
-              "@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js",
-              import.meta.url
-            ).toString(),
-        },
-        eh: {
-          mainModule: duckdb_wasm_eh,
-          mainWorker:
-            global.window && new URL(
-              "@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js",
-              import.meta.url
-            ).toString(),
-        },
-      };
-
 const Shell: React.FC<SomeComponentProps> = (props: SomeComponentProps) => {
 
     const term = React.useRef<HTMLDivElement | null>(null);
     React.useEffect(() => {
-      const shell = require("@duckdb/duckdb-wasm-shell");
+        const shell = require("@duckdb/duckdb-wasm-shell");
 
+        const bostonParquet = new URL('boston_recent_year.parquet', window.location.origin).href;
+        const dcParquet = new URL('dc_recent_year.parquet', window.location.origin).href;
+        
+        // Most of these imports need to happen in useEffect due to server side lodaing from next.js
+        const DUCKDB_BUNDLES: duckdb.DuckDBBundles = {
+          mvp: {
+            mainModule: duckdb_wasm,
+            mainWorker: new URL(
+                "@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js",
+                import.meta.url
+              ).toString(),
+          },
+          eh: {
+            mainModule: duckdb_wasm_eh,
+            mainWorker: new URL(
+                "@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js",
+                import.meta.url
+              ).toString(),
+          },
+        };
+      
 
         shell.embed({
             shellModule: shell_wasm,
             container: term.current!,
             resolveDatabase: async () => {
-              console.log("resolving")
-              console.log({ DUCKDB_BUNDLES });
                 const bundle = await duckdb.selectBundle(DUCKDB_BUNDLES);
                 const logger = new duckdb.ConsoleLogger();
                 const worker = new Worker(bundle.mainWorker!);
