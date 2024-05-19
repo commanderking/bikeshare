@@ -4,6 +4,7 @@ import createMDX from '@next/mdx'
 
 const nextConfig = {
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
+  compress: false,
 
   webpack(config) {
     config.experiments = { ...config.experiments, asyncWebAssembly: true }
@@ -15,6 +16,10 @@ const nextConfig = {
         filename: "static/wasm/[name].[contenthash][ext]",
       },
     })
+
+    config.optimization = {
+      minimize: false
+    }
 
     return config;
   }
