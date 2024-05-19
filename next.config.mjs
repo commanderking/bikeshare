@@ -16,24 +16,13 @@ const nextConfig = {
       },
     })
 
-    // config.devtool = 'source-map';
-    // config.module.rules.push({
-    //   test: /\.js$/,
-    //   enforce: 'pre',
-    //   use: ['source-map-loader'],
-    //   exclude: /node_modules\/(?!duckdb-browser)/, // Exclude all node_modules except duckdb-browser
-    // });
-
-    config.optimization.minimizer = [
-      new TerserPlugin({
-        terserOptions: {
-          mangle: {
-            // Add exceptions here
-            reserved: ['t'],
-          },
-        },
-      }),
-    ];
+    config.devtool = 'source-map';
+    config.module.rules.push({
+      test: /\.js$/,
+      enforce: 'pre',
+      use: ['source-map-loader'],
+      exclude: /node_modules\/(?!duckdb-browser)/, // Exclude all node_modules except duckdb-browser
+    });
 
     // config.optimization = {
     //   minimize: false
