@@ -13,6 +13,6 @@ export const Code = ({ children }: { children: ReactNode}) => {
 
 export const Paragraph = ({ children }: {children: ReactNode }) => <p className="mb-4 mt-4">{children}</p>
 
-export const Link = ({ children, href, target }: { children: ReactNode, href: string, target?: string }) => <a className="text-cyan-600 underline" href={href} target={target}>{children}</a>
+export const Link = ({ children, href, target }: { children: ReactNode, href?: string, target?: string }) => <a className="text-cyan-600 underline" href={href} target={target}>{children}</a>
 
 export const UnorderedList = ({ children }: { children: ReactNode}) => <ul className="list-disc pl-8">{children}</ul>
