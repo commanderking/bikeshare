@@ -1,24 +1,28 @@
 import Shell from "src/app/shell/DuckdbShell.tsx"
-
+import { Link } from "src/app/mdx/components.tsx"
 
 <div className="w-2/3 m-auto mt-16"> 
 
 ### Explore US Bikeshare Data for the Past Year! 
 
-In the <a href="#shellHeader">terminal</a> below, you can run SQL queries on rideshare data for the past year. All queries are run through <a target="_blank" href="https://duckdb.org/2021/10/29/duckdb-wasm">DuckDB-Wasm</a>, an in browser database that you can query with SQL.
+In the <Link href="#shellHeader">terminal</Link> below, you can run SQL queries on rideshare data for the past year. All queries are run through <Link target="_blank" href="https://duckdb.org/2021/10/29/duckdb-wasm">DuckDB-Wasm</Link>, an in browser database that you can query with SQL.
 
+
+For a list of possible cities, type:
+
+`.files LIST` 
+
+And then query the file directly:
 
 ```
 SELECT * FROM 'boston.parquet' LIMIT 100
 ```
 
-For a list of possible cities one can query:
-
-`.files LIST` 
-
 Enjoy! If you'd like to download all data for a city, you can download the parquet files below:
 - [Boston](/boston_recent_year.parquet)
+- [Chicago](/chicago_recent_year.parquet)
 - [DC](/dc_recent_year.parquet)
 
-<div className="max-w-2/3 pt-8"><Shell /></div>
+### Exploration Shell 
+<div className="max-w-2/3"><Shell /></div>
 </div>
