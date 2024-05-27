@@ -1,5 +1,5 @@
 import type { MDXComponents } from 'mdx/types'
-import { Header, Code, Paragraph } from "@/app/mdx/components"
+import { Header, Code, Paragraph, Link, UnorderedList } from "@/app/mdx/components"
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
@@ -10,7 +10,15 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     ),
     p: ({ children }) => (
       <Paragraph>{children}</Paragraph>
+    ),
+    a: ({ children, href }) => (
+      <Link href={href}>{children}</Link>
+    ),
+
+    ul: ({ children }) => (
+      <UnorderedList>{children}</UnorderedList>
     )
+
   }
 
 }
