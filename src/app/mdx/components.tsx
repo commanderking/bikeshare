@@ -3,8 +3,7 @@ import { ReactNode } from "react";
 type Size = '4xl' | "2xl" | "xl" | "lg" | "md" | "sm"
 
 export const Header = ({ children, size }: { children: ReactNode, size: Size}) => {
-    return <h3 className={`text-${size} pt-4 pb-4`}>{children}</h3>
-
+    return <header className={`text-${size} pt-4 pb-4`}>{children}</header>
 }
 
 export const Code = ({ children }: { children: ReactNode}) => {
@@ -16,3 +15,5 @@ export const Paragraph = ({ children }: {children: ReactNode }) => <p className=
 export const Link = ({ children, href, target }: { children: ReactNode, href?: string, target?: string }) => <a className="text-cyan-600 underline" href={href} target={target}>{children}</a>
 
 export const UnorderedList = ({ children }: { children: ReactNode}) => <ul className="list-disc pl-8">{children}</ul>
+
+export const Pre = ({ children }: { children: ReactNode }) => <pre className="pt-2 pb-2">{ children} </pre>

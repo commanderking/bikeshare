@@ -8,21 +8,59 @@ import { Link } from "src/app/mdx/components.tsx"
 In the <Link href="#shellHeader">terminal</Link> below, you can run SQL queries on rideshare data for the past year. All queries are run through <Link target="_blank" href="https://duckdb.org/2021/10/29/duckdb-wasm">DuckDB-Wasm</Link>, an in browser database that you can query with SQL.
 
 
-For a list of possible cities, type:
+For a list of city files you can query, type:
 
 `.files LIST` 
 
-And then query the file directly:
+And then query the file directly with SQL:
 
 ```
 SELECT * FROM 'boston.parquet' LIMIT 100
 ```
 
-Enjoy! If you'd like to download all data for a city, you can download the parquet files below:
+If you'd like to download all data for a city, you can download the parquet files below:
 - [Boston](/boston_recent_year.parquet)
 - [Chicago](/chicago_recent_year.parquet)
 - [DC](/dc_recent_year.parquet)
 
+Need a few ideas of what to query?
+
+<details className="hover:cursor-pointer">
+  <summary>See ideas</summary>
+  ### Where do people from my local station go? 
+    - Replace Dana Park with your local station name
+  ```
+    SELECT
+        start_station_name,
+        end_station_name,
+        COUNT(*) as trips
+    FROM 
+        'boston.parquet'
+    WHERE
+        start_station_name = 'Dana Park'
+    GROUP BY
+        start_station_name,
+        end_station_name
+    ORDER BY 
+        trips DESC;
+  ```
+
+  ### What's the median trip time at different hours of the day?
+
+  ```
+    SELECT
+        EXTRACT(HOUR FROM start_time) AS hour,
+        COUNT(*) AS trips,
+        MEDIAN(DATEDIFF('minute', start_time, end_time)) AS median_trip_duration
+    FROM
+        'boston.parquet'
+    GROUP BY
+        hour
+    ORDER BY
+        hour;
+  ```
+</details>
+
 ### Exploration Shell 
-<div className="max-w-2/3"><Shell /></div>
+<div id="shellHeader" className="max-w-2/3"><Shell /></div>
 </div>
