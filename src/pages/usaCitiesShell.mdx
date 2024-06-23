@@ -27,13 +27,15 @@ Need a few ideas of what to query?
 
 <details className="hover:cursor-pointer">
   <summary>See ideas</summary>
-  ### Where do people from my local station go? 
+  ### Where do people from my local station go and how long do they travel? 
     - Replace Dana Park with your local station name
   ```
     SELECT
         start_station_name,
         end_station_name,
-        COUNT(*) as trips
+        COUNT(*) as trips,
+        ROUND(AVG(DATEDIFF('second', start_time, end_time)) / 60) as avg_duration_minutes,
+        ROUND(MEDIAN(DATEDIFF('second', start_time, end_time)) / 60 ) as median_duration_minutes
     FROM 
         'boston.parquet'
     WHERE
