@@ -8,7 +8,7 @@ const ChartTextLayout = ({
   title?: string | ReactNode
 }) => {
   return (
-    <div className="pb-16">
+    <div className="pb-12">
       {React.isValidElement(title) ? (
         title
       ) : (

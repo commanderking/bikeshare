@@ -69,7 +69,7 @@ export const Visualization = () => {
           Analyzing 14 Years of Bikeshare Trips in the United States
         </h3>
       </div>
-      <p className="pt-8">
+      <p className="pt-8 pb-12">
         Many city bikeshares publish data for every single trip taken on their
         bikes, including each trip's start and end locations, and trip duration.
         Through these individual trips, we can analyze the overall trends of
@@ -77,6 +77,20 @@ export const Visualization = () => {
         bikeshare data from 9 major metropolitan areas including: Boston,
         Chicago, Columbus, DC, Los Angeles, NYC, Philadelphia, Pittsburgh, and
         San Francisco.
+      </p>
+      <p>
+        Some of the counts for each city different than what's reported on
+        official city websites, which suggests that city officials may be using
+        slightly different data than what's publicly published. In all cities,
+        we've used what's been published directly by the bikeshare system. Some
+        of these systems filter out trips that "are taken by staff as they
+        service and inspect the system" and also "any trips that were below 60
+        seconds in length (potentially false starts or users trying to re-dock a
+        bike to ensure it was secure)" (
+        <a href="https://bluebikes.com/system-data" target="_blank">
+          source
+        </a>
+        )
       </p>
 
       {aggregatedData && (
