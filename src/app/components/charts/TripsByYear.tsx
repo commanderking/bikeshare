@@ -12,15 +12,12 @@ export const TripsByYearChart = ({ data, marks = [] }: Props) => {
   const plotRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (data === undefined) return
-    const color = data.length > 0 ? { legend: true } : {}
-
     const plot = Plot.plot({
       marginLeft: 80,
       marginRight: 80,
       y: { grid: true },
       // Remove default commas from year
       x: { tickFormat: '' },
-      color: color,
       marks: [
         Plot.ruleY([0]),
         Plot.lineY(data, {

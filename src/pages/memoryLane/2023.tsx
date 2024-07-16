@@ -186,9 +186,9 @@ export const Visualization = () => {
           <p className="pt-4">
             For cities with less than 1 million trips per year, we see a mixed
             bag. Some cities like Pittsburgh and Los Angeles are on an upswing,
-            but Austin and Chattanooga have seen trips taken drop in recent
-            years. Note that Chattanooga has yet to publish their 2023 data
-            here.
+            but the number of trips in Austin and Chattanooga have dropped in
+            the past couple of years. Note that Chattanooga has yet to publish
+            their 2023 data on their website.
           </p>
         </div>
       </ChartTextLayout>
