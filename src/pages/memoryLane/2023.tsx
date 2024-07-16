@@ -75,9 +75,9 @@ export const Visualization = () => {
           bikes, including each trip's start and end locations, and trip
           duration. Through these individual trips, we can analyze the overall
           trends of bikeshare trips in the United States. The visualizations
-          below use bikeshare data from 9 major metropolitan areas including:
-          Boston, Chicago, Columbus, DC, Los Angeles, NYC, Philadelphia,
-          Pittsburgh, and San Francisco.
+          below use bikeshare data from 11 major metropolitan areas including:
+          Austin, Boston, Chicago, Chattanooga, Columbus, DC, Los Angeles, NYC,
+          Philadelphia, Pittsburgh, and San Francisco.
         </p>
         <p>
           Some of the counts for each city different than what's reported on
