@@ -7,3 +7,5 @@ export type YearlyTrip = {
   third_quantile_duration: number
   system: string
 }
+
+export type AggregatedTrip = Pick<YearlyTrip, 'year' | 'trip_count' | 'system'>

@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react'
 import * as Plot from '@observablehq/plot'
-import { YearlyTrip } from 'src/app/model/YearlyTrip'
+import { YearlyTrip, AggregatedTrip } from 'src/app/model/YearlyTrip'
 
 type Props = {
-  data: YearlyTrip[]
+  data: YearlyTrip[] | AggregatedTrip[]
   marks?: Plot.Markish[]
 }
 

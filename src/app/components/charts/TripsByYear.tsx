@@ -34,7 +34,6 @@ export const TripsByYearChart = ({ data, marks = [] }: Props) => {
           channels: { system: 'system' },
           tip: true,
         }),
-        Plot.tip(data, Plot.pointer({ x: 'year', y: 'trip_count' })),
 
         ...marks,
       ],
