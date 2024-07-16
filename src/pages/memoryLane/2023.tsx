@@ -45,10 +45,7 @@ export const Visualization = () => {
     setAggregatedData(aggregatedTrips)
   }, [yearlyTrips])
 
-  console.log({ aggregatedData })
-
   const historicalTrips = yearlyTrips.filter((trip) => trip.year !== 2024)
-
   const tripsByYearAndSystem = historicalTrips.sort((a, b) => a.year - b.year)
 
   // Above 2 million trips per year
@@ -224,17 +221,3 @@ export const Visualization = () => {
 }
 
 export default Visualization
-
-// <ul className="list-disc pl-10">
-// <li>
-//   Boston (includes Brookline, Cambridge, Everett, Malden, Somerville)
-// </li>
-// <li>Chicago</li>
-// <li>Columbus</li>
-// <li>Washington DC</li>
-// <li>Los Angeles</li>
-// <li>New York City (includes Jersey City)</li>
-// <li>Philadelphia</li>
-// <li>Pittsburgh</li>
-// <li>San Francisco</li>
-// </ul>

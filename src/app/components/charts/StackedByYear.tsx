@@ -40,8 +40,6 @@ const StackedByYear = ({ data, marks = [] }: Props) => {
     plotRef.current && plotRef.current.append(plot)
   }, [data])
 
-  console.log({ data })
-
   return <div ref={plotRef}></div>
 }
 
