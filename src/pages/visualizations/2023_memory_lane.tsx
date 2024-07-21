@@ -7,6 +7,7 @@ import StackedByYear from '@/app/components/charts/StackedByYear'
 import ChartTextLayout from '@/app/components/ChartTextLayout'
 import * as Plot from '@observablehq/plot'
 import { AggregatedTrip } from '@/app/model/YearlyTrip'
+import { getAggregatedTrips } from '@/app/utils/yearlyTrips'
 
 export const Visualization = () => {
   const [cities, setCities] = useState<string[]>([])
@@ -20,28 +21,7 @@ export const Visualization = () => {
   }, [yearlyTrips])
 
   useEffect(() => {
-    const grouped = _.groupBy(yearlyTrips, 'year')
-    const aggregated = _.mapValues(grouped, (trips) => {
-      return trips.reduce(
-        (accumulatedTrips, trip) => {
-          return {
-            trip_count: (accumulatedTrips.trip_count += trip.trip_count),
-            year: trip.year,
-            system: accumulatedTrips.system,
-          }
-        },
-        {
-          trip_count: 0,
-          year: 0,
-          system: 'all_us_cities',
-        }
-      )
-    })
-
-    const aggregatedTrips = Object.values(aggregated).sort(
-      (a, b) => a.year - b.year
-    )
-
+    const aggregatedTrips = getAggregatedTrips()
     setAggregatedData(aggregatedTrips)
   }, [yearlyTrips])
 
