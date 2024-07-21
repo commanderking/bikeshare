@@ -35,7 +35,10 @@ const DashboardContainer = () => {
         <tbody>
           {recentTrips.map((trip, index) => {
             return (
-              <tr className=" bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+              <tr
+                key={trip.system}
+                className=" bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+              >
                 <td className="px-6 py-4">{index + 1}</td>
                 <td className="px-6 py-4 font-semibold">{trip.system}</td>
                 <td className="px-6 py-4">
