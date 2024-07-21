@@ -13,12 +13,10 @@ const LatestYearChart = ({ data, marks = [] }: Props) => {
     if (data.length === 0) return
 
     const plot = Plot.plot({
-      // marginTop: 100,
       marginLeft: 100,
       marginBottom: 60,
       marginRight: 40,
       x: {
-        // axis: 'top',
         grid: true,
         tickRotate: 20,
       },
