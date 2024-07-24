@@ -1,0 +1,46 @@
+[
+  {
+    "system": "columbus",
+    "latest_trip": "2024-07-01"
+  },
+  {
+    "system": "chicago",
+    "latest_trip": "2024-07-02"
+  },
+  {
+    "system": "boston",
+    "latest_trip": "2024-07-02"
+  },
+  {
+    "system": "dc",
+    "latest_trip": "2024-06-30"
+  },
+  {
+    "system": "nyc",
+    "latest_trip": "2024-06-02"
+  },
+  {
+    "system": "sf",
+    "latest_trip": "2024-07-01"
+  },
+  {
+    "system": "philadelphia",
+    "latest_trip": "2024-07-09"
+  },
+  {
+    "system": "pittsburgh",
+    "latest_trip": "2024-07-01"
+  },
+  {
+    "system": "los_angeles",
+    "latest_trip": "2024-07-01"
+  },
+  {
+    "system": "austin",
+    "latest_trip": "2024-01-31"
+  },
+  {
+    "system": "chattanooga",
+    "latest_trip": "2022-06-06"
+  }
+]

@@ -61,14 +61,14 @@ const DashboardContainer = () => {
 
         <div className="grid grid-cols-2 gap-1">
           <div>
-            <a href="http://localhost:3000/visualizations/2023_memory_lane">
+            <a href="./visualizations/2023_memory_lane">
               <StackedByYear data={getAggregatedTrips()} />
 
               <p>How have US bikeshare trips changed over time?</p>
             </a>
           </div>
           <div>
-            <a href="http://localhost:3000/usaCitiesShell">
+            <a href="./usaCitiesShell">
               <Image
                 src="/images/shell.png"
                 alt="Shell Image"
