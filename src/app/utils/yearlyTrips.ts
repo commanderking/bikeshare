@@ -1,7 +1,15 @@
 import _ from 'lodash'
-import yearlyTrips from '@/data/trips_per_year.json'
+import { US_SYSTEMS } from '@/app/constants/cities'
+import { YearlyTrip } from '@/app/model/YearlyTrip'
 
-export const getAggregatedTrips = () => {
+export const getUSYearlyTrips = (yearlyTrips: YearlyTrip[]) => {
+  return yearlyTrips.filter((trips) => {
+    console.log({ US_SYSTEMS })
+    return US_SYSTEMS.includes(trips.system)
+  })
+}
+
+export const getAggregatedTrips = (yearlyTrips: YearlyTrip[]) => {
   const grouped = _.groupBy(yearlyTrips, 'year')
   const aggregated = _.mapValues(grouped, (trips) => {
     return trips.reduce(

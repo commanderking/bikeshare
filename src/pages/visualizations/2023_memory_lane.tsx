@@ -1,31 +1,33 @@
 import yearlyTrips from '@/data/trips_per_year.json'
 import _ from 'lodash'
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import TripsByYear from '@/app/components/charts/TripsByYear'
 import Select from 'react-select'
 import StackedByYear from '@/app/components/charts/StackedByYear'
 import ChartTextLayout from '@/app/components/ChartTextLayout'
 import * as Plot from '@observablehq/plot'
 import { AggregatedTrip } from '@/app/model/YearlyTrip'
-import { getAggregatedTrips } from '@/app/utils/yearlyTrips'
-
+import { getUSYearlyTrips, getAggregatedTrips } from '@/app/utils/yearlyTrips'
+import { YearlyTrip } from '@/app/model/YearlyTrip'
 export const Visualization = () => {
   const [cities, setCities] = useState<string[]>([])
   const [selectedCities, setSelectedCities] = useState<string[]>([])
 
   const [aggregatedData, setAggregatedData] = useState<AggregatedTrip[]>([])
 
-  useEffect(() => {
-    const cities = _.uniq(yearlyTrips.map((trips) => trips.system))
-    setCities(cities)
-  }, [yearlyTrips])
+  const USYearlyTrips = getUSYearlyTrips(yearlyTrips)
 
   useEffect(() => {
-    const aggregatedTrips = getAggregatedTrips()
+    const cities = _.uniq(USYearlyTrips.map((trips) => trips.system))
+    setCities(cities)
+  }, [])
+
+  useEffect(() => {
+    const aggregatedTrips = getAggregatedTrips(USYearlyTrips)
     setAggregatedData(aggregatedTrips)
   }, [yearlyTrips])
 
-  const historicalTrips = yearlyTrips.filter((trip) => trip.year !== 2024)
+  const historicalTrips = USYearlyTrips.filter((trip) => trip.year !== 2024)
   const tripsByYearAndSystem = historicalTrips.sort((a, b) => a.year - b.year)
 
   // Above 2 million trips per year
