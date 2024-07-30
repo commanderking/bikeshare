@@ -4,7 +4,6 @@ import { YearlyTrip } from '@/app/model/YearlyTrip'
 
 export const getUSYearlyTrips = (yearlyTrips: YearlyTrip[]) => {
   return yearlyTrips.filter((trips) => {
-    console.log({ US_SYSTEMS })
     return US_SYSTEMS.includes(trips.system)
   })
 }
@@ -23,7 +22,7 @@ export const getAggregatedTrips = (yearlyTrips: YearlyTrip[]) => {
       {
         trip_count: 0,
         year: 0,
-        system: 'all_us_cities',
+        system: 'all',
       }
     )
   })

@@ -2,8 +2,11 @@
 import yearlyTrips from '@/data/trips_per_year.json'
 import LatestYearChart from '@/app/features/dashboard/components/LatestYearChart'
 import StackedByYear from '@/app/components/charts/StackedByYear'
-import { getAggregatedTrips } from '@/app/utils/yearlyTrips'
+import { getUSYearlyTrips, getAggregatedTrips } from '@/app/utils/yearlyTrips'
 import Image from 'next/image'
+
+const usTrips = getUSYearlyTrips(yearlyTrips)
+
 const DashboardContainer = () => {
   const currentYear = new Date().getFullYear()
 
@@ -62,7 +65,7 @@ const DashboardContainer = () => {
         <div className="grid grid-cols-2 gap-1">
           <div>
             <a href="./visualizations/2023_memory_lane">
-              <StackedByYear data={getAggregatedTrips()} />
+              <StackedByYear data={getAggregatedTrips(usTrips)} />
 
               <p>How have US bikeshare trips changed over time?</p>
             </a>
