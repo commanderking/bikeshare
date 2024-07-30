@@ -16,6 +16,8 @@ const DashboardContainer = () => {
       return b.trip_count - a.trip_count
     })
 
+  const recentUSTrips = getUSYearlyTrips(recentTrips)
+
   return (
     <div className="text-center mt-16 max-w-[640px] m-auto">
       <h1 className="text-4xl">Cities Bike</h1>
@@ -36,7 +38,7 @@ const DashboardContainer = () => {
           </tr>
         </thead>
         <tbody>
-          {recentTrips.map((trip, index) => {
+          {recentUSTrips.map((trip, index) => {
             return (
               <tr
                 key={trip.system}
@@ -56,7 +58,7 @@ const DashboardContainer = () => {
       <div className="p-8">
         <h3 className="text-2xl">Trips per City</h3>
         <p>NYC leads the way in Bikeshares</p>
-        <LatestYearChart data={recentTrips} />
+        <LatestYearChart data={recentUSTrips} />
       </div>
 
       <div className="p-8">
