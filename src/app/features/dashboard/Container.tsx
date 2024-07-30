@@ -2,8 +2,11 @@
 import yearlyTrips from '@/data/trips_per_year.json'
 import LatestYearChart from '@/app/features/dashboard/components/LatestYearChart'
 import StackedByYear from '@/app/components/charts/StackedByYear'
-import { getAggregatedTrips } from '@/app/utils/yearlyTrips'
+import { getUSYearlyTrips, getAggregatedTrips } from '@/app/utils/yearlyTrips'
 import Image from 'next/image'
+
+const usTrips = getUSYearlyTrips(yearlyTrips)
+
 const DashboardContainer = () => {
   const currentYear = new Date().getFullYear()
 
@@ -12,6 +15,8 @@ const DashboardContainer = () => {
     .sort((a, b) => {
       return b.trip_count - a.trip_count
     })
+
+  const recentUSTrips = getUSYearlyTrips(recentTrips)
 
   return (
     <div className="text-center mt-16 max-w-[640px] m-auto">
@@ -33,7 +38,7 @@ const DashboardContainer = () => {
           </tr>
         </thead>
         <tbody>
-          {recentTrips.map((trip, index) => {
+          {recentUSTrips.map((trip, index) => {
             return (
               <tr
                 key={trip.system}
@@ -53,7 +58,7 @@ const DashboardContainer = () => {
       <div className="p-8">
         <h3 className="text-2xl">Trips per City</h3>
         <p>NYC leads the way in Bikeshares</p>
-        <LatestYearChart data={recentTrips} />
+        <LatestYearChart data={recentUSTrips} />
       </div>
 
       <div className="p-8">
@@ -62,7 +67,7 @@ const DashboardContainer = () => {
         <div className="grid grid-cols-2 gap-1">
           <div>
             <a href="./visualizations/2023_memory_lane">
-              <StackedByYear data={getAggregatedTrips()} />
+              <StackedByYear data={getAggregatedTrips(usTrips)} />
 
               <p>How have US bikeshare trips changed over time?</p>
             </a>
