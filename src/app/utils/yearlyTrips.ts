@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { US_SYSTEMS } from '@/app/constants/cities'
+import { US_SYSTEMS, systems } from '@/app/constants/cities'
 import { YearlyTrip } from '@/app/model/YearlyTrip'
 
 export const getUSYearlyTrips = (yearlyTrips: YearlyTrip[]) => {
@@ -32,4 +32,13 @@ export const getAggregatedTrips = (yearlyTrips: YearlyTrip[]) => {
   )
 
   return aggregatedTrips
+}
+
+export const getYearlyTripsWithSystemMetadata = (yearlyTrips: YearlyTrip[]) => {
+  return yearlyTrips.map((yearlyTrip) => {
+    return {
+      ...yearlyTrip,
+      ...systems[yearlyTrip.system],
+    }
+  })
 }
