@@ -29,10 +29,10 @@ const DashboardContainer = () => {
     <div className="text-center mt-16 max-w-[640px] m-auto">
       <h1 className="text-4xl">Cities Bike</h1>
       <p className="pt-4 pb-8 text-lg">
-        Visualizing bikeshare rides across the globe
+        Visualizing bikeshare rides across the USA
       </p>
       <USMapChart data={recentUSTrips} />
-      <div>
+      <div className="pt-8">
         <h3 className="text-2xl">US Bikeshares Rankings - 2024</h3>
         <p className="p-4 italic">*For systems that openly share trip data</p>
       </div>
