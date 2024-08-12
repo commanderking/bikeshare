@@ -2,7 +2,12 @@
 import yearlyTrips from '@/data/trips_per_year.json'
 import LatestYearChart from '@/app/features/dashboard/components/LatestYearChart'
 import StackedByYear from '@/app/components/charts/StackedByYear'
-import { getUSYearlyTrips, getAggregatedTrips } from '@/app/utils/yearlyTrips'
+import USMapChart from '@/app/components/charts/USMap'
+import {
+  getUSYearlyTrips,
+  getAggregatedTrips,
+  getYearlyTripsWithSystemMetadata,
+} from '@/app/utils/yearlyTrips'
 import Image from 'next/image'
 
 const usTrips = getUSYearlyTrips(yearlyTrips)
@@ -16,7 +21,9 @@ const DashboardContainer = () => {
       return b.trip_count - a.trip_count
     })
 
-  const recentUSTrips = getUSYearlyTrips(recentTrips)
+  const recentUSTrips = getYearlyTripsWithSystemMetadata(
+    getUSYearlyTrips(recentTrips)
+  )
 
   return (
     <div className="text-center mt-16 max-w-[640px] m-auto">
@@ -24,6 +31,7 @@ const DashboardContainer = () => {
       <p className="pt-4 pb-8 text-lg">
         Visualizing bikeshare rides across the globe
       </p>
+      <USMapChart data={recentUSTrips} />
       <div>
         <h3 className="text-2xl">US Bikeshares Rankings - 2024</h3>
         <p className="p-4 italic">*For systems that openly share trip data</p>
@@ -33,7 +41,7 @@ const DashboardContainer = () => {
         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
           <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
             <th className="px-6 py-4">Rank</th>
-            <th className="px-6 py-4">Bike System</th>
+            <th className="px-6 py-4">Metro Area</th>
             <th className="px-6 py-4">Trips</th>
           </tr>
         </thead>
@@ -45,7 +53,7 @@ const DashboardContainer = () => {
                 className=" bg-white border-b dark:bg-gray-800 dark:border-gray-700"
               >
                 <td className="px-6 py-4">{index + 1}</td>
-                <td className="px-6 py-4 font-semibold">{trip.system}</td>
+                <td className="px-6 py-4 font-semibold">{trip.metroArea}</td>
                 <td className="px-6 py-4">
                   {trip.trip_count.toLocaleString()}
                 </td>
@@ -55,13 +63,13 @@ const DashboardContainer = () => {
         </tbody>
       </table>
 
-      <div className="p-8">
+      <div className="pt-8">
         <h3 className="text-2xl">Trips per City</h3>
         <p>NYC leads the way in Bikeshares</p>
         <LatestYearChart data={recentUSTrips} />
       </div>
 
-      <div className="p-8">
+      <div className="pt-8">
         <h3 className="text-2xl">Want to explore more data?</h3>
 
         <div className="grid grid-cols-2 gap-1">
