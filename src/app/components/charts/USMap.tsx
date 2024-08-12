@@ -25,7 +25,7 @@ export const USMapChart = ({ data, marks = [] }: Props) => {
   useEffect(() => {
     if (geoJSON === null) return
     const plot = Plot.plot({
-      r: { range: [2, 10] },
+      r: { range: [3, 15] },
       marginLeft: 10,
       marginRight: 10,
       projection: 'albers',
