@@ -1,11 +1,34 @@
 import _ from 'lodash'
-import { US_SYSTEMS, systems } from '@/app/constants/cities'
-import { YearlyTrip } from '@/app/model/YearlyTrip'
+import { systems } from '@/app/constants/cities'
+import { Country } from '@/app/model/System'
+import { YearlyTrip, YearlyTripWithSystem } from '@/app/model/YearlyTrip'
 
-export const getUSYearlyTrips = (yearlyTrips: YearlyTrip[]) => {
-  return yearlyTrips.filter((trips) => {
-    return US_SYSTEMS.includes(trips.system)
-  })
+const toTripsWithSystemData = (yearlyTrip: YearlyTrip) => ({
+  ...yearlyTrip,
+  ...systems[yearlyTrip.system],
+})
+
+const byCountry = (country?: Country) => (yearlyTrip: YearlyTripWithSystem) =>
+  !country || country === yearlyTrip.country
+
+const byYear = (year?: number) => (yearlyTrip: YearlyTripWithSystem) =>
+  !year || year === yearlyTrip.year
+
+type RankingOptions = { year?: number; country?: Country; count?: number }
+
+export const getRankings = (trips: YearlyTrip[], options?: RankingOptions) => {
+  const { country, year, count } = options || {
+    country: undefined,
+    year: undefined,
+    count: undefined,
+  }
+  return trips
+    .map(toTripsWithSystemData)
+    .filter(byCountry(country))
+    .filter(byYear(year))
+    .slice() // Creating shallow copy before sort
+    .sort((a, b) => b.trip_count - a.trip_count)
+    .slice(0, count ?? undefined)
 }
 
 export const getAggregatedTrips = (yearlyTrips: YearlyTrip[]) => {
@@ -32,13 +55,4 @@ export const getAggregatedTrips = (yearlyTrips: YearlyTrip[]) => {
   )
 
   return aggregatedTrips
-}
-
-export const getYearlyTripsWithSystemMetadata = (yearlyTrips: YearlyTrip[]) => {
-  return yearlyTrips.map((yearlyTrip) => {
-    return {
-      ...yearlyTrip,
-      ...systems[yearlyTrip.system],
-    }
-  })
 }

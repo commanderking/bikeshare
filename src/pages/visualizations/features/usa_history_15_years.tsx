@@ -7,28 +7,28 @@ import StackedByYear from '@/app/components/charts/StackedByYear'
 import ChartTextLayout from '@/app/components/ChartTextLayout'
 import * as Plot from '@observablehq/plot'
 import { AggregatedTrip } from '@/app/model/YearlyTrip'
-import { getUSYearlyTrips, getAggregatedTrips } from '@/app/utils/yearlyTrips'
-import { YearlyTrip } from '@/app/model/YearlyTrip'
+import { getRankings, getAggregatedTrips } from '@/app/utils/yearlyTrips'
 export const Visualization = () => {
   const [cities, setCities] = useState<string[]>([])
   const [selectedCities, setSelectedCities] = useState<string[]>([])
 
   const [aggregatedData, setAggregatedData] = useState<AggregatedTrip[]>([])
 
-  const USYearlyTrips = getUSYearlyTrips(yearlyTrips)
-
+  const usaTrips = getRankings(yearlyTrips, {
+    country: 'USA',
+  })
   useEffect(() => {
-    const cities = _.uniq(USYearlyTrips.map((trips) => trips.system))
+    const cities = _.uniq(usaTrips.map((trips) => trips.system))
     setCities(cities)
   }, [])
 
   useEffect(() => {
-    const aggregatedTrips = getAggregatedTrips(USYearlyTrips)
+    const aggregatedTrips = getAggregatedTrips(usaTrips)
     setAggregatedData(aggregatedTrips)
   }, [yearlyTrips])
 
-  const historicalTrips = USYearlyTrips.filter((trip) => trip.year !== 2024)
-  const tripsByYearAndSystem = historicalTrips.sort((a, b) => a.year - b.year)
+  const historicalTrips = usaTrips.filter((trip) => trip.year !== 2024)
+  const tripsByYearAndSystem = usaTrips.sort((a, b) => a.year - b.year)
 
   // Above 2 million trips per year
   const tierTwoCities = ['chicago', 'dc', 'boston', 'sf', 'philadelphia']
