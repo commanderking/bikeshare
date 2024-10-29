@@ -1,14 +1,4 @@
-type Country = 'USA' | 'Taiwan' | 'Canada' | 'Mexico'
-
-type System = {
-  id: string
-  metroArea: string
-  systemName: string
-  country: Country
-  longitude: number
-  latitude: number
-}
-
+import { System } from '@/app/model/System'
 export const systems: { [key: string]: System } = {
   nyc: {
     id: 'nyc',
@@ -97,6 +87,70 @@ export const systems: { [key: string]: System } = {
     country: 'USA',
     longitude: -97.7431,
     latitude: 30.2672,
+  },
+  bergen: {
+    id: 'bergen',
+    metroArea: 'Bergen',
+    systemName: 'Bysykkel',
+    country: 'Norway',
+    longitude: 5.3221,
+    latitude: 60.3913,
+  },
+  trondheim: {
+    id: 'trondheim',
+    metroArea: 'Trondheim',
+    systemName: 'Trondheim Bysykkel',
+    country: 'Norway',
+    longitude: 10.3951,
+    latitude: 63.4305,
+  },
+  oslo: {
+    id: 'oslo',
+    metroArea: 'Oslo',
+    systemName: 'Oslo Bysykkel',
+    country: 'Norway',
+    longitude: 10.7522,
+    latitude: 59.9139,
+  },
+  taipei: {
+    id: 'taipei',
+    metroArea: 'Taipei',
+    systemName: 'YouBike',
+    country: 'Taiwan',
+    longitude: 121.5654,
+    latitude: 25.033,
+  },
+  mexico_city: {
+    id: 'mexico_city',
+    metroArea: 'Mexico City',
+    systemName: 'Ecobici',
+    country: 'Mexico',
+    longitude: -99.1332,
+    latitude: 19.4326,
+  },
+  montreal: {
+    id: 'montreal',
+    metroArea: 'Montreal',
+    systemName: 'BIXI Montreal',
+    country: 'Canada',
+    longitude: -73.5673,
+    latitude: 45.5017,
+  },
+  vancouver: {
+    id: 'vancouver',
+    metroArea: 'Vancouver',
+    systemName: 'Mobi',
+    country: 'Canada',
+    longitude: -123.1216,
+    latitude: 49.2827,
+  },
+  helsinki: {
+    id: 'helsinki',
+    metroArea: 'Helsinki',
+    systemName: 'Helsinki City Bikes',
+    country: 'Finland',
+    longitude: 24.9384,
+    latitude: 60.1699,
   },
 }
 
