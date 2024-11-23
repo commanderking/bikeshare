@@ -19,7 +19,7 @@ const DashboardContainer = () => {
   })
 
   return (
-    <div className="text-center mt-16 max-w-[640px] m-auto">
+    <div className="prose text-center mt-16 max-w-[640px] m-auto">
       <h1 className="text-4xl">Cities Bike</h1>
       <p className="pt-4 pb-8 text-lg">
         Visualizing bikeshare rides across the USA

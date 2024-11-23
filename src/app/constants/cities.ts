@@ -152,10 +152,34 @@ export const systems: { [key: string]: System } = {
     longitude: 24.9384,
     latitude: 60.1699,
   },
+  london: {
+    id: 'london',
+    metroArea: 'London',
+    systemName: 'Santander Cycles',
+    country: 'United Kingdom',
+    longitude: -0.1276,
+    latitude: 51.5074,
+  },
+  chattanooga: {
+    id: 'chattanooga',
+    metroArea: 'Chattanooga',
+    systemName: 'Bike Chattanooga',
+    country: 'USA',
+    longitude: -85.3097,
+    latitude: 35.0456,
+  },
+  jersey_city: {
+    id: 'jersey_city',
+    metroArea: 'Jersey City',
+    systemName: 'Citi Bike',
+    country: 'USA',
+    longitude: -74.0776,
+    latitude: 40.7282,
+  },
 }
 
-export const US_SYSTEMS = Object.values(systems)
-  .filter((system) => {
-    return system.country === 'USA'
-  })
-  .map((systems) => systems.id)
+export const ALL_CITIES = Object.values(systems)
+
+export const US_SYSTEMS = ALL_CITIES.filter((system) => {
+  return system.country === 'USA'
+}).map((systems) => systems.id)

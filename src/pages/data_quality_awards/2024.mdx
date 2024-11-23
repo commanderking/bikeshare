@@ -1,76 +1,127 @@
-<div className="prose w-1/2 m-auto mt-16"> 
+import RadialRank from '@/app/components/charts/RadialRank'
+import {
+  A_PLUS_CIITES,
+  A_CITIES,
+  B_CITIES,
+  C_CITIES,
+  D_CITIES,
+} from '@/app/constants/ratings2024'
+import StatsCard from '@/app/components/StatsCard'
+
+<div className="prose w-1/2 m-auto mt-16">
+
 # The 2024 Cities Bikeshare Data Quality Ratings
 
-Welcome to the very first bikeshare data quality awards! I'm rating which cities provide the highest quality public data for their bikeshare system. Will cities care about these ratings? I doubt it... but the true test of a city's character is what data it makes available when no one is watching (John Wooden - if he ever ran for mayor).
+Welcome to the very first bikeshare data quality awards! Twenty city bikeshares unknowingly compete for the crown of having the highest quality bikeshare data. Not a single city invited me to dissect their bikeshare data, but I believe the "true test of a city's character is what data it makes available when no one is watching" (John Wooden - if he had run for city mayor). Let's reward some unsuspecting cities!
 
-## Rating Criteria and Categories
+## The Rating System
 
-The ratings are based on the following categories:
+The wheel below shows the six spokes on which we'll be assessing each bikeshare's data.
 
-- Accessible - How easy is it for citizens and developers to access and download the data?
-- Relevant - How often is the data updated?
-- Usability - How easy is the data to work with? Can I run it through a pipeline and get all the data I need? Or do I have to handle edge cases like misnamed column headers and invalid datetimes.
-- Completeness - For each trip, are the core pieces of information provided, such as start time, end time, start station, and end station?
-- Presentation and Creativity - Data is well documented.
+<div className="w-2/3 m-auto">
+  <RadialRank
+    data={[
+      {
+        name: 'Rating Categories',
+        accessible: 0,
+        complete: 0,
+        processable: 0,
+        fresh: 0,
+        documented: 0,
+        unique: 0,
+      },
+    ]}
+    options={{
+      hideLegend: true,
+    }}
+  />
+</div>
 
-What was my process for judging a city's data? For each city, I attempted to merge all the city's data, generally spread out over hundreds of files, into one parquet file. If the data quality was low, then I needed to write more code to properly merge those files together. Highly rated cities generally made this process very easy. Lower rated cities made me jump through hoops and many if/else statements to get to the final product. Even then, they still may have had trips that contained missing data.
+In order of importance, is the data...
 
-Here are the requirements:
+- Complete - Are all critical pieces of info, such as start time, end time, start station, and end station provided?
+- Accessible - How simple is it for folks to download the data?
+- Processable - How easy is the data to process?
+- Fresh - How often is the data updated?
+- Documented - How well is variation in the data documented?
+- Unique - Are there aspects of the data that should be emulated?
 
-| Rating | Description                                                                                                       |
-| ------ | ----------------------------------------------------------------------------------------------------------------- |
-| S      | The standard of data quality. Every other city system should seek to match the quality here.                      |
-| A      | High quality - data is updated at least monthly. 99.5%+ of trips have no null values for the core metrics,        |
-| B      | The data performs well in at least two of the above categories, but fails to meet the standards in the other ones |
-| C      | The data has serious gaps in most of the categories, such as many trips with missing data or infrequent updates   |
+Each category is given a score out of 5, and then given a letter grade based on the following rubric.
 
-## The Competing Cities
+| Rating | Description                                                                                                                                                                                                                                           |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A      | High quality - the data is updated at least monthly and is more than 99.99% complete. The data can be downloaded easily by developers and citizens, and is easy to process once downloaded.                                                           |
+| B      | Good quality - the data is updated at least monthly and is more than 95% complete. The data is simple to download, but may require some processing to get the full history of data (merging data structures, handling weird dateteimes or characters) |
+| C      | Average quality - the data is updated monthly or upon request, and is more than 90% complete. The data may require significant work to download or process.-                                                                                          |
+| D      | Poor quality - The data is considered poor if one or more of the following is true - More than 10% of the data is missing. The data is difficult to download and challenging to process.                                                              |
 
-These cities have accessible public data for 2024 on their website.
+## Process
+
+To measure a bikeshare's data quality, I processed the data available to create a single file that contained every trip since the bikeshare started operating. This included downloading all the available data, handling any inconsistencies in data betwteen files
+
+- Downloading the available data.
+- Merging data into one single file, handling any inconsistencies in data between the files
+
+Once merged, I analyzed the data to see how many trips had null data for start time, end time, start station, and end station. You can scrutinize the code for the entire process at: https://github.com/commanderking/citybikeshare.
+
+## Results
+
+Let's first appreciate all these unsuspecting cities for publishing their bikeshare data! Most bikeshares have not done so, and as a result, missed out on this inaugural bikeshare rating.
 
 ### A+ Cities
 
-### Oslo
+<RadialRank data={A_PLUS_CIITES} />
 
-- Trips: 11,546,072
-- Trips (missing data): 0
-- % trips (missing data): 0%
-- Updated: Daily
+### A Cities
 
-Trip data for Oslo is 100% complete - not a single trip is missing for its over 11 million trips since April, 2016. Oslo is one of a trio of Norway cities that update their bikeshare data daily. This combination of timely and complete data make Oslo stand a tier above the rest.
+<RadialRank data={A_CITIES} />
 
-![Oslo Legacy Trips](/images/2024_ratings/oslo_legacy_trips.png)
-Like many bikeshare systems, Oslo City Bike has legacy data that has different headers than the current data. Unlike most bikeshare systems, however, they clearly document when and how that data has changed. And while I wish they would preprocess the data so that all data followed the same structure, the clear documentation makes this an easier pill to swallow. They also provide a separate [CSV file](https://oslobysykkel.no/en/open-data/historical) that maps the old legacy station ids to the new ones.
+### B Cities
 
-Once donwloaded, how easy is it to combine all Oslo data? Below is pseudocode for the process. This system, along with Norway's other cities, are simple. As we move down, we'll see how the data transformation required can become more complex.
+<RadialRank data={B_CITIES} />
 
-```
-    df = (
-        df.rename(renamed_columns)
-        .pipe(map_legacy_station_id_to_name(stations_df))
-        .select(final_columns)
-        .pipe(utils.convert_columns_to_datetime(date_columns, date_formats))
-    )
-```
+### C Cities
 
-The only recommendation I have for Oslo, and Norway in general, is to make their data easier to download for developers in one swoop. I still had to write a scraping script to downlaod all the individual separate csv files. In many US cities, the data is available through a single AWS sync on an s3 bucket.
+<RadialRank data={C_CITIES} />
 
-### Bergen
+### D Cities
+
+<RadialRank data={D_CITIES} />
+
+## Detailed Evaluations
+
+### Oslo and Bergen (A+)
+
+<StatsCard name="Oslo" trips={1000000} percentComplete={50} />
+
+- Trips:
+  11,546,072 - Trips (missing data): 0 - % trips (missing data): 0% - Updated:
+  Daily
 
 - Trips: 4,128,284,
 - Trips (missing data): 0
 - % trips (missing data): 0%
 - Updated: Daily
 
-Bergen, like its Norway sibling Oslo has 100% complete data and updates its trips daily. Having started in June 2018, two years after Oslo, its data conforms to a single data structure, making it even easier than Oslo to transform the data. In all other aspects, Bergen matches the high quality data of Oslo.
+Trip data for Oslo and Bergen are 100% complete, not a single null value for any of their 15 million combined trips. These two cities and Trondheim, also in Norway, are the only three cities to update their city daily. The combination of timely and complete data makes Oslo and Bergen stand a tier above the rest.
+
+![Oslo Legacy Trips](/images/2024_ratings/oslo_legacy_trips.png)
+Like many bikeshare systems, Oslo City Bike has legacy data that has different csv headers than the current data. Unlike all other bikeshare systems, however, they are the only system that documents when and how that data has changed. They also provide a separate [CSV file](https://oslobysykkel.no/en/open-data/historical) that maps the old legacy station ids to the new ones. Bergen's data follows a single data structure, making it even simpler to process. The only recommendation I have for Oslo and Bergen, and Norway in general, is to make their data easier to download for developers in either an export (like Austin), or to sync through s3 (like all Lyft owned systems).
+
+![Oslo Live Rides](/images/2024_ratings/oslo_live_ride.png)
+
+Norway's bikeshare systems are the only systems in the world that (show live ridership data)[https://oslobysykkel.no/en/stations/live], such as how many Norwegians are currently riding and how many rode in the past 24 hours. There's also some historical data, including the median trip time and total number of trips in the current year. It's refreshing to see a system actually make use of the data they've aggregated!
 
 ## A Cities
 
 ### Trondheim
 
-Trondheim falls just short of its two Norway siblings, somehow having 983 trips without start or end station data. Still, even with this small shortcoming, only 0.083% of its 1,199,715 have missing data.
+            "total_rows": 1199715,
+            "null_rows": 983,
+            "percent_null": 0.08,
+            "updated_at": "2024-11-14 16:46:55"
 
-Other than that, Trondheim shares the same high quality data as Oslo and Bergen.
+Trondheim falls just short of the high standards of Norway's two other cities because it has a 983 trips that lack start and end station names. Disappointing by Norway standards, but still better than almost all other bikeshare systems. Other than this small glitch, Trondheim shares the same high quality data as Oslo and Bergen.
 
 ### Austin
 
@@ -85,11 +136,13 @@ Other than that, Trondheim shares the same high quality data as Oslo and Bergen.
 
 ![Austin Export](/images/2024_ratings/austin_export.png)
 
-Austin's data is 100% complete. They also make it easy to export all data - just click the export button, choose a file format among the likes of csv, excel, and a few others, and click download. The export can take some time, but downloads in a single file for processing.
+Austin's data is just a bit weird. In terms of the data, it's of the highest of quality - 100% data complete, and a single data structure for straightforward processing. Along with Chattanooga, Austin has the best data download process. One click of an export button, and boom! All the data in a single excel or csv file.
 
-What prevents Austin from reaching the higher tiers is that its data hasn't been updated since July, 25th. They have switched over from MetroBike to CapMetro, so it's unclear whether the data will continue to be updated.
+Austin does make an odd choice of including only start time, and duration (in minutes) rather than the typical start and end time almost all other bikeshare operators use. Maybe they're just trying to live up to their name of making things weird.
 
-Austin's data also can be simplified to reduce file size and download times. They have a column for Checkout Datetime, but also separate Checkout Date and Checkout Time, which are repetitive.
+What hurts Austin the most is that it stopped updating its data July, 2024, which corresponded to a (switch of operators)[https://www.capmetro.org/news/details/2024/02/01/capmetro-ushers-in-a-new-era-for-metrobike-to-improve-austin-s-bike-share-system]. We'll see if the new operator, CapMetro, will continue to make bikeshare data available for all.
+
+Maybe remove - Austin's data also can be simplified to reduce file size and download times. They have a column for Checkout Datetime, but also separate Checkout Date and Checkout Time, which are repetitive.
 
 ### Boston
 
@@ -100,53 +153,61 @@ Austin's data also can be simplified to reduce file size and download times. The
 
 Highlights:
 
-With less than 0.1% of its trips missing data for its over 23 million lifetime trips, Boston's dataset has few gaps in trip data. Downloading all files is a breeze since they, like many of the Lyft owned bikeshare systems, make their data available in an [s3 bucket](https://s3.amazonaws.com/hubway-data/index.html) that developers can sync. Files are also conveniently named based on the system name at the time (Hubway and Bluebikes).
+With less than 0.1% of its trips missing data, Boston's dataset has very few gaps. Downloading all files is a breeze since they, like many of the Lyft owned bikeshare systems, make their data available in an [s3 bucket](https://s3.amazonaws.com/hubway-data/index.html).
 
-Processing Boston's data has a few bumps in the road. Their datetime format is almost 100% consistent for every trip with the exception of a few datetimes that include milliseconds. I have no problem with being extra precise, but ultimately value consistency. The column headers for the csv files also changed around 2023, but is otherwise consistent pre and post 2023. Unlike Oslo, however, Boston does not document this change and it's up for the developer to uncover these changes.
+Like Boston's streets, the data has a few twists and turns to navigate. A few datetimes are precise to the millisecond, which doesn't play nice with all the other datetimes in seconds. The column headers for the csv files also changed around 2023 and unlike Oslo, however, Boston does not document this change and it's up for the developer to uncover these changes.
 
-### Los Angeles
+In almost all categories Boston is solid, but has some room to improve. On their website, they do share a Boston This nifty [story](https://storymaps.arcgis.com/stories/0f5fc6ed107d4c0491d24051eed77ff9) is linked on their data page, and allows users to see how the bikeshare system has grown, and even visualizes popular stations and and destinations by neighborhood.
 
-            "total_rows": 2355984,
-            "null_rows": 2101,
-            "percent_null": 0.09,
-            "updated_at": "2024-10-23 18:56:48"
+### Los Angeles and ### Philadelphia
+
+los angeles
+"total_rows": 2355984,
+"null_rows": 2101,
+"percent_null": 0.09,
+"updated_at": "2024-10-23 18:56:48"
+
+philly
+"total_rows": 7352332,
+"null_rows": 51,
+"percent_null": 0.0,
+"updated_at": "2024-10-23 18:56:45"
+
+Philadelphia and Los Angeles are both operated by [Bicycle Transit System](https://www.bicycletransit.com/), and both systems have nearly complete data. The data structure for both cities is well documented, and there's one consistent structure for the entire history of data, though there are two datetime formats analysts have to negotiate. Overall, the data is a joy to parse through.
+
+Both cities offer a dashboard that shows the total trips made and passes sold, along with overall benefits including calories burned, miles traveled, and emissions reduced. I wish bikeshare companies would stop project emissions reduced because it's impossible to know whether the person would have just walked, or taken the bus, or not take the trip at all. Alternatively, they should explain how they calculated this emission. Is every trip's estimated miles converted to estimated gas usage? Or are only a certain % of trips included? Perahps it's well intentioned, but it can be very misleading without making the details of the calculation transparent.
+
+This issue does not overshadow that Bicycle Transit Systems has done a great job having high quality data that's complete and easy to process. With their recent (acquisition)[https://www.bicycletransit.com/news/gearing-up-for-growth/] of BCycle and bikeshares in more than 30 cities, I hope they continue to publish quality data for its new cities.
 
 // NTS - Check whether it's due to the misnaming UTF_lossy of one of the station names
-The city of cars doesn't have too many bikeshare rides compared to its population or sprawling acreage, but the data it has for its rides is actually 100% clean to start. The null data comes from needing to map the station code provided in trip data to a station name. It seems that certain stations no longer can be matched. Even so, over 99.9% of the data is present.
+The city of cars doesn't have too many bikeshare rides compared to its population or sprawling acreage, but the data it has for its rides is nearly 100% complete. The null data comes from needing to map the station code provided in trip data to a station name. It seems that certain stations no longer can be matched. Even so, over 99.9% of the data is present.
 
-The data structure is well documented, and there's one consistent structure for all of its data. This is likely due to the bikeshare system being always operated by [Bicycle Transit Systems](https://www.bicycletransit.com/our-current-programs/los-angeles/) since its inception in 2016. There are two variations in datetime, but given that there's only one overall set of column headers, the data is still a joy to parse through. I also appreciate how LA explicitly documents how they've processe their data, such as removing trips that are over 24 hours long.
+The data structure is well documented, and there's one consistent structure for all of its data. This is likely due to the bikeshare system being always operated by [Bicycle Transit Systems](https://www.bicycletransit.com/our-current-programs/los-angeles/) since its inception in 2016. There are two variations in datetime, but given that there's only one overall set of column headers, the data is still a joy to parse through. I also appreciate how LA explicitly documents how they've processed their data, such as removing trips that are over 24 hours long.
 
 ## B Cities
 
 ### Toronto
 
-Toronto is the only city that gives a data quality rating for each of its datasets. As of writing, the bikeshare dataset has a rating of 82%, which puts it squarely in the B range. Even so, let me give credit to Toronto for attempting to rate its data quality - they are the only city I've seen attempt such a self-assessment. As of writing, I was only one of 82 people who watched how Toronto makes [its data](https://www.youtube.com/watch?v=yljTsQkJmP4&ab_channel=CKANAssociation) accessible and measures its quality, but I'm giving the Toronto a 100% rating in their efforts to make data more accessible.
+Toronto is the only city that gives a data quality rating for each of its datasets. As of writing, the bikeshare dataset has a rating of 82%, but let me try to justify its A rating. Credit to Toronto for attempting to rate its data quality. They are the only city I've seen attempt such a self-assessment for all of its open data. As of writing, I was only one of 82 people who watched how Toronto makes [its data](https://www.youtube.com/watch?v=yljTsQkJmP4&ab_channel=CKANAssociation) accessible and measures its quality, but I'm giving the Toronto a 100% rating in their efforts to make data more accessible.
 
-Toronto's data is near complete, only 22 rows have null station data, and 249 with null end or start times. Given the 22 million totl rides, Toronto is also one of the only systems to provide an API to grab the data, and in three popular languages (Python, Node.js, and R)!
+Toronto's data is near perfect, only 22 rows have null station data, and 249 with null end or start times. Given the 22 million total rides, Toronto is also one of the only systems to provide an API to grab the data, using your pick of Python, Node.js, or R. Completeness and Accessibility are responsible for Toronto's high scores.
 
-Toronto acknowledgs that its data has changed once, but it's not documented how exactly it's changed, so I had to attempt running the data through code until I found the variations in headers (in this case, only 2). Some Toronto data also have years with only two digits (i.e. 17 instead of 2017). Time formats in Toronto have three different formats ( "%m/%d/%Y %H:%M", "%m/%d/%Y %H:%M:%S", "%d/%m/%Y %H:%M"), and some of their start stations have placeholder characters that required lossy conversion (i.e. Gailbraith Rd / KingG��s College Cr. - this should be King's College Cr.).
-
-### New York City
-
-            "total_rows": 246014252,
-            "null_rows": 402138,
-            "percent_null": 0.16,
-            "updated_at": "2024-10-23 18:56:30"
-
-New York City, like all Lyft operated cities, stores its data in an s3 bucket for easy download. Citi bike, the operator, also run the Jersey City bikeshare, and includes their data in the same s3 bucket, so
+As for minor flaws, Toronto acknowledges that its data has changed once, but it's not documented how. Developers will need to account for variations in the headers, and
+so I had to attempt running the data through code until I found the variations in headers (in this case, only 2). Some Toronto data also have years with only two digits (i.e. 17 instead of 2017). Time formats in Toronto have three different formats ( "%m/%d/%Y %H:%M", "%m/%d/%Y %H:%M:%S", "%d/%m/%Y %H:%M"), and some of their start stations have placeholder characters that required lossy conversion (i.e. Gailbraith Rd / KingG��s College Cr. - this should be King's College Cr.).
 
 ## C Cities
 
-### Mexico City
+### Taipei
 
-            "total_rows": 100946389,
-            "null_rows": 838522,
-            "percent_null": 0.83,
-            "updated_at": "2024-10-23 18:58:52"
+Taipei's data is nearly 100% complete with only 702 trips with missing data. This is incredible considering the over 93 million trips that have been recorded since 2020, the year when Taipei started tracking Youbike 2.0 trips. This is the only historical data that's available, so we're hoping that Taipei will soon share YouBike 1.0 data as well.
 
-Having the second most trips in North America, Mexico City's Ecobici is middle of pack in data completeness, with 0.8% of its data missing. Mexico City's data is also the most challenging to process because of how inconsistently named the data's headers are. While most cities will have two, or even, three sets of headers, each corresponding to different operators, Mexico City has csv files where certain columns, mostly relating to time and date, have slightly different names. It seems Mexico City's csv headers follow snake case with capital letters for each word (i.e. Fecha_Arribo), but one off files will have a slightly different take. For example, the arrival date (fecha arribo), is sometimes written as: Fecha_Arribo, Fecha_arribo, or Fecha Arribo. In the June 2021 file, there were two identical headers of Hora_Arribo, but one was intended to be Hora_Retiro. Mexico is the only city to separate out its date and time, rather than having a single datetime, requiring analysts to combine those pieces of data.
+One area Taipei falls short is accessing the data. YouBike's [main data page](https://www.youbike.com.tw/region/taipei/operation/) does not reference any data for download. Instead, it's found on the open data page where one can download a single csv. Each row in the csv contains the link to a month of data, so this is a two step process that developers need to hop through to ultimately get monthly data.
 
-#### Chattanooga
+Once downloaded, Taipei's data is straightforward to process. One interesting quirk is they provide start time, precise only to the hour, and the duration of the trip, but not the end time. This likely is for privacy reasons, so it's impossible to track where someone ended up if you know their start time. Taipei is the only city that does this, but I can respect the intention even if it makes producing data with consistent data structures across all bikeshares more challenging. What is mildly annoying, however, is the duration is provided in HH:MM:SS format where HH can be over 24, making custom logic necessary for parsing the datetime.
+
+These are mostly minor inconveniences, but what really drags Taipei's quality is the infrequent data updates. In August, 2024, the data had only been updated up to February, 2024. After requesting more data, a government official did respond and provided updated data until June. It seems that data is only updated when it's requested.
+
+### Chattanooga
 
             "total_rows": 623469,
             "null_rows": 2134,
@@ -181,7 +242,52 @@ Parsing through Montreal's bikeshare data is challenging. To start, there are th
 
 One of Bixi's best features is already visualizing its current year data for visitors, even allowing users to explore different aspects, such as comparing purchases vs trips, and trips made by members vs one off users. Visitors can also switch the year to see how the trips have changed over time. Nice!
 
-### Chicago
+### New York City and Jersey City
+
+            "total_rows": 246014252,
+            "null_rows": 402138,
+            "percent_null": 0.16,
+            "updated_at": "2024-10-23 18:56:30"
+
+New York City and Jersey City data are all available in the same S3 bucket for download. While overall the data completeness is high, all the missing data has come after 2020, perhaps coinciding with Lyft taking over operations from Motivate. Just as concerning is that for certain months in 2013 and 2018, there are files that are duplicated so certain trips are counted twice. Note the larger file sizes of 2013 and 2018 compared to subsequent years in the image below.
+
+![NYC Odd Data](/images/2024_ratings/nyc_weird_data.png)
+
+For NYC, processing the data requires handling three separate data structures, and three time formats, but otherwise is straightforward. Jersey City only uses one time format across all of its three different data structures, making the process a little simpler.
+
+Bells and whistles wise, New York City's bikeshare data has a couple of cool features, such as sharing the (monthly operating costs)[https://citibikenyc.com/system-data/operating-reports], NYC's more general (biking data)[http://www.nyc.gov/html/dot/html/about/datafeeds.shtml#Bikes], and finally a (Google group)[https://groups.google.com/forum/#!aboutgroup/citibike-hackers] one can join to meet other bikeshare data enthusiasts.
+
+### Washington DC
+
+Washington DC data has even more gaps than New York City's, and like NYC, most of it missing data comes after 2020, spiking to over 1 million trips with missing start or end station names in 2024. DC's data is easier to process than NYC's with only two data structures, and only one time format.
+
+## D Cities
+
+### Columbus
+
+        "null_counts":
+            "start_time": 0,
+            "end_time": 0,
+            "start_station_name": 22802,
+            "end_station_name": 34586
+
+        "total_rows": 541083,
+        "null_rows": 44714,
+        "percent_complete": 91.74,
+        "updated_at": "2024-11-16 11:54:28"
+
+### Mexico City
+
+            "total_rows": 100946389,
+            "null_rows": 838522,
+            "percent_null": 0.83,
+            "updated_at": "2024-10-23 18:58:52"
+
+Mexico City really should belong in the C tier based on its data completeness, but its data is miserable to process. It's common for cities two have two or three sets of data structures, each corresponding to a time of a particular operator. Mexico City, however, has data with headers that have columns that have minor variations, or even typos. For example, the arrival date (fecha arribo), is sometimes labeled as: Fecha_Arribo, Fecha_arribo, or Fecha Arribo. In the June 2021 file, there were two identical headers of Hora_Arribo, but one was intended to be Hora_Retiro.
+
+With so many variations, it makes sense Mexico City doesn't attempt to document these variations. Developers are on their own to iron out the quirks in the data.
+
+### Chicago and Columbus
 
             "total_rows": 46498524,
             "null_rows": 5192702,
@@ -190,9 +296,15 @@ One of Bixi's best features is already visualizing its current year data for vis
 
 Processing Chicago data starts off great with a simple S3 bucket sync, but it quickly goes downhill from there.
 
-Prior to 2020, Chicago's bikeshare rarely had any missing data values. Perhaps coinciding with Lyft's takeover in 2019, the data quality drastically declined. Now every month, the data has gaps in data, sometimes missing start or end station names, sometimes missing both. The result is over 11% of Chicago's data having missing information.
+Prior to 2020, Chicago's bikeshare rarely had any missing data values. Perhaps coinciding with Lyft's takeover in 2019, the data quality drastically declined. Now every month, the data has gaps in data, sometimes missing start or end station names, sometimes both. The result is over 11% of Chicago's data having missing information.
 
-To parse the data, Chicago has three different data structures in tis csv files, including one truly baffling set, which includes column headers formatted like "01 - Rental Details Local Start Time". Adding to the pain, Chicago's data comes in four different time formats ("%Y-%m-%d %H:%M:%S",
+To parse the data, Chicago has three different data structures in tis csv files, including one truly baffling set, which includes column headers formatted like "01 - Rental Details Local Start Time". Adding to the pain, Chicago's time columns comes in four different flavors ("%Y-%m-%d %H:%M:%S",
 "%m/%d/%Y %H:%M:%S", "%m/%d/%Y %H:%M","%Y-%m-%d %H:%M").
+
+Columbus performs slightly better than Chicago with less than 10% of its trips missing data, and has only two variations in dateteime, making it slightly simpler to process. These minor improvements, however, are not enough to bump into the the C tier.
+
+### San Francisco
+
+Not to be outdone by the windy city, Fog City makes its data even harder to parse as 1 in 5 trips have either missing start or end station (or both). The data spotiness covers up any other redeeming qualities of the data, which otherwise shares many of the nice accessibility and usability features of its US Lyft operated peers.
 
 </div>
