@@ -77,6 +77,7 @@ const RadialRank = ({ data, options }: Props) => {
         data: points,
         x: 'fx',
         y: 'fy',
+        // @ts-ignore removes fx and fy labels
         axis: null,
         marginRight: 20,
         marginBottom: 20,
