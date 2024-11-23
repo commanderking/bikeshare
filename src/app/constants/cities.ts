@@ -164,9 +164,17 @@ export const systems: { [key: string]: System } = {
     id: 'chattanooga',
     metroArea: 'Chattanooga',
     systemName: 'Bike Chattanooga',
-    country: 'United States',
+    country: 'USA',
     longitude: -85.3097,
     latitude: 35.0456,
+  },
+  jersey_city: {
+    id: 'jersey_city',
+    metroArea: 'Jersey City',
+    systemName: 'Citi Bike',
+    country: 'USA',
+    longitude: -74.0776,
+    latitude: 40.7282,
   },
 }
 

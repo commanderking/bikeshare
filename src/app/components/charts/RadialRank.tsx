@@ -13,7 +13,7 @@ type Options = {
   showFullCategories?: boolean
 }
 
-const getPoints = (data: Rating[], options: Options) => {
+const getPoints = (data: Rating[], options: Options | undefined) => {
   const columns = 3
 
   const startingCount = options?.hideLegend ? 0 : 1
@@ -36,10 +36,11 @@ const getPoints = (data: Rating[], options: Options) => {
         raw,
         fx: (i + startingCount) % columns,
         fy: Math.floor((i + startingCount) / columns),
+        value: 0,
       }))
     )
+  const pointsWithValue = d3.group(points, (d) => d.key)
   for (const [, g] of d3.group(points, (d) => d.key)) {
-    // const m = d3.max(g, (d) => d.raw)
     for (const d of g) d.value = d.raw / 5
   }
 
