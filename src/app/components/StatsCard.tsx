@@ -1,20 +1,31 @@
-type CityStats = {
-  name: string
-  trips: number
-  percentComplete: number
-}
+import RadialRank from '@/app/components/charts/RadialRank'
+import { getRating } from '@/app/constants/ratings2024'
+import { formatCitySystemData } from '@/app/utils/systemStatistics'
 
-const StatsCard = ({ name, trips, percentComplete }: CityStats) => {
+const StatsCard = ({ city, name }: { city: string; name: string }) => {
+  const systemData = formatCitySystemData(city)
+
+  console.log({ systemData })
+  if (!systemData) return null
+
   return (
-    <div className="max-w-sm mx-auto bg-white border border-gray-300 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300">
+    <div className="max-w-sm mx-auto bg-white border border-gray-300 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300 w-full md:w-1/2 inline-block">
       <h2 className="mt-0 text-lg font-semibold text-gray-800 mb-4">{name}</h2>
+      <RadialRank
+        data={[getRating(city)]}
+        hideLegend
+        options={{
+          hideLegend: true,
+        }}
+      />
+
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center space-x-2">
           {/* <FaBicycle className="text-blue-500" /> */}
-          <span className="text-gray-600">Trips:</span>
+          <span className="text-gray-600">Trips (Lifetime):</span>
         </div>
         <span className="text-gray-900 font-medium">
-          {trips.toLocaleString()}
+          {systemData.totalRows.toLocaleString()}
         </span>
       </div>
       <div className="flex items-center justify-between">
@@ -22,7 +33,9 @@ const StatsCard = ({ name, trips, percentComplete }: CityStats) => {
           {/* <FaChartBar className="text-green-500" /> */}
           <span className="text-gray-600">Data Completeness (%):</span>
         </div>
-        <span className="text-gray-900 font-medium">{percentComplete}%</span>
+        <span className="text-gray-900 font-medium">
+          {systemData.percentComplete}%
+        </span>
       </div>
     </div>
   )

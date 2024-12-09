@@ -15,7 +15,6 @@ type Options = {
 
 const getPoints = (data: Rating[], options: Options | undefined) => {
   const columns = 3
-
   const startingCount = options?.hideLegend ? 0 : 1
   const points = d3
     .sort(
@@ -29,9 +28,10 @@ const getPoints = (data: Rating[], options: Options | undefined) => {
           d.unique) *
         -1
     )
-    .flatMap(({ name, ...values }, i) =>
+    .flatMap(({ name, id, ...values }, i) =>
       Object.entries(values).map(([key, raw]) => ({
         name,
+        id,
         key,
         raw,
         fx: (i + startingCount) % columns,
@@ -39,12 +39,12 @@ const getPoints = (data: Rating[], options: Options | undefined) => {
         value: 0,
       }))
     )
+
   const pointsWithValue = d3.group(points, (d) => d.key)
   for (const [, g] of d3.group(points, (d) => d.key)) {
     for (const d of g) d.value = d.raw / 5
   }
 
-  console.log({ points })
   return points
 }
 
@@ -55,6 +55,7 @@ type Props = {
 
 const RadialRank = ({ data, options }: Props) => {
   const plotRef = useRef<HTMLDivElement>(null)
+  console.log({ data })
   const points = getPoints(data, options)
 
   const longitude = d3
@@ -63,7 +64,6 @@ const RadialRank = ({ data, options }: Props) => {
     .align(0.5)
 
   useEffect(() => {
-    console.log({ points })
     const plot = Plot.plot({
       width: Math.max(500, 600),
       marginBottom: 10,
