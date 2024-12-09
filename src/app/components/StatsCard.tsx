@@ -6,14 +6,15 @@ const StatsCard = ({ city, name }: { city: string; name: string }) => {
   const systemData = formatCitySystemData(city)
 
   console.log({ systemData })
-  if (!systemData) return null
+
+  const radialData = getRating(city)
+  if (!systemData || !radialData) return null
 
   return (
     <div className="max-w-sm mx-auto bg-white border border-gray-300 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300 w-full md:w-1/2 inline-block">
       <h2 className="mt-0 text-lg font-semibold text-gray-800 mb-4">{name}</h2>
       <RadialRank
-        data={[getRating(city)]}
-        hideLegend
+        data={[radialData]}
         options={{
           hideLegend: true,
         }}

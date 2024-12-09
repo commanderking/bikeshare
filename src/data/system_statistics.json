@@ -808,6 +808,8 @@
     "null_end_date": 11085,
     "null_starting_time": 572979,
     "null_ending_time": 838062,
+    "null_start_station_name": 0,
+    "null_end_station_name": 0,
     "null_by_year": [
       {
         "year": 2010,
