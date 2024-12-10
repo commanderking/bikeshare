@@ -241,6 +241,30 @@ export const cityRatings: Rating[] = [
     unique: 1, // Has expansion plan, KML?
     updateFrequency: 'MONTHLY',
   },
+  {
+    id: 'london',
+    name: 'London',
+    grade: 'C',
+    accessible: 4,
+    complete: 4,
+    processable: 4,
+    fresh: 4.5,
+    documented: 2,
+    unique: 2, // Has other potentially neat data in bucket
+    updateFrequency: 'BIWEEKLY',
+  },
+  {
+    id: 'helsinki',
+    name: 'Helsinki',
+    grade: 'B',
+    accessible: 3,
+    complete: 4.5,
+    processable: 5,
+    fresh: 4,
+    documented: 2,
+    unique: 2,
+    updateFrequency: 'BIWEEKLY',
+  },
 ]
 
 export const getRating = (id: string) => {
@@ -275,6 +299,7 @@ export const B_CITIES = [
   'pittsburgh',
   'philadelphia',
   'los_angeles',
+  'helsinki',
 ].map(getCityRating)
 export const C_CITIES = [
   'chattanooga',
@@ -283,6 +308,7 @@ export const C_CITIES = [
   'montreal',
   'nyc',
   'dc',
+  'london',
 ].map(getCityRating)
 export const D_CITIES = [
   'vancouver',
