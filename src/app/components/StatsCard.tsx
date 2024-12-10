@@ -1,13 +1,11 @@
 import RadialRank from '@/app/components/charts/RadialRank'
-import { getRating } from '@/app/constants/ratings2024'
+import { getCityRating } from '@/app/constants/ratings2024'
 import { formatCitySystemData } from '@/app/utils/systemStatistics'
 
 const StatsCard = ({ city, name }: { city: string; name: string }) => {
   const systemData = formatCitySystemData(city)
 
-  console.log({ systemData })
-
-  const radialData = getRating(city)
+  const radialData = getCityRating(city)
   if (!systemData || !radialData) return null
 
   return (
@@ -19,10 +17,19 @@ const StatsCard = ({ city, name }: { city: string; name: string }) => {
         </div>
         <span className="text-gray-900 font-medium">{radialData.grade}</span>
       </div>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <span className="text-gray-600">Score:</span>
+        </div>
+        <span className="text-gray-900 font-medium">
+          {radialData.score} / 35
+        </span>
+      </div>
       <RadialRank
         data={[radialData]}
         options={{
           hideLegend: true,
+          hideTitle: true,
         }}
       />
 
@@ -51,6 +58,15 @@ const StatsCard = ({ city, name }: { city: string; name: string }) => {
         </div>
         <span className="text-gray-900 font-medium">
           {systemData.percentComplete}%
+        </span>
+      </div>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          {/* <FaChartBar className="text-green-500" /> */}
+          <span className="text-gray-600">Update Frequency</span>
+        </div>
+        <span className="text-gray-900 font-medium">
+          {radialData.updateFrequency}
         </span>
       </div>
     </div>

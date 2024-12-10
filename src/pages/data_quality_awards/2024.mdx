@@ -16,9 +16,9 @@ Welcome to the very first bikeshare data quality awards! Twenty city bikeshares 
 
 ## The Rating System
 
-The wheel below shows the six spokes on which we'll be assessing each bikeshare's data.
+The wheel chart below shows the six spokes on which we'll be assessing each bikeshare's data.
 
-<div className="w-2/3 m-auto">
+<div className="w-3/4 m-auto">
   <RadialRank
     data={[
       {
@@ -33,24 +33,25 @@ The wheel below shows the six spokes on which we'll be assessing each bikeshare'
     ]}
     options={{
       hideLegend: true,
+      hideTitle: true,
     }}
   />
 </div>
 
 In order of importance, is the data...
 
-- Complete - Are all critical pieces of info, such as start time, end time, start station, and end station provided?
-- Accessible - How simple is it for folks to download the data?
-- Processable - How easy is the data to process?
-- Fresh - How often is the data updated?
-- Documented - How well is variation in the data documented?
-- Unique - Are there aspects of the data that should be emulated?
+- Complete - Are all critical pieces of info, such as start time, end time, start station, and end station provided? (2x)
+- Processable - How easy is the data to process? (1.5x)
+- Accessible - How simple is it for folks to download the data? (1x)
+- Fresh - How often is the data updated? (1x)
+- Documented - How well is variation in the data documented? (1x)
+- Unique - Do they do anything delightful with the data? (1x)
 
-Each category is given a score out of 5, and then given a letter grade based on how well they meet the above criteria.
+For every city bikeshare system, the system receives a score out of 5 for each category, which is multipled by its modifier in parenthesis above, to obtain a final score. We then assign a letter grade based on bucketing the systems by their score.
 
 ## Process
 
-To measure a bikeshare's data quality, I processed the data available to create a single file that contained every trip since the bikeshare started operating. This included downloading all the available data, handling any inconsistencies in data betwteen files
+To measure a bikeshare's data quality, I processed the data available to create a single file that contained every trip since the bikeshare started operating. This included downloading all the available data, handling any inconsistencies in data between files
 
 - Downloading the available data.
 - Merging data into one single parquet file, handling any inconsistencies in data between the files
@@ -59,37 +60,37 @@ For comparability between systems, I only included four data points in the final
 
 ## Results
 
-Regardless of the results, let's appreciate these unsuspecting cities for publishing their bikeshare data! Some of these cities may have earned low ratings, but they're all better than the cities who have made their data available for public consumption. Without further ado, let's ride!
+Regardless of the results, let's appreciate these unsuspecting cities for publishing their bikeshare data! Some of these cities have earned low ratings, but they're all better than the cities who have made their data available for public consumption. Without further ado, let's hit the road!
 
 ### A+ Cities
 
-> Leading the pack on a smooth, fast ride, these cities offer exceptional data quality - complete, consistent, and effortlessly accessible like cruising down a perfectly paved Amsterdam bike lane.
+> Leading the pack on a smooth, fast ride, these cities offer exceptional data quality - complete, consistent, and accessible like cruising down a perfectly paved Amsterdam bike lane.
 
-<RadialRank data={A_PLUS_CITIES} />
+<RadialRank data={A_PLUS_CITIES} options={{ hideLegend: true }} />
 
 ### A Cities
 
 > Pedaling confidently toward the finish line, these cities provide great data quality with smooth paths and only minor detours along the way.
 
-<RadialRank data={A_CITIES} />
+<RadialRank data={A_CITIES} options={{ hideLegend: true }} />
 
 ### B Cities
 
 > Cruising through, these cities offer solid data quality, but occassional bumps and gaps slow progress.
 
-<RadialRank data={B_CITIES} />
+<RadialRank data={B_CITIES} options={{ hideLegend: true }} />
 
 ### C Cities
 
 > Coasting through uneven terrain, the journey is possible, but unclear routes, gaps, and inconsistencies make for a bumpy ride.
 
-<RadialRank data={C_CITIES} />
+<RadialRank data={C_CITIES} options={{ hideLegend: true }} />
 
 ### D Cities
 
 > Stuck on a broken path, these cities' poor data quality leaves you struggling to find the right path and navigate the many blocked paths.
 
-<RadialRank data={D_CITIES} />
+<RadialRank data={D_CITIES} options={{ hideLegend: true }} />
 
 ### E Cities
 

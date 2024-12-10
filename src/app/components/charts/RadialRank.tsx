@@ -2,11 +2,6 @@ import * as Plot from '@observablehq/plot'
 import { useEffect, useRef } from 'react'
 import * as d3 from 'd3'
 import { Rating } from '@/app/model/Ratings'
-/** Completeness scores:
- * 5 - 100%
- * 4 - 99%+
- * 3 -
- **/
 
 type Options = {
   hideLegend?: boolean
@@ -15,21 +10,11 @@ type Options = {
 }
 
 const getPoints = (data: Rating[], options: Options | undefined) => {
-  const columns = 3
+  const columns = 2
   const startingCount = options?.hideLegend ? 0 : 1
   const points = d3
-    .sort(
-      data,
-      (d) =>
-        (d.accessible +
-          d.complete * 2 +
-          d.processable * 1.5 +
-          d.fresh +
-          d.documented +
-          d.unique) *
-        -1
-    )
-    .flatMap(({ name, id, grade, ...values }, i) =>
+    .sort(data, (d) => (d.score || 0) * -1)
+    .flatMap(({ name, id, grade, updateFrequency, score, ...values }, i) =>
       Object.entries(values).map(([key, raw]) => ({
         name,
         id,
@@ -69,7 +54,7 @@ const RadialRank = ({
     .align(0.5)
 
   const getTitle = () => {
-    if (!hideLegend) {
+    if (!hideTitle) {
       return [
         Plot.text(
           points,
@@ -166,6 +151,7 @@ const RadialRank = ({
           y: 90 - 1.09,
           text: (d) => d.slice(0, 1),
           lineWidth: 10,
+          fontSize: 14,
         }),
 
         // areas

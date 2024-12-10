@@ -21,6 +21,7 @@ export type SystemStats = {
 }
 
 type Grade = 'A+' | 'A' | 'B' | 'C' | 'D'
+type UpdateFrequency = 'DAILY' | 'MONTHLY' | 'UPON_REQUEST' | 'UNKNOWN'
 
 export type Rating = {
   name: string
@@ -32,4 +33,6 @@ export type Rating = {
   fresh: number
   documented: number
   unique: number
+  updateFrequency: UpdateFrequency
+  score?: number
 }
