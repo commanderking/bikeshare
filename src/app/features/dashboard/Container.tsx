@@ -66,6 +66,18 @@ const DashboardContainer = () => {
               <p>Write your own SQL queries for US cities in the past year.</p>
             </a>
           </div>
+          <div>
+            <a href="./data_quality_awards/2024">
+              <Image
+                src="/images/data_quality_preview.png"
+                alt="Data Quality Preview"
+                width="500"
+                height="400"
+              />
+
+              <p>2024 Data Quality Rankings</p>
+            </a>
+          </div>
         </div>
       </div>
       <div className="pb-24"></div>

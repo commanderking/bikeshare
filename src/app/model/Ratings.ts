@@ -20,12 +20,24 @@ export type SystemStats = {
   nullCounts: NullCounts
 }
 
+type Grade = 'A+' | 'A' | 'B' | 'C' | 'D'
+type UpdateFrequency =
+  | 'DAILY'
+  | 'MONTHLY'
+  | 'UPON_REQUEST'
+  | 'UNKNOWN'
+  | 'BIWEEKLY'
+
 export type Rating = {
   name: string
+  id: string
+  grade: Grade
   accessible: number
   complete: number
   processable: number
   fresh: number
   documented: number
   unique: number
+  updateFrequency: UpdateFrequency
+  score?: number
 }

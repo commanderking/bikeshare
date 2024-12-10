@@ -2,36 +2,22 @@ import * as Plot from '@observablehq/plot'
 import { useEffect, useRef } from 'react'
 import * as d3 from 'd3'
 import { Rating } from '@/app/model/Ratings'
-/** Completeness scores:
- * 5 - 100%
- * 4 - 99%+
- * 3 -
- **/
 
 type Options = {
   hideLegend?: boolean
+  hideTitle?: boolean
   showFullCategories?: boolean
 }
 
 const getPoints = (data: Rating[], options: Options | undefined) => {
-  const columns = 3
-
+  const columns = 2
   const startingCount = options?.hideLegend ? 0 : 1
   const points = d3
-    .sort(
-      data,
-      (d) =>
-        (d.accessible +
-          d.complete * 2 +
-          d.processable * 1.5 +
-          d.fresh +
-          d.documented +
-          d.unique) *
-        -1
-    )
-    .flatMap(({ name, ...values }, i) =>
+    .sort(data, (d) => (d.score || 0) * -1)
+    .flatMap(({ name, id, grade, updateFrequency, score, ...values }, i) =>
       Object.entries(values).map(([key, raw]) => ({
         name,
+        id,
         key,
         raw,
         fx: (i + startingCount) % columns,
@@ -39,12 +25,12 @@ const getPoints = (data: Rating[], options: Options | undefined) => {
         value: 0,
       }))
     )
+
   const pointsWithValue = d3.group(points, (d) => d.key)
   for (const [, g] of d3.group(points, (d) => d.key)) {
     for (const d of g) d.value = d.raw / 5
   }
 
-  console.log({ points })
   return points
 }
 
@@ -53,7 +39,12 @@ type Props = {
   options?: Options
 }
 
-const RadialRank = ({ data, options }: Props) => {
+const RadialRank = ({
+  data,
+  options = { hideLegend: false, hideTitle: false },
+}: Props) => {
+  const { hideLegend, hideTitle } = options
+
   const plotRef = useRef<HTMLDivElement>(null)
   const points = getPoints(data, options)
 
@@ -62,16 +53,35 @@ const RadialRank = ({ data, options }: Props) => {
     .padding(0.5)
     .align(0.5)
 
+  const getTitle = () => {
+    if (!hideTitle) {
+      return [
+        Plot.text(
+          points,
+          Plot.selectFirst({
+            text: 'name',
+            frameAnchor: 'top',
+            fontWeight: '400',
+            fontSize: 18,
+            y: 15,
+          })
+        ),
+      ]
+    }
+
+    return []
+  }
+
   useEffect(() => {
-    console.log({ points })
     const plot = Plot.plot({
       width: Math.max(500, 600),
       marginBottom: 10,
+      marginTop: hideTitle ? 0 : 20,
       projection: {
         type: 'azimuthal-equidistant',
         rotate: [0, -90],
         // Note: 1.22° corresponds to max. percentage (1.0), plus some room for the labels
-        domain: d3.geoCircle().center([0, 90]).radius(1.22)(),
+        domain: d3.geoCircle().center([0, 90]).radius(1.3)(),
       },
       facet: {
         data: points,
@@ -84,16 +94,7 @@ const RadialRank = ({ data, options }: Props) => {
       },
       marks: [
         // Facet name
-        Plot.text(
-          points,
-          Plot.selectFirst({
-            text: 'name',
-            frameAnchor: 'bottom',
-            fontWeight: '400',
-            fontSize: 14,
-            // y: 0,
-          })
-        ),
+        ...getTitle(),
 
         // grey discs
         Plot.geo([1.0, 0.8, 0.6, 0.4, 0.2], {
@@ -150,6 +151,7 @@ const RadialRank = ({ data, options }: Props) => {
           y: 90 - 1.09,
           text: (d) => d.slice(0, 1),
           lineWidth: 10,
+          fontSize: 14,
         }),
 
         // areas
