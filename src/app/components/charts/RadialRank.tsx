@@ -10,6 +10,7 @@ import { Rating } from '@/app/model/Ratings'
 
 type Options = {
   hideLegend?: boolean
+  hideTitle?: boolean
   showFullCategories?: boolean
 }
 
@@ -28,7 +29,7 @@ const getPoints = (data: Rating[], options: Options | undefined) => {
           d.unique) *
         -1
     )
-    .flatMap(({ name, id, ...values }, i) =>
+    .flatMap(({ name, id, grade, ...values }, i) =>
       Object.entries(values).map(([key, raw]) => ({
         name,
         id,
@@ -53,9 +54,13 @@ type Props = {
   options?: Options
 }
 
-const RadialRank = ({ data, options }: Props) => {
+const RadialRank = ({
+  data,
+  options = { hideLegend: false, hideTitle: false },
+}: Props) => {
+  const { hideLegend, hideTitle } = options
+
   const plotRef = useRef<HTMLDivElement>(null)
-  console.log({ data })
   const points = getPoints(data, options)
 
   const longitude = d3
@@ -63,15 +68,35 @@ const RadialRank = ({ data, options }: Props) => {
     .padding(0.5)
     .align(0.5)
 
+  const getTitle = () => {
+    if (!hideLegend) {
+      return [
+        Plot.text(
+          points,
+          Plot.selectFirst({
+            text: 'name',
+            frameAnchor: 'top',
+            fontWeight: '400',
+            fontSize: 18,
+            y: 15,
+          })
+        ),
+      ]
+    }
+
+    return []
+  }
+
   useEffect(() => {
     const plot = Plot.plot({
       width: Math.max(500, 600),
       marginBottom: 10,
+      marginTop: hideTitle ? 0 : 20,
       projection: {
         type: 'azimuthal-equidistant',
         rotate: [0, -90],
         // Note: 1.22° corresponds to max. percentage (1.0), plus some room for the labels
-        domain: d3.geoCircle().center([0, 90]).radius(1.22)(),
+        domain: d3.geoCircle().center([0, 90]).radius(1.3)(),
       },
       facet: {
         data: points,
@@ -84,16 +109,7 @@ const RadialRank = ({ data, options }: Props) => {
       },
       marks: [
         // Facet name
-        Plot.text(
-          points,
-          Plot.selectFirst({
-            text: 'name',
-            frameAnchor: 'bottom',
-            fontWeight: '400',
-            fontSize: 14,
-            // y: 0,
-          })
-        ),
+        ...getTitle(),
 
         // grey discs
         Plot.geo([1.0, 0.8, 0.6, 0.4, 0.2], {

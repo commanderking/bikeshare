@@ -1,7 +1,10 @@
-export const cityRatings = [
+import { Rating } from 'src/app/model/Ratings'
+
+export const cityRatings: Rating[] = [
   {
     id: 'austin',
     name: 'Austin',
+    grade: 'B',
     accessible: 5,
     complete: 5,
     processable: 4.5,
@@ -12,6 +15,7 @@ export const cityRatings = [
   {
     id: 'bergen',
     name: 'Bergen',
+    grade: 'A+',
     accessible: 4,
     complete: 5,
     processable: 5,
@@ -22,6 +26,7 @@ export const cityRatings = [
   {
     id: 'boston',
     name: 'Boston',
+    grade: 'B',
     accessible: 4,
     complete: 4,
     processable: 4,
@@ -32,6 +37,7 @@ export const cityRatings = [
   {
     id: 'chattanooga',
     name: 'Chattanooga',
+    grade: 'C',
     accessible: 5,
     complete: 3,
     processable: 5,
@@ -42,6 +48,7 @@ export const cityRatings = [
   {
     id: 'columbus',
     name: 'Columbus',
+    grade: 'D',
     accessible: 4,
     complete: 2,
     processable: 3,
@@ -52,6 +59,7 @@ export const cityRatings = [
   {
     id: 'chicago',
     name: 'Chicago',
+    grade: 'D',
     accessible: 4,
     complete: 2,
     processable: 3,
@@ -62,6 +70,7 @@ export const cityRatings = [
   {
     id: 'jersey_city',
     name: 'Jersey City',
+    grade: 'C',
     accessible: 4,
     complete: 3,
     processable: 4,
@@ -72,6 +81,7 @@ export const cityRatings = [
   {
     id: 'los_angeles',
     name: 'Los Angeles',
+    grade: 'B',
     accessible: 4,
     complete: 4,
     processable: 4,
@@ -82,6 +92,7 @@ export const cityRatings = [
   {
     id: 'mexico_city',
     name: 'Mexico City',
+    grade: 'D',
     accessible: 4,
     complete: 4,
     processable: 2,
@@ -92,6 +103,7 @@ export const cityRatings = [
   {
     id: 'montreal',
     name: 'Montreal',
+    grade: 'C',
     accessible: 4,
     complete: 3,
     processable: 3,
@@ -102,6 +114,7 @@ export const cityRatings = [
   {
     id: 'nyc',
     name: 'New York City',
+    grade: 'C',
     accessible: 4,
     complete: 3,
     processable: 3, // Worse than Jersey City - duplicate monthly data, too many date formats
@@ -112,6 +125,7 @@ export const cityRatings = [
   {
     id: 'oslo',
     name: 'Oslo',
+    grade: 'A+',
     accessible: 4,
     complete: 5,
     processable: 5,
@@ -122,6 +136,7 @@ export const cityRatings = [
   {
     id: 'philadelphia',
     name: 'Philadelphia',
+    grade: 'B',
     accessible: 4,
     complete: 5,
     processable: 4,
@@ -132,6 +147,7 @@ export const cityRatings = [
   {
     id: 'pittsburgh',
     name: 'Pittsburgh',
+    grade: 'B',
     accessible: 4,
     complete: 5,
     processable: 3,
@@ -142,6 +158,7 @@ export const cityRatings = [
   {
     id: 'sf',
     name: 'San Francisco',
+    grade: 'D',
     accessible: 4,
     complete: 1,
     processable: 4,
@@ -152,6 +169,7 @@ export const cityRatings = [
   {
     id: 'taipei',
     name: 'Taipei',
+    grade: 'C',
     accessible: 3,
     complete: 5,
     processable: 4, // Really weird time structure that's not standard chrono format
@@ -162,6 +180,7 @@ export const cityRatings = [
   {
     id: 'toronto',
     name: 'Toronto',
+    grade: 'A',
     accessible: 5,
     complete: 5,
     processable: 4,
@@ -172,6 +191,7 @@ export const cityRatings = [
   {
     id: 'trondheim',
     name: 'Trondheim',
+    grade: 'A',
     accessible: 4,
     complete: 4,
     processable: 5,
@@ -182,6 +202,7 @@ export const cityRatings = [
   {
     id: 'vancouver',
     name: 'Vancouver',
+    grade: 'D',
     accessible: 4,
     complete: 4,
     processable: 3, // One set of data structure, but hours of datetime not zero padded, utf8-lossy needed, horrendous where there are 30,000 rows at the end that have null data for any column
@@ -192,6 +213,7 @@ export const cityRatings = [
   {
     id: 'dc',
     name: 'Washington DC',
+    grade: 'C',
     accessible: 4,
     complete: 3,
     processable: 4,
