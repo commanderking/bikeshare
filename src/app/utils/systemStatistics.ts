@@ -32,7 +32,6 @@ const formatDate = (dateStr: string): string => {
 const prepareCityData =
   (data: Record<string, RawSystemData>) =>
   (cityName: string): SystemData | null => {
-    console.log({ cityName })
     if (!(cityName in data)) return null
 
     const formattedData = toCamelCase(data[cityName]) as SystemData

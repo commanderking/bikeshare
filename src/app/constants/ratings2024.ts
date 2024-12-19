@@ -1,46 +1,76 @@
-import { Rating } from 'src/app/model/Ratings'
+import _ from 'lodash'
+import {
+  RawRating,
+  Rating,
+  UpdateFrequency,
+  Grade,
+} from 'src/app/model/Ratings'
 
-export const cityRatings: Rating[] = [
+const UpdateFrequencyEnum: {
+  [key in UpdateFrequency]: {
+    id: UpdateFrequency
+    name: string
+  }
+} = {
+  UNKNOWN: {
+    id: 'UNKNOWN',
+    name: 'Unknown',
+  },
+  DAILY: {
+    id: 'DAILY',
+    name: 'Daily',
+  },
+  BIWEEKLY: {
+    id: 'BIWEEKLY',
+    name: 'Biweekly',
+  },
+  MONTHLY: {
+    id: 'MONTHLY',
+    name: 'Monthly',
+  },
+  UPON_REQUEST: {
+    id: 'UPON_REQUEST',
+    name: 'Upon Request',
+  },
+}
+
+export const cityRatings: RawRating[] = [
   {
     id: 'austin',
     name: 'Austin',
-    grade: 'B',
     accessible: 5,
     complete: 5,
     processable: 4.5,
-    fresh: 2,
-    documented: 5,
+    fresh: 1,
+    documented: 5, // You can preview all the data and see headers for the whole data set
     unique: 2, // Direct query on data, OData,
     updateFrequency: 'UNKNOWN',
   },
   {
     id: 'bergen',
     name: 'Bergen',
-    grade: 'A+',
-    accessible: 4,
+    accessible: 3,
     complete: 5,
     processable: 5,
     fresh: 5,
-    documented: 4,
+    documented: 5,
     unique: 5, // Updated daily, example JSON/CSV, always updated daily， live look - https://bergenbysykkel.no/en/stations/live
     updateFrequency: 'DAILY',
   },
   {
     id: 'boston',
     name: 'Boston',
-    grade: 'B',
     accessible: 4,
     complete: 4,
     processable: 4,
     fresh: 4,
-    documented: 4,
+    documented: 3,
     unique: 4, // Link to 2020 Visualization made by city (+2), Membership and Ridership data presented as a table for every year, most popular stations
     updateFrequency: 'MONTHLY',
   },
   {
     id: 'chattanooga',
     name: 'Chattanooga',
-    grade: 'C',
     accessible: 5,
     complete: 4,
     processable: 5,
@@ -52,44 +82,40 @@ export const cityRatings: Rating[] = [
   {
     id: 'columbus',
     name: 'Columbus',
-    grade: 'D',
     accessible: 4,
-    complete: 2,
+    complete: 3,
     processable: 3,
     fresh: 4,
-    documented: 4,
+    documented: 3,
     unique: 0,
     updateFrequency: 'MONTHLY',
   },
   {
     id: 'chicago',
     name: 'Chicago',
-    grade: 'D',
     accessible: 4,
     complete: 2,
     processable: 3,
     fresh: 4,
-    documented: 4,
+    documented: 3,
     unique: 0,
     updateFrequency: 'MONTHLY',
   },
   {
     id: 'jersey_city',
     name: 'Jersey City',
-    grade: 'C',
     accessible: 4,
     complete: 4,
     processable: 4,
     fresh: 4,
-    documented: 4,
+    documented: 3,
     unique: 2, // Link to monthly operating expenses, link to google group and NYC bicycling data
     updateFrequency: 'MONTHLY',
   },
   {
     id: 'los_angeles',
     name: 'Los Angeles',
-    grade: 'B',
-    accessible: 4,
+    accessible: 3,
     complete: 4,
     processable: 4,
     fresh: 4,
@@ -100,56 +126,51 @@ export const cityRatings: Rating[] = [
   {
     id: 'mexico_city',
     name: 'Mexico City',
-    grade: 'D',
-    accessible: 4,
+    accessible: 3,
     complete: 4,
     processable: 2,
     fresh: 4,
-    documented: 2,
+    documented: 1,
     unique: 0,
     updateFrequency: 'MONTHLY',
   },
   {
     id: 'montreal',
     name: 'Montreal',
-    grade: 'C',
-    accessible: 4,
+    accessible: 3,
     complete: 4,
     processable: 3,
     fresh: 4,
-    documented: 4,
+    documented: 1,
     unique: 3, // Great per month visualization and breakdown of members vs occasionals (best in class)
     updateFrequency: 'MONTHLY',
   },
   {
     id: 'nyc',
     name: 'New York City',
-    grade: 'C',
     accessible: 4,
     complete: 4,
     processable: 3, // Worse than Jersey City - duplicate monthly data, too many date formats
     fresh: 4,
-    documented: 4,
+    documented: 3,
     unique: 2, // Same as Jersey City
     updateFrequency: 'MONTHLY',
   },
   {
     id: 'oslo',
     name: 'Oslo',
-    grade: 'A+',
-    accessible: 4,
+    accessible: 3,
     complete: 5,
     processable: 5,
     fresh: 5,
-    documented: 4,
+    documented: 5,
     unique: 5,
     updateFrequency: 'DAILY',
   },
   {
     id: 'philadelphia',
     name: 'Philadelphia',
-    grade: 'B',
-    accessible: 4,
+    accessible: 3,
     complete: 5,
     processable: 4,
     fresh: 4,
@@ -160,79 +181,72 @@ export const cityRatings: Rating[] = [
   {
     id: 'pittsburgh',
     name: 'Pittsburgh',
-    grade: 'B',
-    accessible: 4,
-    complete: 5,
+    accessible: 3,
+    complete: 4,
     processable: 3,
     fresh: 4,
-    documented: 4, // No documentation, but nice way to explore data for each month. Also notes as to station name renaming
+    documented: 3, // No documentation, but nice way to explore data for each month. Also notes as to station name renaming
     unique: 3, // Love the UI, download in wide variety of formats (CSV, TSV, JSON, XML, XLS), ability to explore/filter in UI
     updateFrequency: 'MONTHLY',
   },
   {
     id: 'sf',
     name: 'San Francisco',
-    grade: 'D',
     accessible: 4,
     complete: 1,
     processable: 4,
     fresh: 4,
-    documented: 3, // San Francisco has less documentation than other Lyft
+    documented: 3,
     unique: 0,
     updateFrequency: 'MONTHLY',
   },
   {
     id: 'taipei',
     name: 'Taipei',
-    grade: 'C',
-    accessible: 3,
+    accessible: 2,
     complete: 5,
     processable: 4, // Really weird time structure that's not standard chrono format
     fresh: 2,
-    documented: 2, // San Francisco has less documentation than other Lyft
+    documented: 1,
     unique: 4, // World class visualizations on webpage https://www.youbike.com.tw/region/taipei/operation/ (+3), cool anonymization of start and end time
     updateFrequency: 'UPON_REQUEST',
   },
   {
     id: 'toronto',
     name: 'Toronto',
-    grade: 'A',
-    accessible: 5,
+    accessible: 4,
     complete: 5,
     processable: 4,
     fresh: 5,
-    documented: 4,
+    documented: 3,
     unique: 3, // Does their own data quality rating (+2), API documentation
     updateFrequency: 'MONTHLY',
   },
   {
     id: 'trondheim',
     name: 'Trondheim',
-    grade: 'A',
-    accessible: 4,
+    accessible: 3,
     complete: 4,
     processable: 5,
     fresh: 5,
-    documented: 4,
+    documented: 5,
     unique: 5, // https://trondheimbysykkel.no/en/stations/live
     updateFrequency: 'DAILY',
   },
   {
     id: 'vancouver',
     name: 'Vancouver',
-    grade: 'D',
-    accessible: 4,
+    accessible: 2, // GOOGLE DOCS?
     complete: 4,
-    processable: 3, // One set of data structure, but hours of datetime not zero padded, utf8-lossy needed, horrendous where there are 30,000 rows at the end that have null data for any column
+    processable: 2, // One set of data structure, but hours of datetime not zero padded, utf8-lossy needed, horrendous where there are 30,000 rows at the end that have null data for any column
     fresh: 4,
-    documented: 3, // Stopover data is cool that it exists
+    documented: 1, // Stopover data is cool that it exists
     unique: 0,
     updateFrequency: 'MONTHLY',
   },
   {
     id: 'dc',
     name: 'Washington DC',
-    grade: 'C',
     accessible: 4,
     complete: 3,
     processable: 4,
@@ -244,26 +258,35 @@ export const cityRatings: Rating[] = [
   {
     id: 'london',
     name: 'London',
-    grade: 'C',
     accessible: 4,
     complete: 4,
     processable: 4,
     fresh: 4.5,
-    documented: 2,
+    documented: 1,
     unique: 2, // Has other potentially neat data in bucket
     updateFrequency: 'BIWEEKLY',
   },
   {
     id: 'helsinki',
     name: 'Helsinki',
-    grade: 'B',
     accessible: 3,
-    complete: 4.5,
+    complete: 4,
     processable: 5,
     fresh: 4,
-    documented: 2,
+    documented: 1,
     unique: 2,
-    updateFrequency: 'BIWEEKLY',
+    updateFrequency: 'MONTHLY',
+  },
+  {
+    id: 'guadalajara',
+    name: 'Guadalajara',
+    accessible: 3, // the year tabs close when you download a file.
+    complete: 5,
+    processable: 4,
+    fresh: 4,
+    documented: 1,
+    unique: 1,
+    updateFrequency: 'MONTHLY',
   },
 ]
 
@@ -271,18 +294,41 @@ export const getRating = (id: string) => {
   return cityRatings.find((rating) => rating.id === id)
 }
 
-export const calculateScore = (rating: Rating) => {
+const getGrade = (score: number, maxScore: number): Grade => {
+  const percentage = (score / maxScore) * 100
+  if (percentage >= 95) {
+    return 'A+'
+  }
+  if (percentage >= 90) {
+    return 'A'
+  }
+  if (percentage >= 80) {
+    return 'B'
+  }
+
+  if (percentage >= 70) {
+    return 'C'
+  }
+
+  return 'D'
+}
+
+const MAX_SCORE = 35
+
+export const calculateScore = (rating: RawRating): Rating => {
   const score =
     rating.accessible +
     rating.complete * 2 +
-    rating.processable * 1.5 +
+    rating.processable * 2 +
     rating.fresh +
-    rating.documented +
-    rating.unique * 0.5
+    rating.documented
+  const grade = getGrade(score, MAX_SCORE)
 
   return {
     ...rating,
     score,
+    frequency: UpdateFrequencyEnum[rating.updateFrequency].name,
+    grade,
   }
 }
 
@@ -291,29 +337,14 @@ export const getCityRating = (id: string) => {
   return calculateScore(getRating(id))
 }
 
-export const A_PLUS_CITIES = ['bergen', 'oslo'].map(getCityRating)
-export const A_CITIES = ['trondheim', 'toronto'].map(getCityRating)
-export const B_CITIES = [
-  'austin',
-  'boston',
-  'pittsburgh',
-  'philadelphia',
-  'los_angeles',
-  'helsinki',
-].map(getCityRating)
-export const C_CITIES = [
-  'chattanooga',
-  'jersey_city',
-  'taipei',
-  'montreal',
-  'nyc',
-  'dc',
-  'london',
-].map(getCityRating)
-export const D_CITIES = [
-  'vancouver',
-  'mexico_city',
-  'columbus',
-  'chicago',
-  'sf',
-].map(getCityRating)
+const allCityRatings = cityRatings.map(calculateScore)
+
+export const allCityRatingsByGrade = _.groupBy(allCityRatings, 'grade')
+export const allCitiesByGrade = _.mapValues(
+  allCityRatingsByGrade,
+  (citiesForGrade) => {
+    return citiesForGrade
+      .sort((a, b) => b.score - a.score)
+      .map((city) => city.id)
+  }
+)

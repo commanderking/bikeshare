@@ -1,4 +1,5 @@
 import * as Plot from '@observablehq/plot'
+import _ from 'lodash'
 import { useEffect, useRef } from 'react'
 import * as d3 from 'd3'
 import { Rating } from '@/app/model/Ratings'
@@ -7,6 +8,7 @@ type Options = {
   hideLegend?: boolean
   hideTitle?: boolean
   showFullCategories?: boolean
+  maxWidth?: number
 }
 
 const getPoints = (data: Rating[], options: Options | undefined) => {
@@ -14,8 +16,16 @@ const getPoints = (data: Rating[], options: Options | undefined) => {
   const startingCount = options?.hideLegend ? 0 : 1
   const points = d3
     .sort(data, (d) => (d.score || 0) * -1)
-    .flatMap(({ name, id, grade, updateFrequency, score, ...values }, i) =>
-      Object.entries(values).map(([key, raw]) => ({
+    .flatMap(({ name, id, ...values }, i) =>
+      Object.entries(
+        _.pick(values, [
+          'complete',
+          'processable',
+          'accessible',
+          'fresh',
+          'documented',
+        ])
+      ).map(([key, raw]) => ({
         name,
         id,
         key,
@@ -28,7 +38,7 @@ const getPoints = (data: Rating[], options: Options | undefined) => {
 
   const pointsWithValue = d3.group(points, (d) => d.key)
   for (const [, g] of d3.group(points, (d) => d.key)) {
-    for (const d of g) d.value = d.raw / 5
+    for (const d of g) d.value = Boolean(d.raw) ? d.raw / 5 : 0
   }
 
   return points
@@ -41,9 +51,9 @@ type Props = {
 
 const RadialRank = ({
   data,
-  options = { hideLegend: false, hideTitle: false },
+  options = { hideLegend: false, hideTitle: false, maxWidth: 600 },
 }: Props) => {
-  const { hideLegend, hideTitle } = options
+  const { hideLegend, hideTitle, maxWidth } = options
 
   const plotRef = useRef<HTMLDivElement>(null)
   const points = getPoints(data, options)
@@ -74,7 +84,7 @@ const RadialRank = ({
 
   useEffect(() => {
     const plot = Plot.plot({
-      width: Math.max(500, 600),
+      width: maxWidth || 600,
       marginBottom: 10,
       marginTop: hideTitle ? 0 : 20,
       projection: {
@@ -141,19 +151,6 @@ const RadialRank = ({
           lineWidth: 5,
           fontSize: 14,
         }),
-
-        // axes labels, initials
-        Plot.text(longitude.domain(), {
-          fx: 0,
-          fy: 0,
-          facet: 'exclude',
-          x: longitude,
-          y: 90 - 1.09,
-          text: (d) => d.slice(0, 1),
-          lineWidth: 10,
-          fontSize: 14,
-        }),
-
         // areas
         Plot.area(points, {
           x1: ({ key }) => longitude(key),
