@@ -44,7 +44,3 @@ const prepareCityData =
   }
 
 export const formatCitySystemData = prepareCityData(systemStats)
-
-const toProperFormat = () => {}
-
-const getCityStats = () => {}

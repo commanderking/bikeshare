@@ -6,8 +6,8 @@ export type Null_By_Year = {
 export type RawSystemData = {
   null_start_time: number
   null_end_time: number
-  null_start_station_name: number
-  null_end_station_name: number
+  null_start_station_name?: number
+  null_end_station_name?: number
   null_by_year: Null_By_Year[]
   total_rows: number
   null_rows: number
