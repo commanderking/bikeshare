@@ -29,7 +29,7 @@ const getPoints = (data: Rating[], options: Options | undefined) => {
         name,
         id,
         key,
-        raw,
+        raw: Number(raw),
         fx: (i + startingCount) % columns,
         fy: Math.floor((i + startingCount) / columns),
         value: 0,
@@ -38,7 +38,7 @@ const getPoints = (data: Rating[], options: Options | undefined) => {
 
   const pointsWithValue = d3.group(points, (d) => d.key)
   for (const [, g] of d3.group(points, (d) => d.key)) {
-    for (const d of g) d.value = Boolean(d.raw) ? d.raw / 5 : 0
+    for (const d of g) d.value = d.raw / 5
   }
 
   return points
