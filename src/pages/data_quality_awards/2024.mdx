@@ -140,6 +140,8 @@ their data:
 
 ## Riding High in the Land of Fjords
 
+Before diving into the exact grading scale for each category, let's explain why Oslo and Bergen stand head and shoulders above the other cities in terms of data quality.
+
 <StatsCards cities={['oslo', 'bergen']} />
 
 Trip data for Oslo and Bergen are 100% complete. These two cities and Trondheim, are the only three systems that update their data daily. This combination of timely and complete data propel Oslo and Bergen to a tier above other bikeshare systems worldwide.
@@ -155,6 +157,8 @@ Norway's bikeshare systems also lead the pack in providing live ridership data. 
 My only critique? Oslo and Bergen could allow users to download all the data at once. Features like an export option, similar to those used by Lyft-operated systems, or an API like Toronto’s, would make accessing their data even more user-friendly.
 
 ## Category Analysis
+
+Below is the detailed scale for every category.
 
 ### Date Completeness
 
@@ -184,13 +188,13 @@ A bike trip was incomplete if it was missing any of the four key data points - s
 
 To excel in accessibility, cities needed to make their bikeshare data easy to access for both scripted and non-scripted download. Scoring was based on the following criteria:
 
-| Score | Criteria                                                               | Example Cities         |
-| ----- | ---------------------------------------------------------------------- | ---------------------- |
-| 5     | Single click download                                                  | Austin, Chattanooga    |
-| 4     | Possible to download all data with a single script command             | London, New York City  |
-| 3     | Data available through downloading data month by month or year by year | Trondheim, Mexico City |
-| 2     | Data stored in unconventional way                                      | Taipei, Toronto        |
-| 1     | Data can be downloaded, but it's a miserable experience                | Guadalajara            |
+| Score | Criteria                                                                         | Example Cities         |
+| ----- | -------------------------------------------------------------------------------- | ---------------------- |
+| 5     | Single click download                                                            | Austin, Chattanooga    |
+| 4     | Possible to download all data with a single script command (i.e. s3 sync or API) | London, New York City  |
+| 3     | Data available through downloading data month by month or year by year           | Trondheim, Mexico City |
+| 2     | Data available in unconventional way                                             | Taipei, Helsinki       |
+| 1     | Data available, but it's miserable to access                                     | Guadalajara            |
 
 Austin and Chattanooga shine in accessibility by providing single-click exports for their entire dataset, allowing users to download every trip in one go. However, it’s worth noting that both cities handle relatively low volumes of bike rides. Larger cities might struggle to in keeping down the file size.
 
@@ -371,6 +375,8 @@ This issue does not overshadow that Bicycle Transit Systems has done a great job
 <StatsCard city="mexico_city" name="Mexico City" />
 
 Mexico City really should belong in the C tier based on its data completeness, but its data is miserable to process. It's common for cities to have two or three sets of data structures, each corresponding to a different operator. Mexico City, however, has column headers with minor variations, or even typos. For example, the arrival date (fecha arribo), is sometimes labeled as: Fecha_Arribo, Fecha_arribo, or Fecha Arribo. In the June 2021 file, there were two identical headers of Hora_Arribo, but one was intended to be Hora_Retiro. With so many variations, it makes sense Mexico City does not bother to document them. Developers will need to stumble through them to successfully parse the data.
+
+Mexico City also only provides start and end station ids, but not start and end station names. Using Mexico's current station names, only some of these ids are able to get station names. It's impossible to get the
 
 ---
 

@@ -14,7 +14,7 @@ const DashboardContainer = () => {
     count: 10,
   })
   const recentUSTrips = getRankings(yearlyTrips, {
-    year: currentYear,
+    year: 2024,
     country: 'USA',
   })
 
@@ -33,7 +33,7 @@ const DashboardContainer = () => {
       <RankingTable trips={recentUSTrips} />
 
       <div className="pt-8">
-        <h3 className="text-2xl">Trips per City</h3>
+        <h3 className="text-2xl">Trips per City (2024)</h3>
         <p>NYC leads the way in Bikeshares</p>
         <LatestYearChart data={recentUSTrips} />
       </div>
