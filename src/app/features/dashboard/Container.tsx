@@ -18,6 +18,8 @@ const DashboardContainer = () => {
     country: 'USA',
   })
 
+  console.log({ recentUSTrips })
+
   return (
     <div className="prose text-center mt-16 max-w-[640px] m-auto">
       <h1 className="text-4xl">Cities Bike</h1>
@@ -36,6 +38,14 @@ const DashboardContainer = () => {
         <h3 className="text-2xl">Trips per City (2024)</h3>
         <p>NYC leads the way in Bikeshares</p>
         <LatestYearChart data={recentUSTrips} />
+      </div>
+
+      <h2>How about global trends?</h2>
+
+      <div className="pt-8">
+        <h3 className="text-2xl">Trips per City (2024)</h3>
+        <p>NYC still leading...</p>
+        <LatestYearChart data={recentGlobalTrips} />
       </div>
 
       <div className="pt-8">

@@ -1,177 +1,177 @@
 import { System } from '@/app/model/System'
 export const systems: { [key: string]: System } = {
-  nyc: {
+  new_york_city_bikeshare: {
     id: 'nyc',
     metroArea: 'New York City',
-    systemName: 'Citi Bike',
+    system_name: 'new_york_city_bikeshare',
     country: 'USA',
     longitude: -74.006,
     latitude: 40.7128,
   },
-  chicago: {
+  chicago_bikeshare: {
     id: 'chicago',
     metroArea: 'Chicago',
-    systemName: 'Divvy Bike',
+    system_name: 'chicago_bikeshare',
     country: 'USA',
     longitude: -87.6298,
     latitude: 41.8781,
   },
-  dc: {
+  washington_dc_bikeshare: {
     id: 'dc',
     metroArea: 'Washington D.C.',
-    systemName: 'Capital Bikeshare',
+    system_name: 'washington_dc_bikeshare',
     country: 'USA',
     longitude: -77.0369,
     latitude: 38.9072,
   },
-  boston: {
+  boston_bikeshare: {
     id: 'boston',
     metroArea: 'Boston',
-    systemName: 'Bluebike',
+    system_name: 'boston_bikeshare',
     country: 'USA',
     longitude: -71.0589,
     latitude: 42.3601,
   },
-  sf: {
+  san_francisco_bikeshare: {
     id: 'sf',
     metroArea: 'San Francisco',
-    systemName: 'Bay Wheels',
+    system_name: 'san_francisco_bikeshare',
     country: 'USA',
     longitude: -122.4194,
     latitude: 37.7749,
   },
-  philadelphia: {
+  philadelphia_bikeshare: {
     id: 'philadelphia',
     metroArea: 'Philadelphia',
-    systemName: 'Indego',
+    system_name: 'philadelphia_bikeshare',
     country: 'USA',
     longitude: -75.1652,
     latitude: 39.9526,
   },
-  los_angeles: {
+  los_angeles_bikeshare: {
     id: 'los_angeles',
     metroArea: 'Los Angeles',
-    systemName: 'Metro Bike Share',
+    system_name: 'los_angeles_bikeshare',
     country: 'USA',
     longitude: -118.2437,
     latitude: 34.0522,
   },
-  toronto: {
+  toronto_bikeshare: {
     id: 'toronto',
     metroArea: 'Toronto',
-    systemName: 'Bike Share Toronto',
+    system_name: 'toronto_bikeshare',
     country: 'Canada',
     longitude: -79.3832,
     latitude: 43.6532,
   },
-  pittsburgh: {
+  pittsburgh_bikeshare: {
     id: 'pittsburgh',
     metroArea: 'Pittsburgh',
-    systemName: 'POGOH',
+    system_name: 'pittsburgh_bikeshare',
     country: 'USA',
     longitude: -79.9959,
     latitude: 40.4406,
   },
-  columbus: {
+  columbus_bikeshare: {
     id: 'columbus',
     metroArea: 'Columbus',
-    systemName: 'CoGo',
+    system_name: 'columbus_bikeshare',
     country: 'USA',
     longitude: -82.9988,
     latitude: 39.9612,
   },
-  austin: {
+  austin_bikeshare: {
     id: 'austin',
     metroArea: 'Austin',
-    systemName: 'CapMetro Bikeshare',
+    system_name: 'austin_bikeshare',
     country: 'USA',
     longitude: -97.7431,
     latitude: 30.2672,
   },
-  bergen: {
+  bergen_bikeshare: {
     id: 'bergen',
     metroArea: 'Bergen',
-    systemName: 'Bysykkel',
+    system_name: 'bergen_bikeshare',
     country: 'Norway',
     longitude: 5.3221,
     latitude: 60.3913,
   },
-  trondheim: {
+  trondheim_bikeshare: {
     id: 'trondheim',
     metroArea: 'Trondheim',
-    systemName: 'Trondheim Bysykkel',
+    system_name: 'trondheim_bikeshare',
     country: 'Norway',
     longitude: 10.3951,
     latitude: 63.4305,
   },
-  oslo: {
+  oslo_bikeshare: {
     id: 'oslo',
     metroArea: 'Oslo',
-    systemName: 'Oslo Bysykkel',
+    system_name: 'oslo_bikeshare',
     country: 'Norway',
     longitude: 10.7522,
     latitude: 59.9139,
   },
-  taipei: {
+  taipei_bikeshare: {
     id: 'taipei',
     metroArea: 'Taipei',
-    systemName: 'YouBike',
+    system_name: 'taipei_bikeshare',
     country: 'Taiwan',
     longitude: 121.5654,
     latitude: 25.033,
   },
-  mexico_city: {
+  mexico_city_bikeshare: {
     id: 'mexico_city',
-    metroArea: 'Mexico City',
-    systemName: 'Ecobici',
+    metroArea: 'mexico_city_bikeshare',
+    system_name: 'Ecobici',
     country: 'Mexico',
     longitude: -99.1332,
     latitude: 19.4326,
   },
-  montreal: {
+  montreal_bikeshare: {
     id: 'montreal',
     metroArea: 'Montreal',
-    systemName: 'BIXI Montreal',
+    system_name: 'montreal_bikeshare',
     country: 'Canada',
     longitude: -73.5673,
     latitude: 45.5017,
   },
-  vancouver: {
+  vancouver_bikeshare: {
     id: 'vancouver',
     metroArea: 'Vancouver',
-    systemName: 'Mobi',
+    system_name: 'vancouver_bikeshare',
     country: 'Canada',
     longitude: -123.1216,
     latitude: 49.2827,
   },
-  helsinki: {
+  helsinki_bikeshare: {
     id: 'helsinki',
     metroArea: 'Helsinki',
-    systemName: 'Helsinki City Bikes',
+    system_name: 'helsinki_bikeshare',
     country: 'Finland',
     longitude: 24.9384,
     latitude: 60.1699,
   },
-  london: {
+  london_bikeshare: {
     id: 'london',
     metroArea: 'London',
-    systemName: 'Santander Cycles',
+    system_name: 'london_bikeshare',
     country: 'United Kingdom',
     longitude: -0.1276,
     latitude: 51.5074,
   },
-  chattanooga: {
+  chattanooga_bikeshare: {
     id: 'chattanooga',
     metroArea: 'Chattanooga',
-    systemName: 'Bike Chattanooga',
+    system_name: 'chattanooga_bikeshare',
     country: 'USA',
     longitude: -85.3097,
     latitude: 35.0456,
   },
-  jersey_city: {
+  jersey_city_bikeshare: {
     id: 'jersey_city',
     metroArea: 'Jersey City',
-    systemName: 'Citi Bike',
+    system_name: 'jersey_city_bikeshare',
     country: 'USA',
     longitude: -74.0776,
     latitude: 40.7282,

@@ -258,7 +258,7 @@ export const cityRatings: RawRating[] = [
   {
     id: 'london',
     name: 'London',
-    accessible: 4,
+    accessible: 2, // No updates since July, 2024. :(
     complete: 4,
     processable: 4,
     fresh: 4.5,

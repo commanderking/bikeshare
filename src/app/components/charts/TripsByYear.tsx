@@ -23,12 +23,12 @@ export const TripsByYearChart = ({ data, marks = [] }: Props) => {
         Plot.lineY(data, {
           x: 'year',
           y: 'trip_count',
-          stroke: 'system',
+          stroke: 'system_name',
           marker: true,
         }),
         Plot.dot(data, {
           ...Plot.pointer({ x: 'year', y: 'trip_count', fill: 'red', r: 3 }),
-          channels: { system: 'system' },
+          channels: { 'Metro Area': 'metroArea' },
           tip: true,
         }),
 
