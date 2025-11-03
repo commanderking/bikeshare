@@ -3,13 +3,13 @@ import type { System } from '@/app/model/System'
 export type YearlyTrip = {
   year: number
   trip_count: number
-  mean_duration: number
-  first_quantile_duration: number
-  median_duration: number
-  third_quantile_duration: number
   system: string
+  duration_q1: number
+  duration_median: number
+  duration_q3: number
+  city: string
 }
 
 export type YearlyTripWithSystem = YearlyTrip & System
 
-export type AggregatedTrip = Pick<YearlyTrip, 'year' | 'trip_count' | 'system'>
+export type AggregatedTrip = Pick<YearlyTrip, 'year' | 'trip_count' | 'city'>

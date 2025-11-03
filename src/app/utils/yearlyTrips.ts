@@ -1,11 +1,21 @@
 import _ from 'lodash'
 import { systems } from '@/app/constants/cities'
 import { Country } from '@/app/model/System'
-import { YearlyTrip, YearlyTripWithSystem } from '@/app/model/YearlyTrip'
+import {
+  RawYearlyTrip,
+  YearlyTrip,
+  YearlyTripWithSystem,
+} from '@/app/model/YearlyTrip'
+
+const removeNullCases = (yearlyTrip: RawYearlyTrip) => {
+  const { year, duration_median, duration_q1, duration_q3 } = yearlyTrip
+  const possibleNullValues = [year, duration_median, duration_q1, duration_q3]
+  return !possibleNullValues.some((value) => value === null)
+}
 
 const toTripsWithSystemData = (yearlyTrip: YearlyTrip) => ({
   ...yearlyTrip,
-  ...systems[yearlyTrip.system],
+  ...systems[yearlyTrip.city],
 })
 
 const byCountry = (country?: Country) => (yearlyTrip: YearlyTripWithSystem) =>
@@ -16,13 +26,19 @@ const byYear = (year?: number) => (yearlyTrip: YearlyTripWithSystem) =>
 
 type RankingOptions = { year?: number; country?: Country; count?: number }
 
-export const getRankings = (trips: YearlyTrip[], options?: RankingOptions) => {
+export const getRankings = (
+  trips: RawYearlyTrip[],
+  options?: RankingOptions
+) => {
   const { country, year, count } = options || {
     country: undefined,
     year: undefined,
     count: undefined,
   }
+
+  console.log({ trips })
   return trips
+    .filter(removeNullCases)
     .map(toTripsWithSystemData)
     .filter(byCountry(country))
     .filter(byYear(year))
@@ -39,13 +55,13 @@ export const getAggregatedTrips = (yearlyTrips: YearlyTrip[]) => {
         return {
           trip_count: (accumulatedTrips.trip_count += trip.trip_count),
           year: trip.year,
-          system: accumulatedTrips.system,
+          city: accumulatedTrips.city,
         }
       },
       {
         trip_count: 0,
         year: 0,
-        system: 'all',
+        city: 'all',
       }
     )
   })

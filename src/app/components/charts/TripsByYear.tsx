@@ -23,7 +23,7 @@ export const TripsByYearChart = ({ data, marks = [] }: Props) => {
         Plot.lineY(data, {
           x: 'year',
           y: 'trip_count',
-          stroke: 'system',
+          stroke: 'city',
           marker: true,
         }),
         Plot.dot(data, {

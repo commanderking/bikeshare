@@ -6,6 +6,7 @@ import RankingTable from '@/app/features/dashboard/components/RankingTable'
 import { getRankings } from '@/app/utils/yearlyTrips'
 import Image from 'next/image'
 
+console.log({ yearlyTrips })
 const DashboardContainer = () => {
   const currentYear = new Date().getFullYear()
 
@@ -37,6 +38,14 @@ const DashboardContainer = () => {
         <p>NYC leads the way in Bikeshares</p>
         <LatestYearChart data={recentUSTrips} />
       </div>
+
+      {/* <h2>How about global trends?</h2>
+
+      <div className="pt-8">
+        <h3 className="text-2xl">Trips per City (2024)</h3>
+        <p>NYC still leading...</p>
+        <LatestYearChart data={recentGlobalTrips} />
+      </div> */}
 
       <div className="pt-8">
         <h3 className="text-2xl">Want to explore more data?</h3>

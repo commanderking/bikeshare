@@ -18,7 +18,7 @@ export const Visualization = () => {
     country: 'USA',
   })
   useEffect(() => {
-    const cities = _.uniq(usaTrips.map((trips) => trips.system))
+    const cities = _.uniq(usaTrips.map((trips) => trips.city))
     setCities(cities)
   }, [])
 
@@ -31,10 +31,16 @@ export const Visualization = () => {
   const tripsByYearAndSystem = usaTrips.sort((a, b) => a.year - b.year)
 
   // Above 2 million trips per year
-  const tierTwoCities = ['chicago', 'dc', 'boston', 'sf', 'philadelphia']
+  const tierTwoSystems = [
+    'chicago',
+    'washington_dc',
+    'boston',
+    'san_francisco',
+    'philadelphia',
+  ]
 
   // Around 1 million trips or less per year
-  const tierThreeCities = [
+  const tierThreeSystems = [
     'los_angeles',
     'pittsburgh',
     'columbus',
@@ -94,7 +100,10 @@ export const Visualization = () => {
             Plot.text(
               tripsByYearAndSystem,
               Plot.selectLast({
-                filter: (d) => ['nyc', 'chicago', 'dc'].includes(d.system),
+                filter: (d) =>
+                  ['new_york_city', 'chicago', 'washington_dc'].includes(
+                    d.city
+                  ),
                 x: 'year',
                 y: 'trip_count',
                 z: 'system',
@@ -115,18 +124,18 @@ export const Visualization = () => {
         <div className="pt-8">
           <TripsByYear
             data={tripsByYearAndSystem.filter((trips) =>
-              tierTwoCities.includes(trips.system)
+              tierTwoSystems.includes(trips.city)
             )}
             marks={[
               Plot.text(
                 tripsByYearAndSystem.filter((trips) =>
-                  tierTwoCities.includes(trips.system)
+                  tierTwoSystems.includes(trips.city)
                 ),
                 Plot.selectLast({
                   x: 'year',
                   y: 'trip_count',
-                  z: 'system',
-                  text: 'system',
+                  z: 'city',
+                  text: 'metroArea',
                   textAnchor: 'start',
                   dx: 5,
                 })
@@ -144,18 +153,18 @@ export const Visualization = () => {
         <div className="pt-4">
           <TripsByYear
             data={tripsByYearAndSystem.filter((trips) =>
-              tierThreeCities.includes(trips.system)
+              tierThreeSystems.includes(trips.city)
             )}
             marks={[
               Plot.text(
                 tripsByYearAndSystem.filter((trips) =>
-                  tierThreeCities.includes(trips.system)
+                  tierThreeSystems.includes(trips.city)
                 ),
                 Plot.selectLast({
                   x: 'year',
                   y: 'trip_count',
-                  z: 'system',
-                  text: 'system',
+                  z: 'city',
+                  text: 'metroArea',
                   textAnchor: 'start',
                   dx: 5,
                 })
@@ -194,7 +203,7 @@ export const Visualization = () => {
           data={historicalTrips
             .sort((a, b) => a.year - b.year)
             .filter((trip) =>
-              selectedCities.find((city) => city === trip.system)
+              selectedCities.find((city) => city === trip.city)
             )}
         />
       </ChartTextLayout>

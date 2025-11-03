@@ -1,9 +1,9 @@
 import { System } from '@/app/model/System'
 export const systems: { [key: string]: System } = {
-  nyc: {
+  new_york_city: {
     id: 'nyc',
     metroArea: 'New York City',
-    systemName: 'Citi Bike',
+    city: 'new_york_city',
     country: 'USA',
     longitude: -74.006,
     latitude: 40.7128,
@@ -11,15 +11,15 @@ export const systems: { [key: string]: System } = {
   chicago: {
     id: 'chicago',
     metroArea: 'Chicago',
-    systemName: 'Divvy Bike',
+    city: 'chicago',
     country: 'USA',
     longitude: -87.6298,
     latitude: 41.8781,
   },
-  dc: {
+  washington_dc: {
     id: 'dc',
     metroArea: 'Washington D.C.',
-    systemName: 'Capital Bikeshare',
+    city: 'washington_dc',
     country: 'USA',
     longitude: -77.0369,
     latitude: 38.9072,
@@ -27,15 +27,15 @@ export const systems: { [key: string]: System } = {
   boston: {
     id: 'boston',
     metroArea: 'Boston',
-    systemName: 'Bluebike',
+    city: 'boston',
     country: 'USA',
     longitude: -71.0589,
     latitude: 42.3601,
   },
-  sf: {
+  san_francisco: {
     id: 'sf',
     metroArea: 'San Francisco',
-    systemName: 'Bay Wheels',
+    city: 'san_francisco',
     country: 'USA',
     longitude: -122.4194,
     latitude: 37.7749,
@@ -43,7 +43,7 @@ export const systems: { [key: string]: System } = {
   philadelphia: {
     id: 'philadelphia',
     metroArea: 'Philadelphia',
-    systemName: 'Indego',
+    city: 'philadelphia',
     country: 'USA',
     longitude: -75.1652,
     latitude: 39.9526,
@@ -51,7 +51,7 @@ export const systems: { [key: string]: System } = {
   los_angeles: {
     id: 'los_angeles',
     metroArea: 'Los Angeles',
-    systemName: 'Metro Bike Share',
+    city: 'los_angeles',
     country: 'USA',
     longitude: -118.2437,
     latitude: 34.0522,
@@ -59,7 +59,7 @@ export const systems: { [key: string]: System } = {
   toronto: {
     id: 'toronto',
     metroArea: 'Toronto',
-    systemName: 'Bike Share Toronto',
+    city: 'toronto',
     country: 'Canada',
     longitude: -79.3832,
     latitude: 43.6532,
@@ -67,7 +67,7 @@ export const systems: { [key: string]: System } = {
   pittsburgh: {
     id: 'pittsburgh',
     metroArea: 'Pittsburgh',
-    systemName: 'POGOH',
+    city: 'pittsburgh',
     country: 'USA',
     longitude: -79.9959,
     latitude: 40.4406,
@@ -75,7 +75,7 @@ export const systems: { [key: string]: System } = {
   columbus: {
     id: 'columbus',
     metroArea: 'Columbus',
-    systemName: 'CoGo',
+    city: 'columbus',
     country: 'USA',
     longitude: -82.9988,
     latitude: 39.9612,
@@ -83,7 +83,7 @@ export const systems: { [key: string]: System } = {
   austin: {
     id: 'austin',
     metroArea: 'Austin',
-    systemName: 'CapMetro Bikeshare',
+    city: 'austin',
     country: 'USA',
     longitude: -97.7431,
     latitude: 30.2672,
@@ -91,7 +91,7 @@ export const systems: { [key: string]: System } = {
   bergen: {
     id: 'bergen',
     metroArea: 'Bergen',
-    systemName: 'Bysykkel',
+    city: 'bergen',
     country: 'Norway',
     longitude: 5.3221,
     latitude: 60.3913,
@@ -99,7 +99,7 @@ export const systems: { [key: string]: System } = {
   trondheim: {
     id: 'trondheim',
     metroArea: 'Trondheim',
-    systemName: 'Trondheim Bysykkel',
+    city: 'trondheim',
     country: 'Norway',
     longitude: 10.3951,
     latitude: 63.4305,
@@ -107,7 +107,7 @@ export const systems: { [key: string]: System } = {
   oslo: {
     id: 'oslo',
     metroArea: 'Oslo',
-    systemName: 'Oslo Bysykkel',
+    city: 'oslo',
     country: 'Norway',
     longitude: 10.7522,
     latitude: 59.9139,
@@ -115,15 +115,15 @@ export const systems: { [key: string]: System } = {
   taipei: {
     id: 'taipei',
     metroArea: 'Taipei',
-    systemName: 'YouBike',
+    city: 'taipei',
     country: 'Taiwan',
     longitude: 121.5654,
     latitude: 25.033,
   },
   mexico_city: {
     id: 'mexico_city',
-    metroArea: 'Mexico City',
-    systemName: 'Ecobici',
+    metroArea: 'mexico_city',
+    city: 'Ecobici',
     country: 'Mexico',
     longitude: -99.1332,
     latitude: 19.4326,
@@ -131,7 +131,7 @@ export const systems: { [key: string]: System } = {
   montreal: {
     id: 'montreal',
     metroArea: 'Montreal',
-    systemName: 'BIXI Montreal',
+    city: 'montreal',
     country: 'Canada',
     longitude: -73.5673,
     latitude: 45.5017,
@@ -139,7 +139,7 @@ export const systems: { [key: string]: System } = {
   vancouver: {
     id: 'vancouver',
     metroArea: 'Vancouver',
-    systemName: 'Mobi',
+    city: 'vancouver',
     country: 'Canada',
     longitude: -123.1216,
     latitude: 49.2827,
@@ -147,7 +147,7 @@ export const systems: { [key: string]: System } = {
   helsinki: {
     id: 'helsinki',
     metroArea: 'Helsinki',
-    systemName: 'Helsinki City Bikes',
+    city: 'helsinki',
     country: 'Finland',
     longitude: 24.9384,
     latitude: 60.1699,
@@ -155,7 +155,7 @@ export const systems: { [key: string]: System } = {
   london: {
     id: 'london',
     metroArea: 'London',
-    systemName: 'Santander Cycles',
+    city: 'london',
     country: 'United Kingdom',
     longitude: -0.1276,
     latitude: 51.5074,
@@ -163,7 +163,7 @@ export const systems: { [key: string]: System } = {
   chattanooga: {
     id: 'chattanooga',
     metroArea: 'Chattanooga',
-    systemName: 'Bike Chattanooga',
+    city: 'chattanooga',
     country: 'USA',
     longitude: -85.3097,
     latitude: 35.0456,
@@ -171,7 +171,7 @@ export const systems: { [key: string]: System } = {
   jersey_city: {
     id: 'jersey_city',
     metroArea: 'Jersey City',
-    systemName: 'Citi Bike',
+    city: 'jersey_city',
     country: 'USA',
     longitude: -74.0776,
     latitude: 40.7282,

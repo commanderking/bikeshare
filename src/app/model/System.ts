@@ -10,7 +10,7 @@ export type Country =
 export type System = {
   id: string
   metroArea: string
-  systemName: string
+  city: string
   country: Country
   longitude: number
   latitude: number
