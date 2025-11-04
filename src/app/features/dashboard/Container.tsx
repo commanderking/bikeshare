@@ -18,6 +18,8 @@ const DashboardContainer = () => {
     country: 'USA',
   })
 
+  console.log({ recentUSTrips })
+
   return (
     <div className="prose text-center mt-16 max-w-[640px] m-auto">
       <h1 className="text-4xl">Cities Bike</h1>

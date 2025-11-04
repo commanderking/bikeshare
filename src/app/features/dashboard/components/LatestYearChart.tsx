@@ -23,7 +23,7 @@ const LatestYearChart = ({ data, marks = [] }: Props) => {
       marks: [
         Plot.barX(data, {
           x: 'trip_count',
-          y: 'system',
+          y: 'metroArea',
           sort: { y: 'x', reverse: true },
         }),
       ],
