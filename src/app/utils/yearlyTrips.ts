@@ -1,13 +1,9 @@
 import _ from 'lodash'
 import { systems } from '@/app/constants/cities'
 import { Country } from '@/app/model/System'
-import {
-  RawYearlyTrip,
-  YearlyTrip,
-  YearlyTripWithSystem,
-} from '@/app/model/YearlyTrip'
+import { YearlyTrip, YearlyTripWithSystem } from '@/app/model/YearlyTrip'
 
-const removeNullCases = (yearlyTrip: RawYearlyTrip) => {
+const removeNullCases = (yearlyTrip: YearlyTrip) => {
   const { year, duration_median, duration_q1, duration_q3 } = yearlyTrip
   const possibleNullValues = [year, duration_median, duration_q1, duration_q3]
   return !possibleNullValues.some((value) => value === null)
@@ -26,10 +22,7 @@ const byYear = (year?: number) => (yearlyTrip: YearlyTripWithSystem) =>
 
 type RankingOptions = { year?: number; country?: Country; count?: number }
 
-export const getRankings = (
-  trips: RawYearlyTrip[],
-  options?: RankingOptions
-) => {
+export const getRankings = (trips: YearlyTrip[], options?: RankingOptions) => {
   const { country, year, count } = options || {
     country: undefined,
     year: undefined,

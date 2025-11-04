@@ -6,7 +6,6 @@ import RankingTable from '@/app/features/dashboard/components/RankingTable'
 import { getRankings } from '@/app/utils/yearlyTrips'
 import Image from 'next/image'
 
-console.log({ yearlyTrips })
 const DashboardContainer = () => {
   const currentYear = new Date().getFullYear()
 

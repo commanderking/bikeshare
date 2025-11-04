@@ -3,7 +3,6 @@ import type { System } from '@/app/model/System'
 export type YearlyTrip = {
   year: number
   trip_count: number
-  system: string
   duration_q1: number
   duration_median: number
   duration_q3: number
