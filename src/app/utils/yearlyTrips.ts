@@ -5,7 +5,7 @@ import { YearlyTrip, YearlyTripWithSystem } from '@/app/model/YearlyTrip'
 
 const toTripsWithSystemData = (yearlyTrip: YearlyTrip) => ({
   ...yearlyTrip,
-  ...systems[yearlyTrip.system],
+  ...systems[yearlyTrip.city],
 })
 
 const byCountry = (country?: Country) => (yearlyTrip: YearlyTripWithSystem) =>
@@ -22,6 +22,7 @@ export const getRankings = (trips: YearlyTrip[], options?: RankingOptions) => {
     year: undefined,
     count: undefined,
   }
+
   return trips
     .map(toTripsWithSystemData)
     .filter(byCountry(country))
@@ -39,13 +40,13 @@ export const getAggregatedTrips = (yearlyTrips: YearlyTrip[]) => {
         return {
           trip_count: (accumulatedTrips.trip_count += trip.trip_count),
           year: trip.year,
-          system: accumulatedTrips.system,
+          city: accumulatedTrips.city,
         }
       },
       {
         trip_count: 0,
         year: 0,
-        system: 'all',
+        city: 'all',
       }
     )
   })
