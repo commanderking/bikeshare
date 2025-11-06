@@ -3,7 +3,7 @@ import { systems } from '@/app/constants/cities'
 import { Country } from '@/app/model/System'
 import { YearlyTrip, YearlyTripWithSystem } from '@/app/model/YearlyTrip'
 
-const toTripsWithSystemData = (yearlyTrip: YearlyTrip) => ({
+export const toTripsWithSystemData = (yearlyTrip: YearlyTrip) => ({
   ...yearlyTrip,
   ...systems[yearlyTrip.city],
 })

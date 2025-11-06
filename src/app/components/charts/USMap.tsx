@@ -46,7 +46,7 @@ export const USMapChart = ({ data, marks = [] }: Props) => {
             y: 'latitude',
             title: (d) => {
               return [
-                `${d.metroArea} - ${d.city}`,
+                `${d.metroArea}`,
                 `Trips: ${d.trip_count.toLocaleString()}`,
               ].join('\n\n')
             },
