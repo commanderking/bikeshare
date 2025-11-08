@@ -1,16 +1,8 @@
 import React, { useEffect, useRef } from 'react'
 import * as Plot from '@observablehq/plot'
+import { YearlyTripWithSystem } from '@/app/model/YearlyTrip'
 
-type Row = {
-  year?: number
-  trip_count?: number
-  duration_median: number
-  duration_q1: number
-  duration_q3: number
-  null_rows?: number
-  city: string
-  metroArea: string
-}
+type Row = YearlyTripWithSystem
 
 interface Props {
   data: Row[]
@@ -18,7 +10,7 @@ interface Props {
   xLabel?: string
 }
 
-const barHeight = 20
+const barHeight = 28
 
 const DurationBoxPlotHorizontal: React.FC<Props> = ({
   data,
@@ -31,15 +23,19 @@ const DurationBoxPlotHorizontal: React.FC<Props> = ({
     if (!ref.current || !data?.length) return
 
     const cities = data.map((d) => d.metroArea)
-    const xMax = Math.max(...data.map((d) => d.duration_q3)) * 1.1
+    const xMax = Math.max(...data.map((d) => d.duration_95_percent)) * 0.7
 
     const plot = Plot.plot({
       grid: true,
-      height: Math.max(height, cities.length * (barHeight + 8)),
-      marginLeft: 110,
+      height: Math.max(height, cities.length * (barHeight + 10)),
+      style: {
+        fontSize: '20',
+      },
+      width: 600,
+      marginLeft: 150,
       marginRight: 30,
-      marginBottom: 40,
-      marginTop: 40,
+      marginBottom: 60,
+      marginTop: 20,
       x: {
         domain: [0, xMax],
         label: null,
@@ -48,11 +44,45 @@ const DurationBoxPlotHorizontal: React.FC<Props> = ({
       y: {
         label: null,
         domain: cities,
-        padding: 0.1,
+        padding: 0.3,
       },
       marks: [
         // Bottom axis (labeled)
         Plot.axisX({ anchor: 'bottom', label: xLabel }),
+
+        // Whiskers (lower → Q1)
+        Plot.ruleY(data, {
+          y: 'metroArea',
+          x1: 'duration_5_percent',
+          x2: 'duration_q1',
+          stroke: '#888',
+          strokeWidth: 2,
+        }),
+
+        // Whiskers (Q3 → upper)
+        Plot.ruleY(data, {
+          y: 'metroArea',
+          x1: 'duration_q3',
+          x2: 'duration_95_percent',
+          stroke: '#888',
+          strokeWidth: 2,
+        }),
+
+        // Small caps at each whisker end
+        Plot.ruleY(data, {
+          y: 'metroArea',
+          x1: (d) => d.duration_5_percent,
+          x2: (d) => d.duration_5_percent,
+          stroke: '#888',
+          strokeWidth: 4,
+        }),
+        Plot.ruleY(data, {
+          y: 'metroArea',
+          x1: (d) => d.duration_95_percent,
+          x2: (d) => d.duration_95_percent,
+          stroke: '#888',
+          strokeWidth: 4,
+        }),
 
         // Box (Q1–Q3)
         Plot.ruleY(data, {
@@ -77,7 +107,7 @@ const DurationBoxPlotHorizontal: React.FC<Props> = ({
           y: 'metroArea',
           x: (d) => d.duration_median + 0.5,
           text: (d) => d.duration_median.toFixed(1),
-          fontSize: 9,
+          fontSize: 16,
           fill: '#333',
           textAnchor: 'start',
           dx: 2,

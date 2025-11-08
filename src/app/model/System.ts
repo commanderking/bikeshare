@@ -6,6 +6,8 @@ export type Country =
   | 'Norway'
   | 'Finland'
   | 'United Kingdom'
+  | 'Argentina'
+  | 'South Korea'
 
 export type System = {
   id: string

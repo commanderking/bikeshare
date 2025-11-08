@@ -6,6 +6,8 @@ export type YearlyTrip = {
   duration_q1: number
   duration_median: number
   duration_q3: number
+  duration_5_percent: number
+  duration_95_percent: number
   city: string
 }
 
