@@ -53,7 +53,7 @@ const DashboardContainer = () => {
 
         <div className="grid grid-cols-2 gap-1">
           <div>
-            <a href="./visualizations/features/usa_history_15_years">
+            <a href="./visualizations/usa_history_15_years">
               <Image
                 src="/images/features_usa_history_15_years.png"
                 alt="Shell Image"
