@@ -24,7 +24,7 @@ const DashboardContainer = () => {
   return (
     <div className="prose text-center mt-16 max-w-[640px] m-auto">
       <h1 className="text-4xl">Cities Bike</h1>
-      <Biker width={400} className="mx-auto" />
+      <Biker width={400} showGround className="mx-auto" />
       <p className="pt-4 pb-8 text-lg">
         Visualizing bikeshare rides across the USA
       </p>
