@@ -4,6 +4,7 @@ import LatestYearChart from '@/app/features/dashboard/components/LatestYearChart
 import USMapChart from '@/app/components/charts/USMap'
 import RankingTable from '@/app/features/dashboard/components/RankingTable'
 import { getRankings } from '@/app/utils/yearlyTrips'
+import Biker from '@/app/components/Biker'
 import Image from 'next/image'
 
 const DashboardContainer = () => {
@@ -23,6 +24,7 @@ const DashboardContainer = () => {
   return (
     <div className="prose text-center mt-16 max-w-[640px] m-auto">
       <h1 className="text-4xl">Cities Bike</h1>
+      <Biker width={400} showGround className="mx-auto" />
       <p className="pt-4 pb-8 text-lg">
         Visualizing bikeshare rides across the USA
       </p>
