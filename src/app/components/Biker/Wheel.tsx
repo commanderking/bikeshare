@@ -9,26 +9,28 @@ interface WheelProps {
   colors: BikerColors
 }
 
-/** One wheel: rim, four spokes (rotated each frame via `spokesRef`), and hub. */
+/** One wheel: black outer tire, a thin colored inner rim (half the tire's
+ *  width), four spokes (rotated each frame via `spokesRef`), and hub. */
 const Wheel: React.FC<WheelProps> = ({ cx, cy, spokesRef, colors }) => (
   <g transform={`translate(${cx},${cy})`}>
-    <circle r="18" fill="none" stroke={colors.wheelRim} strokeWidth="2.1" />
+    <circle r="18" fill="none" stroke={colors.tire} strokeWidth="2.1" />
+    <circle r="16.4" fill="none" stroke={colors.wheelRim} strokeWidth="1.05" />
     <g ref={spokesRef} style={{ transformOrigin: '0 0' }}>
-      <line x1="0" y1="-18" x2="0" y2="18" stroke={colors.spoke} strokeWidth="0.85" />
-      <line x1="-18" y1="0" x2="18" y2="0" stroke={colors.spoke} strokeWidth="0.85" />
+      <line x1="0" y1="-16" x2="0" y2="16" stroke={colors.spoke} strokeWidth="0.85" />
+      <line x1="-16" y1="0" x2="16" y2="0" stroke={colors.spoke} strokeWidth="0.85" />
       <line
-        x1="-12.73"
-        y1="-12.73"
-        x2="12.73"
-        y2="12.73"
+        x1="-11.3"
+        y1="-11.3"
+        x2="11.3"
+        y2="11.3"
         stroke={colors.spoke}
         strokeWidth="0.85"
       />
       <line
-        x1="12.73"
-        y1="-12.73"
-        x2="-12.73"
-        y2="12.73"
+        x1="11.3"
+        y1="-11.3"
+        x2="-11.3"
+        y2="11.3"
         stroke={colors.spoke}
         strokeWidth="0.85"
       />
