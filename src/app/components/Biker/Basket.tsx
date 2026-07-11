@@ -3,7 +3,7 @@ import type { BikerColors } from './colors'
 
 /**
  * Front cargo carrier variants, interpreted from real bikeshare photos.
- * Cities with similar hardware share a shape (see cityColors.ts):
+ * Cities with similar hardware share a shape (see cityBikeConfig.ts):
  *   - 'none'  no front carrier (Austin, Bergen)
  *   - 'wire'  open mesh bucket basket (Boston, Chattanooga, Seoul, Taipei)
  *   - 'box'   solid cargo box / branded carrier (Mexico City)

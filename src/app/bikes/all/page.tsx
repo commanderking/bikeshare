@@ -1,5 +1,5 @@
 import Biker from '@/app/components/Biker'
-import { CITY_BIKE_CONFIG, CONFIGURED_CITY_IDS } from '@/app/components/Biker/cityColors'
+import { CITY_BIKE_CONFIG, CONFIGURED_CITY_IDS } from '@/app/components/Biker/cityBikeConfig'
 import { systems } from '@/app/constants/cities'
 import { CITY_IMAGE_URL } from '@/app/constants/bikeImages'
 
