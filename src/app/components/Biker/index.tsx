@@ -8,8 +8,9 @@ import { useBikerAnimation } from './useBikerAnimation'
 import Wheel from './Wheel'
 import Frame from './Frame'
 import Basket, { BasketType } from './Basket'
+import Skirt, { SkirtGuard } from './Skirt'
 
-export type { BikerColors, BasketType }
+export type { BikerColors, BasketType, SkirtGuard }
 
 interface BikerProps {
   /** Crank angular velocity in radians per animation frame. Higher = faster pedalling. */
@@ -28,6 +29,8 @@ interface BikerProps {
   colors?: Partial<BikerColors>
   /** Front cargo carrier shape. */
   basketType?: BasketType
+  /** Rear dress/skirt guard shape + color. */
+  skirtGuard?: SkirtGuard
   width?: number | string
   height?: number | string
   className?: string
@@ -43,6 +46,7 @@ const Biker: React.FC<BikerProps> = ({
   speedBursts = true,
   colors,
   basketType = 'rack',
+  skirtGuard = { type: 'halfDisc', color: '#f5e79e' },
   width = 200,
   height,
   className,
@@ -81,16 +85,9 @@ const Biker: React.FC<BikerProps> = ({
       <Wheel cx={66} cy={87} spokesRef={reg('rearSpokes')} colors={c} />
       <Wheel cx={137} cy={87} spokesRef={reg('frontSpokes')} colors={c} />
 
-      {/* WHEEL GUARDS (fenders): a solid rear guard — an arc over the top of the
-          rear wheel (~9 to ~2 o'clock) closing to a point near the hub — and a
-          thin partial guard on the back (left) side of the front wheel */}
-      <path
-        d="M46.3 83.53 A20 20 0 0 1 81.76 74.69 L71 88 Z"
-        fill={c.skirtGuard}
-        stroke={c.skirtGuard}
-        strokeWidth="0.75"
-        strokeLinejoin="round"
-      />
+      {/* REAR skirt/dress guard (shape + color via the skirtGuard prop) */}
+      <Skirt guard={skirtGuard} />
+      {/* FRONT fender — thin partial guard on the back of the front wheel */}
       <path
         d="M116.5 87.7 A20.5 20.5 0 0 1 137.7 66.5"
         fill="none"

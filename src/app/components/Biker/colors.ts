@@ -4,8 +4,6 @@ export interface BikerColors {
   frontFender: string
   /** Stroke color of the front basket / bracket. Defaults to `frameDark`. */
   basket: string
-  /** Solid dress/skirt guard panel over the rear wheel (the branded surface). */
-  skirtGuard: string
   saddle: string
   shirt: string
   shirtBack: string
@@ -30,7 +28,6 @@ export const DEFAULT_COLORS: BikerColors = {
   frameDark: '#175d6b',
   frontFender: '#f5e79e',
   basket: '#175d6b',
-  skirtGuard: '#f5e79e',
   saddle: '#2e2e2e',
   shirt: '#3b6ea5',
   shirtBack: '#2f5985',
