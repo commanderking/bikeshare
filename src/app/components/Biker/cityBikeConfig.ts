@@ -1,11 +1,14 @@
 import type { BikerColors } from './colors'
 import type { BasketType } from './Basket'
 import type { SkirtGuard } from './Skirt'
+import type { DownTubeCurve } from './Frame'
 
 export interface CityBikeConfig {
   colors: Partial<BikerColors>
   basketType: BasketType
   skirtGuard: SkirtGuard
+  /** Down-tube sweep profile; defaults to 'default' when omitted. */
+  downTube?: DownTubeCurve
 }
 
 /**
@@ -38,6 +41,7 @@ export const CITY_BIKE_CONFIG: Record<string, CityBikeConfig> = {
   bergen: {
     basketType: 'rack',
     skirtGuard: { type: '9_1_CIRCLE', color: '#dcdcd8' },
+    downTube: 'nordic',
     colors: {
       frame: '#e8e7e3',
       frontFender: '#e8e7e3',
@@ -55,6 +59,7 @@ export const CITY_BIKE_CONFIG: Record<string, CityBikeConfig> = {
   boston: {
     basketType: 'box',
     skirtGuard: { type: 'CRESCENT', color: '#1c6fb0' },
+    downTube: 'lyft',
     colors: {
       frame: '#1c8ac8',
       frontFender: '#1c8ac8',
@@ -72,6 +77,7 @@ export const CITY_BIKE_CONFIG: Record<string, CityBikeConfig> = {
   chattanooga: {
     basketType: 'rack',
     skirtGuard: { type: 'LEVEL_2', color: '#a6d50d' },
+    downTube: 'lyft',
     colors: {
       frame: '#1d5fa0',
       frontFender: '#1d5fa0',
@@ -89,6 +95,7 @@ export const CITY_BIKE_CONFIG: Record<string, CityBikeConfig> = {
   chicago: {
     basketType: 'box',
     skirtGuard: { type: 'LEVEL_2', color: '#52bfe6' },
+    downTube: 'lyft',
     colors: {
       frame: '#52bfe6',
       frontFender: '#52bfe6',
@@ -106,6 +113,7 @@ export const CITY_BIKE_CONFIG: Record<string, CityBikeConfig> = {
   columbus: {
     basketType: 'rack',
     skirtGuard: { type: 'LEVEL_2', color: '#17827c' },
+    downTube: 'lyft',
     colors: {
       frame: '#17171a',
       frontFender: '#17171a',
@@ -123,6 +131,7 @@ export const CITY_BIKE_CONFIG: Record<string, CityBikeConfig> = {
   mexico_city: {
     basketType: 'box',
     skirtGuard: { type: '9_1_CIRCLE', color: '#b8b9bb' },
+    downTube: 'lyft',
     colors: {
       frame: '#1a1a1d',
       frontFender: '#1a1a1d',
@@ -174,6 +183,7 @@ export const CITY_BIKE_CONFIG: Record<string, CityBikeConfig> = {
   toronto: {
     basketType: 'rack',
     skirtGuard: { type: 'LEVEL_1', color: '#35a844' },
+    downTube: 'lyft',
     colors: {
       frame: '#262629',
       frontFender: '#1e1e20',
@@ -191,6 +201,7 @@ export const CITY_BIKE_CONFIG: Record<string, CityBikeConfig> = {
   washington_dc: {
     basketType: 'rack',
     skirtGuard: { type: '9_1_CIRCLE', color: '#1a1a1a' },
+    downTube: 'lyft',
     colors: {
       frame: '#d81f26',
       frontFender: '#1e1e20',
@@ -208,6 +219,7 @@ export const CITY_BIKE_CONFIG: Record<string, CityBikeConfig> = {
   daejeon: {
     basketType: 'wire',
     skirtGuard: { type: 'halfDisc', color: '#6fb52e' },
+    downTube: 'lyft',
     colors: {
       frame: '#6fb52e',
       frontFender: '#d94b3a',
@@ -225,6 +237,7 @@ export const CITY_BIKE_CONFIG: Record<string, CityBikeConfig> = {
   guadalajara: {
     basketType: 'wire',
     skirtGuard: { type: 'LEVEL_1', color: '#2e8b3d' },
+    downTube: 'lyft',
     colors: {
       frame: '#bcbfc2',
       frontFender: '#bcbfc2',
@@ -259,6 +272,7 @@ export const CITY_BIKE_CONFIG: Record<string, CityBikeConfig> = {
   jersey_city: {
     basketType: 'rack',
     skirtGuard: { type: 'LEVEL_2', color: '#2f6db5' },
+    downTube: 'lyft',
     colors: {
       frame: '#2f6db5',
       frontFender: '#2f6db5',
@@ -276,6 +290,7 @@ export const CITY_BIKE_CONFIG: Record<string, CityBikeConfig> = {
   new_york_city: {
     basketType: 'rack',
     skirtGuard: { type: 'LEVEL_2', color: '#2f6db5' },
+    downTube: 'lyft',
     colors: {
       frame: '#2f6db5',
       frontFender: '#2f6db5',
@@ -291,13 +306,14 @@ export const CITY_BIKE_CONFIG: Record<string, CityBikeConfig> = {
     },
   },
   oslo: {
-    basketType: 'none',
+    basketType: 'rack',
     skirtGuard: { type: '9_1_CIRCLE', color: '#e8e7e3' },
+    downTube: 'nordic',
     colors: {
       frame: '#2a7fc0',
       frontFender: '#e8e7e3',
       frameDark: '#1c5f96',
-      basket: '#c7c7c2',
+      basket: 'black',
       saddle: '#1b1b1b',
       tire: '#1a1a1a',
       wheelRim: '#c4c7ca',
@@ -310,6 +326,7 @@ export const CITY_BIKE_CONFIG: Record<string, CityBikeConfig> = {
   london: {
     basketType: 'rack',
     skirtGuard: { type: 'LEVEL_2', color: '#d81f2a' },
+    downTube: 'lyft',
     colors: {
       frame: '#3f434a',
       frontFender: '#3f434a',
@@ -327,6 +344,7 @@ export const CITY_BIKE_CONFIG: Record<string, CityBikeConfig> = {
   los_angeles: {
     basketType: 'rack',
     skirtGuard: { type: '10_3_CIRCLE', color: '#a5cd39' },
+    downTube: 'lyft',
     colors: {
       frame: '#1a1a1a',
       frontFender: '#1a1a1a',
@@ -344,6 +362,7 @@ export const CITY_BIKE_CONFIG: Record<string, CityBikeConfig> = {
   montreal: {
     basketType: 'rack',
     skirtGuard: { type: 'LEVEL_1', color: '#d81f2a' },
+    downTube: 'lyft',
     colors: {
       frame: '#d81f2a',
       frontFender: '#d81f2a',
@@ -361,6 +380,7 @@ export const CITY_BIKE_CONFIG: Record<string, CityBikeConfig> = {
   philadelphia: {
     basketType: 'box',
     skirtGuard: { type: '10_3_CIRCLE', color: '#2277bd' },
+    downTube: 'lyft',
     colors: {
       frame: '#2277bd',
       frontFender: '#2277bd',
@@ -412,6 +432,7 @@ export const CITY_BIKE_CONFIG: Record<string, CityBikeConfig> = {
   san_francisco: {
     basketType: 'wire',
     skirtGuard: { type: 'halfDisc', color: '#b565a7' },
+    downTube: 'lyft',
     colors: {
       frame: '#bcbfc2',
       frontFender: '#bcbfc2',
@@ -427,13 +448,14 @@ export const CITY_BIKE_CONFIG: Record<string, CityBikeConfig> = {
     },
   },
   trondheim: {
-    basketType: 'none',
+    basketType: 'rack',
     skirtGuard: { type: '9_1_CIRCLE', color: '#d13b2e' },
+    downTube: 'nordic',
     colors: {
       frame: '#e8e7e3',
       frontFender: '#e8e7e3',
       frameDark: '#c7c7c2',
-      basket: '#c7c7c2',
+      basket: '#d13b2e',
       saddle: '#1b1b1b',
       tire: '#1a1a1a',
       wheelRim: '#d13b2e',

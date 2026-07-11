@@ -33,6 +33,7 @@ export default function AllBikesPage() {
                 colors={config.colors}
                 basketType={config.basketType}
                 skirtGuard={config.skirtGuard}
+                downTube={config.downTube}
               />
             </div>
           )
