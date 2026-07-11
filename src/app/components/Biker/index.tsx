@@ -6,8 +6,11 @@ import { BOTTOM_BRACKET, HIP, SHOULDER, DEFAULT_SPEED } from './geometry'
 import { INIT } from './kinematics'
 import { useBikerAnimation } from './useBikerAnimation'
 import Wheel from './Wheel'
+import Frame from './Frame'
+import Basket, { BasketType } from './Basket'
+import Skirt, { SkirtGuard } from './Skirt'
 
-export type { BikerColors }
+export type { BikerColors, BasketType, SkirtGuard }
 
 interface BikerProps {
   /** Crank angular velocity in radians per animation frame. Higher = faster pedalling. */
@@ -24,6 +27,10 @@ interface BikerProps {
   speedBursts?: boolean
   /** Override any subset of the default colors. */
   colors?: Partial<BikerColors>
+  /** Front cargo carrier shape. */
+  basketType?: BasketType
+  /** Rear dress/skirt guard shape + color. */
+  skirtGuard?: SkirtGuard
   width?: number | string
   height?: number | string
   className?: string
@@ -38,6 +45,8 @@ const Biker: React.FC<BikerProps> = ({
   waveInterval = [5000, 10000],
   speedBursts = true,
   colors,
+  basketType = 'rack',
+  skirtGuard = { type: 'halfDisc', color: '#f5e79e' },
   width = 200,
   height,
   className,
@@ -74,22 +83,15 @@ const Biker: React.FC<BikerProps> = ({
       )}
 
       <Wheel cx={66} cy={87} spokesRef={reg('rearSpokes')} colors={c} />
-      <Wheel cx={134} cy={87} spokesRef={reg('frontSpokes')} colors={c} />
+      <Wheel cx={137} cy={87} spokesRef={reg('frontSpokes')} colors={c} />
 
-      {/* WHEEL GUARDS (fenders): a solid rear guard — an arc over the top of the
-          rear wheel (~9 to ~2 o'clock) closing to a point near the hub — and a
-          thin partial guard on the back (left) side of the front wheel */}
+      {/* REAR skirt/dress guard (shape + color via the skirtGuard prop) */}
+      <Skirt guard={skirtGuard} />
+      {/* FRONT fender — thin partial guard on the back of the front wheel */}
       <path
-        d="M46.3 83.53 A20 20 0 0 1 81.76 74.69 L71 88 Z"
-        fill={c.fender}
-        stroke={c.fender}
-        strokeWidth="0.75"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M113.5 87.7 A20.5 20.5 0 0 1 134.7 66.5"
+        d="M116.5 87.7 A20.5 20.5 0 0 1 137.7 66.5"
         fill="none"
-        stroke={c.fender}
+        stroke={c.frontFender}
         strokeWidth="2.2"
         strokeLinecap="round"
       />
@@ -139,15 +141,8 @@ const Biker: React.FC<BikerProps> = ({
         opacity="0.5"
       />
 
-      {/* MAIN FRAME (simple step-through) */}
-      <g fill="none" strokeLinecap="round">
-        <line x1="66" y1="87" x2="92" y2="87" stroke={c.frame} strokeWidth="3" />
-        <line x1="92" y1="87" x2="130" y2="58" stroke={c.frame} strokeWidth="3" />
-        <line x1="92" y1="87" x2="86" y2="50" stroke={c.frame} strokeWidth="2.6" />
-        <line x1="130" y1="58" x2="134" y2="87" stroke={c.frame} strokeWidth="2.6" />
-        <line x1="130" y1="58" x2="122" y2="44.5" stroke={c.frameDark} strokeWidth="2.4" />
-        <line x1="66" y1="87" x2="86.8" y2="59.6" stroke={c.frame} strokeWidth="2.6" />
-      </g>
+      {/* MAIN FRAME — step-through, drawn as labeled tubes (see Frame.tsx) */}
+      <Frame colors={c} />
 
       {/* HANDLEBAR, near seat height */}
       <line
@@ -161,22 +156,30 @@ const Biker: React.FC<BikerProps> = ({
       />
       <circle cx="118" cy="44.5" r="1.6" fill={c.frameDark} />
 
-      {/* BASKET BRACKET — backward-L at the head-tube junction, plus diagonal support */}
-      <path
-        d="M139.3,58 L139.3,46 M139.3,58 L130,58"
-        fill="none"
-        stroke={c.frameDark}
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-      <line x1="130" y1="58" x2="139.3" y2="46" stroke={c.crank} strokeWidth="1" strokeLinecap="round" />
+      {/* FRONT CARGO CARRIER — shape varies by city (wire / box / rack / none) */}
+      <Basket type={basketType} colors={c} />
 
       {/* chainring — smaller than the crank so the pedals sweep outside it */}
-      <circle cx="92" cy="87" r="5" fill="none" stroke={c.ring} strokeWidth="1.4" />
+      <circle
+        cx="92"
+        cy="87"
+        r="5"
+        fill="none"
+        stroke={c.ring}
+        strokeWidth="1.4"
+      />
       <circle cx="92" cy="87" r="1.8" fill={c.ring} />
 
       {/* saddle */}
-      <line x1="81" y1="50.5" x2="88" y2="51" stroke={c.saddle} strokeWidth="5" strokeLinecap="round" />
+      <line
+        x1="81"
+        y1="50.5"
+        x2="88"
+        y2="51"
+        stroke={c.saddle}
+        strokeWidth="5"
+        strokeLinecap="round"
+      />
 
       {/* NEAR-SIDE CRANK + LEG — drawn on top, in front of the frame */}
       <line
@@ -245,15 +248,45 @@ const Biker: React.FC<BikerProps> = ({
           strokeWidth="2.8"
           strokeLinecap="round"
         />
-        <circle ref={reg('hand')} cx={INIT.arm.handX} cy={INIT.arm.handY} r="2.1" fill={c.skin} />
+        <circle
+          ref={reg('hand')}
+          cx={INIT.arm.handX}
+          cy={INIT.arm.handY}
+          r="2.1"
+          fill={c.skin}
+        />
       </g>
 
       {/* TORSO */}
-      <line x1="86" y1="47" x2="100" y2="19" stroke={c.shirt} strokeWidth="4.2" strokeLinecap="round" />
+      <line
+        x1="86"
+        y1="47"
+        x2="100"
+        y2="19"
+        stroke={c.shirt}
+        strokeWidth="4.2"
+        strokeLinecap="round"
+      />
 
       {/* NEAR ARM (his right) — static, always gripping the bar; drawn in front */}
-      <line x1="100" y1="20.5" x2="103" y2="34.5" stroke={c.shirt} strokeWidth="2.8" strokeLinecap="round" />
-      <line x1="103" y1="34.5" x2="119.5" y2="44.5" stroke={c.shirt} strokeWidth="2.8" strokeLinecap="round" />
+      <line
+        x1="100"
+        y1="20.5"
+        x2="103"
+        y2="34.5"
+        stroke={c.shirt}
+        strokeWidth="2.8"
+        strokeLinecap="round"
+      />
+      <line
+        x1="103"
+        y1="34.5"
+        x2="119.5"
+        y2="44.5"
+        stroke={c.shirt}
+        strokeWidth="2.8"
+        strokeLinecap="round"
+      />
       <circle cx="119.5" cy="44.5" r="2.1" fill={c.skin} />
 
       {/* HEAD */}

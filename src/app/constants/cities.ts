@@ -49,6 +49,14 @@ export const systems: { [key: string]: System } = {
     longitude: -82.9988,
     latitude: 39.9612,
   },
+  daejeon: {
+    id: 'daejeon',
+    metroArea: 'Daejeon',
+    city: 'daejeon',
+    country: 'South Korea',
+    longitude: 127.3845,
+    latitude: 36.3504,
+  },
   guadalajara: {
     id: 'guadalajara',
     metroArea: 'Guadalajara',
