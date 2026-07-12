@@ -6,11 +6,11 @@ import { BOTTOM_BRACKET, HIP, SHOULDER, DEFAULT_SPEED } from './geometry'
 import { INIT } from './kinematics'
 import { useBikerAnimation } from './useBikerAnimation'
 import Wheel from './Wheel'
-import Frame from './Frame'
+import Frame, { DownTubeCurve } from './Frame'
 import Basket, { BasketType } from './Basket'
 import Skirt, { SkirtGuard } from './Skirt'
 
-export type { BikerColors, BasketType, SkirtGuard }
+export type { BikerColors, BasketType, SkirtGuard, DownTubeCurve }
 
 interface BikerProps {
   /** Crank angular velocity in radians per animation frame. Higher = faster pedalling. */
@@ -31,6 +31,8 @@ interface BikerProps {
   basketType?: BasketType
   /** Rear dress/skirt guard shape + color. */
   skirtGuard?: SkirtGuard
+  /** Down-tube sweep profile; varies with the bike's frame dimensions. */
+  downTube?: DownTubeCurve
   width?: number | string
   height?: number | string
   className?: string
@@ -47,6 +49,7 @@ const Biker: React.FC<BikerProps> = ({
   colors,
   basketType = 'rack',
   skirtGuard = { type: 'halfDisc', color: '#f5e79e' },
+  downTube = 'default',
   width = 200,
   height,
   className,
@@ -142,7 +145,7 @@ const Biker: React.FC<BikerProps> = ({
       />
 
       {/* MAIN FRAME — step-through, drawn as labeled tubes (see Frame.tsx) */}
-      <Frame colors={c} />
+      <Frame colors={c} downTube={downTube} />
 
       {/* HANDLEBAR, near seat height */}
       <line
