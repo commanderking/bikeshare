@@ -1,4 +1,3 @@
-import yearlyTrips from '@/data/trips_per_year.json'
 import _ from 'lodash'
 import { useEffect, useState } from 'react'
 import TripsByYear from '@/app/components/charts/TripsByYear'
@@ -8,27 +7,31 @@ import ChartTextLayout from '@/app/components/ChartTextLayout'
 import * as Plot from '@observablehq/plot'
 import { AggregatedTrip } from '@/app/model/YearlyTrip'
 import { getRankings, getAggregatedTrips } from '@/app/utils/yearlyTrips'
+import { useYearlyTrips } from '@/app/hooks/useYearlyTrips'
+import { LATEST_COMPLETE_YEAR } from '@/app/constants/years'
 export const Visualization = () => {
+  const { trips } = useYearlyTrips()
   const [cities, setCities] = useState<string[]>([])
   const [selectedCities, setSelectedCities] = useState<string[]>([])
 
   const [aggregatedData, setAggregatedData] = useState<AggregatedTrip[]>([])
 
-  const usaTrips = getRankings(yearlyTrips, {
+  const usaTrips = getRankings(trips, {
     country: 'USA',
+    maxYear: LATEST_COMPLETE_YEAR,
   })
   useEffect(() => {
     const cities = _.uniq(usaTrips.map((trips) => trips.city))
     setCities(cities)
-  }, [])
+  }, [trips])
 
   useEffect(() => {
-    const aggregatedTrips = getAggregatedTrips(usaTrips)
-    setAggregatedData(aggregatedTrips)
-  }, [yearlyTrips])
+    setAggregatedData(getAggregatedTrips(usaTrips))
+  }, [trips])
 
-  const historicalTrips = usaTrips.filter((trip) => trip.year !== 2024)
-  const tripsByYearAndSystem = usaTrips.sort((a, b) => a.year - b.year)
+  const tripsByYearAndSystem = usaTrips
+    .slice()
+    .sort((a, b) => a.year - b.year)
 
   // Above 2 million trips per year
   const tierTwoSystems = [
@@ -200,7 +203,8 @@ export const Visualization = () => {
           placeholder="Select one or more cities..."
         />
         <TripsByYear
-          data={historicalTrips
+          data={usaTrips
+            .slice()
             .sort((a, b) => a.year - b.year)
             .filter((trip) =>
               selectedCities.find((city) => city === trip.city)

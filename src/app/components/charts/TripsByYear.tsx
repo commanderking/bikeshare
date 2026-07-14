@@ -9,6 +9,7 @@ type Props = {
 }
 
 export const TripsByYearChart = ({ data, marks = [] }: Props) => {
+  console.log({ data })
   const plotRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (data === undefined) return

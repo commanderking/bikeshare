@@ -14,12 +14,21 @@ const byCountry = (country?: Country) => (yearlyTrip: YearlyTripWithSystem) =>
 const byYear = (year?: number) => (yearlyTrip: YearlyTripWithSystem) =>
   !year || year === yearlyTrip.year
 
-type RankingOptions = { year?: number; country?: Country; count?: number }
+const byMaxYear = (maxYear?: number) => (yearlyTrip: YearlyTripWithSystem) =>
+  !maxYear || yearlyTrip.year <= maxYear
+
+type RankingOptions = {
+  year?: number
+  maxYear?: number
+  country?: Country
+  count?: number
+}
 
 export const getRankings = (trips: YearlyTrip[], options?: RankingOptions) => {
-  const { country, year, count } = options || {
+  const { country, year, maxYear, count } = options || {
     country: undefined,
     year: undefined,
+    maxYear: undefined,
     count: undefined,
   }
 
@@ -27,6 +36,7 @@ export const getRankings = (trips: YearlyTrip[], options?: RankingOptions) => {
     .map(toTripsWithSystemData)
     .filter(byCountry(country))
     .filter(byYear(year))
+    .filter(byMaxYear(maxYear))
     .slice() // Creating shallow copy before sort
     .sort((a, b) => b.trip_count - a.trip_count)
     .slice(0, count ?? undefined)
