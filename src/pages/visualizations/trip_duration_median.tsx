@@ -1,7 +1,7 @@
 import MedianTripTimeBoxPlot from '@/app/components/charts/MedianTripTimeBoxPlot'
-import yearlyTrips from '@/data/trips_per_year.json'
 import MedianTripHorizontalBoxPlot from '@/app/components/charts/MedianTripTimeHorizontalBoxPlot'
 import { toTripsWithSystemData } from '@/app/utils/yearlyTrips'
+import { useYearlyTrips } from '@/app/hooks/useYearlyTrips'
 import { YearlyTripWithSystem } from '@/app/model/YearlyTrip'
 
 const secondsToMinutes = (seconds: number) => seconds / 60
@@ -24,24 +24,28 @@ const toMinutes = (trip: YearlyTripWithSystem) => {
   }
 }
 
-const getCityTrip = (city: string) => {
-  return yearlyTrips
+const city = 'seoul'
+const year = 2023
+
+const TripDuration = () => {
+  const { trips, loading } = useYearlyTrips()
+
+  const cityTrip = trips
     .map(toTripsWithSystemData)
     .filter((trip) => trip.city === city)
     .map(toMinutes)
-}
-const city = 'seoul'
-const cityTrip = getCityTrip(city)
 
-const year = 2023
-const allCities = yearlyTrips
-  .filter((trip) => trip.year === year)
-  .map(toTripsWithSystemData)
-  .map(toMinutes)
-  .slice()
-  .sort((a, b) => a.duration_median - b.duration_median)
+  const allCities = trips
+    .filter((trip) => trip.year === year)
+    .map(toTripsWithSystemData)
+    .map(toMinutes)
+    .slice()
+    .sort((a, b) => a.duration_median - b.duration_median)
 
-const TripDuration = () => {
+  if (loading) {
+    return <p className="text-center italic py-16">Loading…</p>
+  }
+
   return (
     <div className="max-w-[600px] m-auto p-8">
       <h3 className="text-2xl text-center">Median Trip Duration for {city} </h3>

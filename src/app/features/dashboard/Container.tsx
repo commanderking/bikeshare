@@ -1,5 +1,5 @@
 'use client'
-import yearlyTrips from '@/data/trips_per_year.json'
+import { useYearlyTrips } from '@/app/hooks/useYearlyTrips'
 import LatestYearChart from '@/app/features/dashboard/components/LatestYearChart'
 import USMapChart from '@/app/components/charts/USMap'
 import RankingTable from '@/app/features/dashboard/components/RankingTable'
@@ -7,19 +7,20 @@ import { getRankings } from '@/app/utils/yearlyTrips'
 import Biker from '@/app/components/Biker'
 import Image from 'next/image'
 
-const DashboardContainer = () => {
-  const currentYear = new Date().getFullYear()
+const CURRENT_YEAR = 2025
 
-  const recentGlobalTrips = getRankings(yearlyTrips, {
-    year: 2023,
-    count: 10,
-  })
-  const recentUSTrips = getRankings(yearlyTrips, {
-    year: 2024,
+const DashboardContainer = () => {
+  const { trips, loading } = useYearlyTrips()
+
+  const recentUSTrips = getRankings(trips, {
+    year: CURRENT_YEAR,
     country: 'USA',
   })
 
-  console.log({ recentUSTrips })
+  const topGlobalTrips = getRankings(trips, {
+    year: CURRENT_YEAR,
+    count: 10,
+  })
 
   return (
     <div className="prose text-center mt-16 max-w-[640px] m-auto">
@@ -28,27 +29,35 @@ const DashboardContainer = () => {
       <p className="pt-4 pb-8 text-lg">
         Visualizing bikeshare rides across the USA
       </p>
-      <USMapChart data={recentUSTrips} />
-      <div className="pt-8">
-        <h3 className="text-2xl">US Bikeshare Rankings - 2024</h3>
-        <p className="p-4 italic">*For systems that openly share trip data</p>
-      </div>
+      {loading ? (
+        <p className="py-16 italic">Loading bikeshare data…</p>
+      ) : (
+        <>
+          <USMapChart data={recentUSTrips} />
+          <div className="pt-8">
+            <h3 className="text-2xl">US Bikeshare Rankings - {CURRENT_YEAR}</h3>
+            <p className="p-4 italic">
+              *For systems that openly share trip data
+            </p>
+          </div>
 
-      <RankingTable trips={recentUSTrips} />
+          <RankingTable trips={recentUSTrips} />
 
-      <div className="pt-8">
-        <h3 className="text-2xl">Trips per City (2024)</h3>
-        <p>NYC leads the way in Bikeshares</p>
-        <LatestYearChart data={recentUSTrips} />
-      </div>
+          <div className="pt-8">
+            <h3 className="text-2xl">Trips per City ({CURRENT_YEAR})</h3>
+            <p>NYC leads the way in Bikeshares</p>
+            <LatestYearChart data={recentUSTrips} />
+          </div>
 
-      {/* <h2>How about global trends?</h2>
-
-      <div className="pt-8">
-        <h3 className="text-2xl">Trips per City (2024)</h3>
-        <p>NYC still leading...</p>
-        <LatestYearChart data={recentGlobalTrips} />
-      </div> */}
+          <div className="pt-8">
+            <h2>How about global trends?</h2>
+            <h3 className="text-2xl">
+              Top 10 Cities Worldwide - {CURRENT_YEAR}
+            </h3>
+            <RankingTable trips={topGlobalTrips} />
+          </div>
+        </>
+      )}
 
       <div className="pt-8">
         <h3 className="text-2xl">Want to explore more data?</h3>
