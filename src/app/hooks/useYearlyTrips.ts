@@ -8,8 +8,6 @@ type UseYearlyTrips = {
   error: Error | null
 }
 
-// Loads all city summaries from the CDN, replacing the old static
-// trips_per_year.json import. Fetches once on mount.
 export const useYearlyTrips = (): UseYearlyTrips => {
   const [state, setState] = useState<UseYearlyTrips>({
     trips: [],
