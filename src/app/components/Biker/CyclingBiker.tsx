@@ -2,14 +2,23 @@
 
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import Biker from '.'
+import Globe from './Globe'
 import { CITY_BIKE_CONFIG, CONFIGURED_CITY_IDS } from './cityBikeConfig'
 import { systems } from '@/app/constants/cities'
+
+// Diameter of the corner globe in px (smaller on mobile).
+const GLOBE_SIZE_DESKTOP = 125
+const GLOBE_SIZE_MOBILE = 100
+// Tailwind's `sm` breakpoint — below this we treat the layout as mobile.
+const MOBILE_MAX_WIDTH = 640
 
 // SVG viewBox is 200x112, so height is width * this.
 const BIKER_ASPECT = 112 / 200
 // Ground line's y position within the 112-tall viewBox, matching Biker's showGround.
 const GROUND_Y = 105
 const GROUND_COLOR = '#ccc'
+// Extra empty space above the biker so the corner globe has room to sit.
+const GLOBE_HEADROOM = 60
 
 // How long each biker sits on screen before riding off (ms).
 const DEFAULT_RIDE_MS = 3000
@@ -74,6 +83,18 @@ const CyclingBiker: React.FC<CyclingBikerProps> = ({
   // Hidden until the mount effect has positioned the biker, so it never flashes
   // at the un-centered SSR/first-paint position.
   const [ready, setReady] = useState(false)
+
+  // Globe diameter, shrunk on mobile. Starts at the desktop size so SSR and the
+  // first client render match; the effect adjusts after mount.
+  const [globeSize, setGlobeSize] = useState(GLOBE_SIZE_DESKTOP)
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${MOBILE_MAX_WIDTH}px)`)
+    const update = () =>
+      setGlobeSize(mq.matches ? GLOBE_SIZE_MOBILE : GLOBE_SIZE_DESKTOP)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
 
   // Horizontal anchor positions in px, recomputed from the container width.
   const geomRef = useRef({
@@ -184,16 +205,43 @@ const CyclingBiker: React.FC<CyclingBikerProps> = ({
 
   const config = CITY_BIKE_CONFIG[cityId]
 
-  const cityName = systems[cityId]?.metroArea
+  const system = systems[cityId]
+  const cityName = system?.metroArea
+
+  // On mobile, inset the globe from the edge so it doesn't hug the screen side.
+  const globeInset = globeSize === GLOBE_SIZE_MOBILE ? 5 : 0
 
   return (
-    <div className={className} style={{ width: '100%', ...style }}>
+    <div
+      className={className}
+      style={{ position: 'relative', width: '100%', ...style }}
+    >
+      {/* Globe in the top-right corner that spins to face each new city. */}
+      {system && (
+        <div
+          style={{
+            position: 'absolute',
+            top: globeInset,
+            right: globeInset,
+            zIndex: 1,
+            visibility: ready ? 'visible' : 'hidden',
+          }}
+        >
+          <Globe
+            longitude={system.longitude}
+            latitude={system.latitude}
+            city={cityName}
+            size={globeSize}
+            style={{ opacity: 0.7 }}
+          />
+        </div>
+      )}
       <div
         ref={containerRef}
         style={{
           position: 'relative',
           width: '100%',
-          height: width * BIKER_ASPECT,
+          height: width * BIKER_ASPECT + GLOBE_HEADROOM,
           overflow: 'hidden',
         }}
       >
@@ -204,7 +252,7 @@ const CyclingBiker: React.FC<CyclingBikerProps> = ({
             position: 'absolute',
             left: 0,
             right: 0,
-            top: (GROUND_Y / 112) * width * BIKER_ASPECT,
+            top: GLOBE_HEADROOM + (GROUND_Y / 112) * width * BIKER_ASPECT,
             height: Math.max(1, width / 200),
             background: GROUND_COLOR,
           }}
@@ -212,7 +260,7 @@ const CyclingBiker: React.FC<CyclingBikerProps> = ({
         <div
           style={{
             position: 'absolute',
-            top: 0,
+            top: GLOBE_HEADROOM,
             left: 0,
             transform: `translateX(${x}px)`,
             transition,
@@ -226,7 +274,7 @@ const CyclingBiker: React.FC<CyclingBikerProps> = ({
             basketType={config.basketType}
             skirtGuard={config.skirtGuard}
             downTube={config.downTube}
-            wave={false}
+            wave={true}
             speedBursts={false}
           />
         </div>
