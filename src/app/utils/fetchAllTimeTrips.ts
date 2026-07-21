@@ -114,7 +114,7 @@ const getCityAllTimeTrips = async (city: string): Promise<AllTimeCityTrips> => {
 
 // Fetches every city's visuals in parallel and returns their all-time totals.
 // A single failing city is logged and skipped rather than failing the page.
-export const fetchAllTimeTrips = async (): Promise<AllTimeCityTrips[]> => {
+const fetchAllTimeTripsUncached = async (): Promise<AllTimeCityTrips[]> => {
   const results = await Promise.all(
     Object.keys(systems).map(async (city) => {
       try {
@@ -127,4 +127,19 @@ export const fetchAllTimeTrips = async (): Promise<AllTimeCityTrips[]> => {
   )
 
   return results.filter((city): city is AllTimeCityTrips => city !== null)
+}
+
+// Memoize across mounts so React StrictMode's double-invoke and dev Fast
+// Refresh remounts reuse one request instead of re-fetching every city's
+// visuals.json. A failed run clears the cache so a later mount can retry.
+let cachedTrips: Promise<AllTimeCityTrips[]> | null = null
+
+export const fetchAllTimeTrips = (): Promise<AllTimeCityTrips[]> => {
+  if (!cachedTrips) {
+    cachedTrips = fetchAllTimeTripsUncached().catch((error) => {
+      cachedTrips = null
+      throw error
+    })
+  }
+  return cachedTrips
 }

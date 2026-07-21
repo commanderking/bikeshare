@@ -55,7 +55,8 @@ const SRC = {
   },
   ssb2024: {
     source: 'Statistics Norway (SSB), 2024',
-    sourceUrl: 'https://www.ssb.no/en/befolkning/folketall/statistikk/befolkning',
+    sourceUrl:
+      'https://www.ssb.no/en/befolkning/folketall/statistikk/befolkning',
     year: 2024,
   },
   statFi2024: {
@@ -87,6 +88,9 @@ const SRC = {
 } as const
 
 type SourceRef = { source: string; sourceUrl: string; year: number }
+
+// Every official statistics source used for the population figures.
+export const POPULATION_SOURCES: SourceRef[] = Object.values(SRC)
 
 // Small builder so each area row reads as data, not boilerplate.
 const area = (
@@ -173,12 +177,12 @@ export const AREAS_SERVED: Record<string, SystemAreas> = {
   },
   new_york_city: {
     system: 'Citi Bike',
-    note: 'The same Citi Bike system also serves Jersey City & Hoboken, NJ (see jersey_city).',
+    note: 'The same Citi Bike system also serves Jersey City & Hoboken, NJ (see jersey_city), but those are not included as those city trips are captured in the Jersey City trips.',
     coveredAreas: [
-      area('Brooklyn (Kings County)', 'NY', 'borough', 2736074, SRC.usCensus2020),
-      area('Queens (Queens County)', 'NY', 'borough', 2405464, SRC.usCensus2020, true),
-      area('Manhattan (New York County)', 'NY', 'borough', 1694251, SRC.usCensus2020),
-      area('The Bronx (Bronx County)', 'NY', 'borough', 1472654, SRC.usCensus2020, true),
+      area('Brooklyn', 'NY', 'borough', 2736074, SRC.usCensus2020),
+      area('Queens', 'NY', 'borough', 2405464, SRC.usCensus2020, true),
+      area('Manhattan', 'NY', 'borough', 1694251, SRC.usCensus2020),
+      area('The Bronx ', 'NY', 'borough', 1472654, SRC.usCensus2020, true),
     ],
   },
   philadelphia: {
@@ -209,8 +213,22 @@ export const AREAS_SERVED: Record<string, SystemAreas> = {
     system: 'Capital Bikeshare',
     coveredAreas: [
       area('Fairfax County', 'VA', 'county', 1150309, SRC.usCensus2020, true),
-      area('Montgomery County', 'MD', 'county', 1062061, SRC.usCensus2020, true),
-      area("Prince George's County", 'MD', 'county', 967201, SRC.usCensus2020, true),
+      area(
+        'Montgomery County',
+        'MD',
+        'county',
+        1062061,
+        SRC.usCensus2020,
+        true
+      ),
+      area(
+        "Prince George's County",
+        'MD',
+        'county',
+        967201,
+        SRC.usCensus2020,
+        true
+      ),
       area('Washington', 'DC', 'city', 689545, SRC.usCensus2020),
       area('Arlington County', 'VA', 'county', 238643, SRC.usCensus2020),
       area('Alexandria', 'VA', 'city', 159467, SRC.usCensus2020),
@@ -236,9 +254,7 @@ export const AREAS_SERVED: Record<string, SystemAreas> = {
   },
   toronto: {
     system: 'Bike Share Toronto',
-    coveredAreas: [
-      area('Toronto', 'ON', 'city', 2794356, SRC.statCan2021),
-    ],
+    coveredAreas: [area('Toronto', 'ON', 'city', 2794356, SRC.statCan2021)],
   },
   vancouver: {
     system: 'Mobi',
@@ -253,7 +269,14 @@ export const AREAS_SERVED: Record<string, SystemAreas> = {
     coveredAreas: [
       area('Zapopan', 'Jalisco', 'city', 1476491, SRC.inegi2020, true),
       area('Guadalajara', 'Jalisco', 'city', 1385629, SRC.inegi2020),
-      area('San Pedro Tlaquepaque', 'Jalisco', 'city', 687127, SRC.inegi2020, true),
+      area(
+        'San Pedro Tlaquepaque',
+        'Jalisco',
+        'city',
+        687127,
+        SRC.inegi2020,
+        true
+      ),
     ],
   },
   mexico_city: {
@@ -271,21 +294,17 @@ export const AREAS_SERVED: Record<string, SystemAreas> = {
   // ---- South Korea ----
   seoul: {
     system: 'Ddareungi (Seoul Bike)',
-    coveredAreas: [
-      area('Seoul', undefined, 'city', 9386034, SRC.kostat2023),
-    ],
+    coveredAreas: [area('Seoul', undefined, 'city', 9386034, SRC.kostat2023)],
   },
   daejeon: {
     system: 'Tashu',
-    coveredAreas: [
-      area('Daejeon', undefined, 'city', 1442216, SRC.kostat2023),
-    ],
+    coveredAreas: [area('Daejeon', undefined, 'city', 1442216, SRC.kostat2023)],
   },
 
   // ---- Taiwan ----
   taipei: {
     system: 'YouBike',
-    note: 'YouBike also runs as a separate regional network across New Taipei City and other Taiwanese cities.',
+    note: 'YouBike also runs as a separate regional network across New Taipei City and other Taiwanese cities, but those trips are not included in this data set.',
     coveredAreas: [
       area('Taipei City', undefined, 'city', 2494813, SRC.taipei2024),
     ],
@@ -300,9 +319,7 @@ export const AREAS_SERVED: Record<string, SystemAreas> = {
   },
   oslo: {
     system: 'Oslo Bysykkel',
-    coveredAreas: [
-      area('Oslo', undefined, 'city', 717710, SRC.ssb2024, true),
-    ],
+    coveredAreas: [area('Oslo', undefined, 'city', 717710, SRC.ssb2024, true)],
   },
   trondheim: {
     system: 'Trondheim Bysykkel',
@@ -327,16 +344,51 @@ export const AREAS_SERVED: Record<string, SystemAreas> = {
     note: 'Covers central/inner London boroughs only, and typically only part of each.',
     coveredAreas: [
       area('Newham', 'Greater London', 'borough', 351100, SRC.ons2021, true),
-      area('Wandsworth', 'Greater London', 'borough', 327500, SRC.ons2021, true),
+      area(
+        'Wandsworth',
+        'Greater London',
+        'borough',
+        327500,
+        SRC.ons2021,
+        true
+      ),
       area('Lambeth', 'Greater London', 'borough', 317600, SRC.ons2021, true),
-      area('Tower Hamlets', 'Greater London', 'borough', 310300, SRC.ons2021, true),
+      area(
+        'Tower Hamlets',
+        'Greater London',
+        'borough',
+        310300,
+        SRC.ons2021,
+        true
+      ),
       area('Southwark', 'Greater London', 'borough', 307700, SRC.ons2021, true),
       area('Hackney', 'Greater London', 'borough', 259200, SRC.ons2021, true),
       area('Islington', 'Greater London', 'borough', 216600, SRC.ons2021, true),
       area('Camden', 'Greater London', 'borough', 210100, SRC.ons2021, true),
-      area('Westminster', 'Greater London', 'borough', 204300, SRC.ons2021, true),
-      area('Hammersmith and Fulham', 'Greater London', 'borough', 183200, SRC.ons2021, true),
-      area('Kensington and Chelsea', 'Greater London', 'borough', 143400, SRC.ons2021, true),
+      area(
+        'Westminster',
+        'Greater London',
+        'borough',
+        204300,
+        SRC.ons2021,
+        true
+      ),
+      area(
+        'Hammersmith and Fulham',
+        'Greater London',
+        'borough',
+        183200,
+        SRC.ons2021,
+        true
+      ),
+      area(
+        'Kensington and Chelsea',
+        'Greater London',
+        'borough',
+        143400,
+        SRC.ons2021,
+        true
+      ),
       area('City of London', 'Greater London', 'city', 8600, SRC.ons2021, true),
     ],
   },
@@ -344,9 +396,7 @@ export const AREAS_SERVED: Record<string, SystemAreas> = {
   // ---- Argentina ----
   rosario: {
     system: 'Mi Bici Tu Bici',
-    coveredAreas: [
-      area('Rosario', 'Santa Fe', 'city', 1030069, SRC.indec2022),
-    ],
+    coveredAreas: [area('Rosario', 'Santa Fe', 'city', 1030069, SRC.indec2022)],
   },
 }
 

@@ -35,6 +35,8 @@ interface BikerProps {
   downTube?: DownTubeCurve
   width?: number | string
   height?: number | string
+  /** Override the SVG viewBox, e.g. to crop the empty side padding. */
+  viewBox?: string
   className?: string
   style?: React.CSSProperties
 }
@@ -52,6 +54,7 @@ const Biker: React.FC<BikerProps> = ({
   downTube = 'default',
   width = 200,
   height,
+  viewBox = '0 0 200 112',
   className,
   style,
 }) => {
@@ -66,7 +69,7 @@ const Biker: React.FC<BikerProps> = ({
 
   return (
     <svg
-      viewBox="0 0 200 112"
+      viewBox={viewBox}
       width={width}
       height={height}
       className={className}
