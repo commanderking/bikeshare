@@ -12,7 +12,7 @@ const ChartTextLayout = ({
       {React.isValidElement(title) ? (
         title
       ) : (
-        <h1 className="text-2xl pb-4">{title}</h1>
+        <h1 className="text-lg pb-4">{title}</h1>
       )}
       {children}
     </div>
