@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useEffect, useRef, useState } from 'react'
 import { AllTimeCityTrips } from '@/app/utils/fetchAllTimeTrips'
 import { formatValue } from './constants'
 import { useTrackWidth } from './useTrackWidth'
@@ -60,6 +60,20 @@ export const AllTimeTripsBar = ({
   const canExpand = sorted.length > collapsedCount
   const visible = expanded ? sorted : sorted.slice(0, collapsedCount)
 
+  // Play the entrance once per city. A row animates the first time it becomes
+  // visible; already-seen rows (e.g. after "Show all") render at rest. The
+  // stagger is batch-relative so newly revealed rows start their cascade at 0.
+  const animatedRef = useRef<Set<string>>(new Set())
+  let staggerCursor = 0
+  const rowAnimation = visible.map((d) =>
+    animatedRef.current.has(d.city)
+      ? { animate: false, staggerIndex: 0 }
+      : { animate: true, staggerIndex: staggerCursor++ },
+  )
+  useEffect(() => {
+    visible.forEach((d) => animatedRef.current.add(d.city))
+  }, [visible])
+
   // Number the footnoted cities among the visible rows, in display order.
   const footnoteNumber = new Map<string, number>()
   const orderedFootnotes: { note: string }[] = []
@@ -74,7 +88,7 @@ export const AllTimeTripsBar = ({
   return (
     <div ref={rootRef}>
       <div className="flex flex-col gap-2">
-        {visible.map((d) => (
+        {visible.map((d, i) => (
           <CityRow
             key={d.city}
             d={d}
@@ -90,6 +104,8 @@ export const AllTimeTripsBar = ({
             onToggleInfo={() =>
               setOpenInfo((prev) => (prev === d.city ? null : d.city))
             }
+            animate={rowAnimation[i].animate}
+            staggerIndex={rowAnimation[i].staggerIndex}
           />
         ))}
       </div>
