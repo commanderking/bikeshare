@@ -26,10 +26,7 @@ export const ROW_GAP_PX = 8
 // it just past the bar end (dark) so the bar can stay fully proportional.
 export const LABEL_INSIDE_MIN_PX = 48
 
-// Entrance animation timings (ms). Each city first fades in (row + biker), then
-// the biker "rides" right as the bar grows out behind it to its final width.
-export const FADE_MS = 100
-export const RIDE_MS = 800
-// Gap between one city's start and the next. Less than FADE_MS + RIDE_MS, so the
-// next city begins riding while the previous one is still settling.
-export const STAGGER_MS = 600
+// Reorder animation (ms). When the ranking changes (e.g. toggling the year
+// window), rows slide to their new positions while every bar resizes over this
+// same window — one synchronized phase, no per-row stagger.
+export const REORDER_MS = 1000

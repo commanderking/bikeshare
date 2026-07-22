@@ -1,12 +1,12 @@
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode } from 'react'
 import { AllTimeCityTrips } from '@/app/utils/fetchAllTimeTrips'
 import {
   BAR_MAX_PCT,
-  FADE_MS,
   LABEL_INSIDE_MIN_PX,
-  STAGGER_MS,
+  REORDER_MS,
   formatValue,
 } from './constants'
+import { prefersReducedMotion } from './motion'
 import CityLabel from './CityLabel'
 import CityBar from './CityBar'
 
@@ -24,19 +24,12 @@ type Props = {
   info?: ReactNode
   infoOpen: boolean
   onToggleInfo: () => void
-  // Whether this row should play its entrance the first time it appears.
-  animate: boolean
-  // This row's position within the current animating batch, for stagger timing.
-  staggerIndex: number
 }
 
-const prefersReducedMotion = () =>
-  typeof window !== 'undefined' &&
-  !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-
-// One city's row: name label on the left, proportional bar + trailing biker on
-// the right. On first appearance the row fades in, then the biker rides right as
-// the bar grows out behind it.
+// One city's row: name label on the left, then the city's biker, then the
+// proportional bar with its value label. Everything renders at rest; the only
+// motion is the ranking resize/reorder (see the bar's width transition and the
+// FLIP in the parent), which plays when the metric changes.
 const CityRow = ({
   d,
   value,
@@ -49,8 +42,6 @@ const CityRow = ({
   info,
   infoOpen,
   onToggleInfo,
-  animate,
-  staggerIndex,
 }: Props) => {
   const widthPct = (value / max) * BAR_MAX_PCT
   // Until measured, assume the label fits (keeps the initial paint clean).
@@ -58,30 +49,17 @@ const CityRow = ({
     trackWidth > 0 ? (widthPct / 100) * trackWidth : Number.POSITIVE_INFINITY
   const labelInside = barPx >= LABEL_INSIDE_MIN_PX
 
-  // Freeze the entrance decision and stagger slot at mount, so a later re-render
-  // (e.g. the width measurement landing) can't cancel an in-flight animation.
-  const [shouldAnimate] = useState(() => animate && !prefersReducedMotion())
-  const [staggerAt] = useState(staggerIndex)
-  const [revealed, setRevealed] = useState(!shouldAnimate)
-  useEffect(() => {
-    if (!shouldAnimate) return
-    const raf = requestAnimationFrame(() => setRevealed(true))
-    return () => cancelAnimationFrame(raf)
-  }, [shouldAnimate])
-
-  const fadeDelayMs = staggerAt * STAGGER_MS
-  const rideDelayMs = fadeDelayMs + FADE_MS
+  // A width change only happens on a ranking change, so transition it (unless
+  // reduced motion). On first paint there's no prior width, so nothing animates.
+  const widthTransition = prefersReducedMotion()
+    ? undefined
+    : `width ${REORDER_MS}ms ease`
 
   return (
     <div
-      className="flex items-center gap-2"
+      className="flex items-center gap-1"
+      data-city={d.city}
       title={`${d.metroArea}: ${formatValue(value)}${tooltipSuffix}`}
-      style={{
-        opacity: revealed ? 1 : 0,
-        transition: shouldAnimate
-          ? `opacity ${FADE_MS}ms ease ${fadeDelayMs}ms`
-          : undefined,
-      }}
     >
       <CityLabel
         name={d.metroArea}
@@ -96,9 +74,7 @@ const CityRow = ({
         widthPct={widthPct}
         label={format(value)}
         labelInside={labelInside}
-        revealed={revealed}
-        animate={shouldAnimate}
-        rideDelayMs={rideDelayMs}
+        widthTransition={widthTransition}
       />
     </div>
   )
