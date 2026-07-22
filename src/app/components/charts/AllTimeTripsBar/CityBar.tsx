@@ -5,7 +5,6 @@ import {
   BAR_HEIGHT,
   BIKER_VIEWBOX,
   BIKER_WIDTH,
-  RIDE_MS,
 } from './constants'
 
 type Props = {
@@ -15,22 +14,18 @@ type Props = {
   label: string
   // Whether the value label fits inside the bar (white) or sits past it (dark).
   labelInside: boolean
-  // Entrance animation: when false the bar starts collapsed and grows to
-  // widthPct once `revealed` flips, carrying the trailing biker rightward.
-  revealed: boolean
-  animate: boolean
-  rideDelayMs: number
+  // CSS transition for the bar's width, applied on ranking resizes.
+  widthTransition?: string
 }
 
-// The proportional bar and its value label, with the biker trailing at the right.
+// The proportional bar with its value label, then the city's biker resting just
+// past the bar (the value label sits just past the bar end for short bars).
 const CityBar = ({
   city,
   widthPct,
   label,
   labelInside,
-  revealed,
-  animate,
-  rideDelayMs,
+  widthTransition,
 }: Props) => {
   const config = CITY_BIKE_CONFIG[city]
 
@@ -39,12 +34,10 @@ const CityBar = ({
       <div
         className="flex items-center overflow-hidden rounded-r"
         style={{
-          width: revealed ? `${widthPct}%` : 0,
+          width: `${widthPct}%`,
           height: BAR_HEIGHT,
           background: BAR_COLOR,
-          transition: animate
-            ? `width ${RIDE_MS}ms ease-out ${rideDelayMs}ms`
-            : undefined,
+          transition: widthTransition,
         }}
       >
         {labelInside && (

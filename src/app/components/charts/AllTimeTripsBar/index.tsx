@@ -1,6 +1,7 @@
 import { ReactNode, useEffect, useRef, useState } from 'react'
 import { AllTimeCityTrips } from '@/app/utils/fetchAllTimeTrips'
-import { formatValue } from './constants'
+import { REORDER_MS, formatValue } from './constants'
+import { prefersReducedMotion, useIsomorphicLayoutEffect } from './motion'
 import { useTrackWidth } from './useTrackWidth'
 import CityRow from './CityRow'
 
@@ -54,25 +55,64 @@ export const AllTimeTripsBar = ({
 
   const [rootRef, trackWidth] = useTrackWidth()
 
+  // Reorder (FLIP): after each render, animate any row that changed vertical
+  // position from its previous spot to its new one. Row width transitions run
+  // in parallel (see CityRow), so a ranking change slides the rows and resizes
+  // the bars together in one synchronized phase.
+  const [reduceMotion] = useState(prefersReducedMotion)
+  const prevTops = useRef<Map<string, number>>(new Map())
+  const flipRaf = useRef<number | null>(null)
+  useIsomorphicLayoutEffect(() => {
+    const container = rootRef.current
+    if (!container) return
+    if (flipRaf.current) cancelAnimationFrame(flipRaf.current)
+
+    const rows = Array.from(
+      container.querySelectorAll<HTMLElement>('[data-city]'),
+    )
+    // Clear any in-flight transform so we measure true resting positions.
+    for (const row of rows) {
+      row.style.transition = 'none'
+      row.style.transform = ''
+    }
+    // Document-relative (not viewport-relative) tops, so scrolling between
+    // renders — which doesn't re-run this effect — can't leave a stale baseline
+    // that makes the next reorder animate the scroll distance instead of the swap.
+    const tops = new Map<string, number>()
+    for (const row of rows) {
+      tops.set(row.dataset.city!, row.getBoundingClientRect().top + window.scrollY)
+    }
+
+    let moved = false
+    if (!reduceMotion) {
+      // Invert: hold each moved row at its old position with a transform.
+      for (const row of rows) {
+        const prev = prevTops.current.get(row.dataset.city!)
+        const dy = prev == null ? 0 : prev - tops.get(row.dataset.city!)!
+        if (dy) {
+          row.style.transform = `translateY(${dy}px)`
+          moved = true
+        }
+      }
+    }
+    if (moved) {
+      // Play: next frame, transition the transform away to the real position.
+      flipRaf.current = requestAnimationFrame(() => {
+        for (const row of rows) {
+          if (!row.style.transform) continue
+          row.style.transition = `transform ${REORDER_MS}ms ease`
+          row.style.transform = ''
+        }
+      })
+    }
+    prevTops.current = tops
+  })
+
   const sorted = data.slice().sort((a, b) => value(b) - value(a))
   const max = Math.max(...sorted.map(value), 1)
 
   const canExpand = sorted.length > collapsedCount
   const visible = expanded ? sorted : sorted.slice(0, collapsedCount)
-
-  // Play the entrance once per city. A row animates the first time it becomes
-  // visible; already-seen rows (e.g. after "Show all") render at rest. The
-  // stagger is batch-relative so newly revealed rows start their cascade at 0.
-  const animatedRef = useRef<Set<string>>(new Set())
-  let staggerCursor = 0
-  const rowAnimation = visible.map((d) =>
-    animatedRef.current.has(d.city)
-      ? { animate: false, staggerIndex: 0 }
-      : { animate: true, staggerIndex: staggerCursor++ },
-  )
-  useEffect(() => {
-    visible.forEach((d) => animatedRef.current.add(d.city))
-  }, [visible])
 
   // Number the footnoted cities among the visible rows, in display order.
   const footnoteNumber = new Map<string, number>()
@@ -88,7 +128,7 @@ export const AllTimeTripsBar = ({
   return (
     <div ref={rootRef}>
       <div className="flex flex-col gap-2">
-        {visible.map((d, i) => (
+        {visible.map((d) => (
           <CityRow
             key={d.city}
             d={d}
@@ -104,8 +144,6 @@ export const AllTimeTripsBar = ({
             onToggleInfo={() =>
               setOpenInfo((prev) => (prev === d.city ? null : d.city))
             }
-            animate={rowAnimation[i].animate}
-            staggerIndex={rowAnimation[i].staggerIndex}
           />
         ))}
       </div>
