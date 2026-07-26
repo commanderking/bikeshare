@@ -1,6 +1,6 @@
 import { scaleSqrt } from 'd3'
 import { DEFAULT_SPEED } from '@/app/components/Biker/geometry'
-import { RaceCity } from './buildRaceTimeline'
+import { RaceCity } from '../timeline/buildRaceTimeline'
 
 // Biker cadence range (crank radians/frame). Anchored around the biker's
 // DEFAULT_SPEED (0.032): a slow-but-visible floor up to a brisk sprint.
@@ -16,8 +16,8 @@ export const referenceGrowth = (
   percentile = 0.9
 ): number => {
   const vals: number[] = []
-  for (const c of cities) {
-    for (const m of c.monthlyTrips) if (m > 0) vals.push(m)
+  for (const city of cities) {
+    for (const trips of city.monthlyTrips) if (trips > 0) vals.push(trips)
   }
   if (vals.length === 0) return 1
   vals.sort((a, b) => a - b)

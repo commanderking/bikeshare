@@ -20,7 +20,7 @@ export const expandYouBike1 = (
   monthly2021: MonthlyRow[]
 ): VolumeByMonth[] => {
   const rows: VolumeByMonth[] = []
-  const annualByYear = new Map(annual.map((r) => [r.year, r.trips]))
+  const annualByYear = new Map(annual.map((row) => [row.year, row.trips]))
 
   for (const { year, trips } of annual) {
     if (year === 2012) {
@@ -29,18 +29,20 @@ export const expandYouBike1 = (
       // Handled below from the monthly file.
     } else {
       const perMonth = Math.round(trips / 12)
-      for (let m = 1; m <= 12; m++) rows.push({ year, month: m, trips: perMonth })
+      for (let month = 1; month <= 12; month++) {
+        rows.push({ year, month, trips: perMonth })
+      }
     }
   }
 
   // 2021: keep reported months exactly; spread the rest across the missing ones.
-  const reported = monthly2021.reduce((sum, r) => sum + r.trips, 0)
+  const reported = monthly2021.reduce((sum, row) => sum + row.trips, 0)
   const annual2021 = annualByYear.get(2021) ?? reported
-  const present = new Set(monthly2021.map((r) => r.month))
-  const missing = [1, 2, 3].filter((m) => !present.has(m))
+  const present = new Set(monthly2021.map((row) => row.month))
+  const missing = [1, 2, 3].filter((month) => !present.has(month))
   const perMissing =
     missing.length > 0 ? Math.max(0, Math.round((annual2021 - reported) / missing.length)) : 0
-  for (const m of missing) rows.push({ year: 2021, month: m, trips: perMissing })
+  for (const month of missing) rows.push({ year: 2021, month, trips: perMissing })
   for (const { month, trips } of monthly2021) rows.push({ year: 2021, month, trips })
 
   return rows
@@ -49,8 +51,8 @@ export const expandYouBike1 = (
 // Loads the two YouBike 1.0 source files and expands them to monthly rows.
 export const loadYouBike1 = async (): Promise<VolumeByMonth[]> => {
   const [annual, monthly2021]: [AnnualRow[], MonthlyRow[]] = await Promise.all([
-    fetch(ANNUAL_URL).then((r) => r.json()),
-    fetch(MONTHLY_2021_URL).then((r) => r.json()),
+    fetch(ANNUAL_URL).then((response) => response.json()),
+    fetch(MONTHLY_2021_URL).then((response) => response.json()),
   ])
   return expandYouBike1(annual, monthly2021)
 }

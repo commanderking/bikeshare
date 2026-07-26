@@ -1,7 +1,7 @@
 'use client'
 
 import { RefObject } from 'react'
-import { SPEED_OPTIONS } from './constants'
+import { SPEED_OPTIONS } from '../constants'
 
 type Props = {
   playing: boolean
@@ -10,10 +10,10 @@ type Props = {
   speedMul: number
   onSpeedChange: (mul: number) => void
   maxT: number
-  onScrub: (t: number) => void
+  onScrub: (time: number) => void
   scrubberRef: RefObject<HTMLInputElement>
   // Year labels + the month index each year starts at, for the timeline ticks.
-  yearTicks: { year: number; t: number }[]
+  yearTicks: { year: number; monthIndex: number }[]
 }
 
 // Playback bar: play/pause (or replay at the end), a scrubber the parent drives
@@ -46,21 +46,21 @@ const Controls = ({
         max={maxT}
         step={0.02}
         defaultValue={0}
-        onChange={(e) => onScrub(Number(e.target.value))}
+        onChange={(event) => onScrub(Number(event.target.value))}
         aria-label="Timeline"
         className="w-full accent-blue-600"
       />
       {/* Year ticks + labels beneath the track. Label every other year to keep
           the axis uncluttered; a tick marks each year. */}
       {maxT > 0 &&
-        yearTicks.map(({ year, t }, k) => (
+        yearTicks.map(({ year, monthIndex }, index) => (
           <div
             key={year}
             className="pointer-events-none absolute top-full -translate-x-1/2"
-            style={{ left: `${(t / maxT) * 100}%` }}
+            style={{ left: `${(monthIndex / maxT) * 100}%` }}
           >
             <div className="mx-auto h-1.5 w-px bg-gray-400" />
-            {k % 2 === 0 && (
+            {index % 2 === 0 && (
               <div className="mt-0.5 whitespace-nowrap text-[9px] tabular-nums text-gray-400">
                 {year}
               </div>

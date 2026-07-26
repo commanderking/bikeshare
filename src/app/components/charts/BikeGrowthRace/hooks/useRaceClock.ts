@@ -9,7 +9,7 @@ type Options = {
   // takes effect immediately without restarting the loop).
   getMonthsPerSec: () => number
   // Called every animation frame (and on every seek) with the current time.
-  onFrame: (t: number) => void
+  onFrame: (time: number) => void
   // Called once when the clock reaches maxT.
   onEnd: () => void
   // Called when a hold (see `hold`) finishes, just before the clock resumes.
@@ -22,7 +22,7 @@ type RaceClock = {
   playing: boolean
   play: () => void
   pause: () => void
-  seek: (t: number) => void
+  seek: (time: number) => void
   // Freeze time (without changing `playing`) for `ms`, then resume. Used to pause
   // briefly at a reached milestone. The frozen frame keeps re-rendering.
   hold: (ms: number) => void
@@ -78,8 +78,8 @@ export const useRaceClock = ({
         onHoldEndRef.current()
       }
 
-      let t = tRef.current + dt * getMpsRef.current()
-      if (t >= maxT) {
+      let time = tRef.current + dt * getMpsRef.current()
+      if (time >= maxT) {
         tRef.current = maxT
         onFrameRef.current(maxT)
         stop()
@@ -87,8 +87,8 @@ export const useRaceClock = ({
         onEndRef.current()
         return
       }
-      tRef.current = t
-      onFrameRef.current(t)
+      tRef.current = time
+      onFrameRef.current(time)
       rafRef.current = requestAnimationFrame(loop)
     },
     [maxT, stop]
@@ -102,9 +102,9 @@ export const useRaceClock = ({
   const pause = useCallback(() => setPlaying(false), [])
 
   const seek = useCallback(
-    (t: number) => {
+    (time: number) => {
       holdUntilRef.current = null // scrubbing cancels any in-progress hold
-      tRef.current = Math.max(0, Math.min(t, maxT))
+      tRef.current = Math.max(0, Math.min(time, maxT))
       onFrameRef.current(tRef.current)
     },
     [maxT]

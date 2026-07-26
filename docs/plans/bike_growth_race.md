@@ -1,122 +1,212 @@
-# Plan for Bike Growth Timeline Race Chart
+# Bike Growth Timeline Race Chart
 
-Goal: Create an engaging Bike Race Chart for Bikeshare growth across global cities.
-
-Let's take the top biking cities globally and show a race.
+Goal: an engaging bar-chart **race** of cumulative bikeshare growth across global
+cities. **Status: implemented** at `src/pages/visualizations/bike_growth_race.tsx`
+→ `src/app/components/charts/BikeGrowthRace/`. This doc reflects the built system;
+where the original plan evolved during the build, it's noted inline.
 
 ## Requirements (original)
 
-1. Horizontal Bar Chart is the main format. Each row is a city.
-1. Increment is monthly (2 seconds / month to start).
-1. Growth each month must be visually represented as a continuous increase (not a sudden addition each month).
-1. Starts in the year the first city has data. There may be only one city on the chart to start.
-1. As cities launch (get their first bikeshare ride), they join the chart (at the next slot) below the already-established bikeshares.
-1. At the right end of each bar we place `Biker.tsx` for that city, continuing to pedal. Biker speed depends on that month's growth rate.
-1. The end of the chart is always the max of the city with the most trips; all bars are relative, so a bar can shrink and expand.
-1. Only the top 12 cities are shown at a time. Cities can drop off.
-1. As a city surpasses the count of a city above it, they swap places.
-1. Data lives at `https://cdn.jsdelivr.net/gh/commanderking/citybikeshare@main/analysis/<city>/visuals.json` (same dataset/calls as `useAllTimeTrips`).
+1. Horizontal bar chart, one row per city.
+1. Monthly increment, continuous growth (not a sudden jump each month).
+1. Starts in the year the first city has data; may begin with a single city.
+1. Cities join the chart when they get their first ride.
+1. `Biker.tsx` rides at the end of each bar, pedalling at that month's growth rate.
+1. Top 12 cities shown at a time; cities can drop off and swap places on overtake.
+1. Data comes from `…/analysis/<city>/visuals.json` (same source as `useAllTimeTrips`).
 
-## Resolved decisions
+> **Evolved during the build:** the original "bars are relative to the current
+> leader" rule made the leader look permanently finished. It was replaced by a
+> **milestone goal axis** (below) — each segment is a distinct race to a fixed
+> line. This is the single biggest departure from the original plan.
 
-- **Bar metric:** **Cumulative total trips** — a running sum of every trip since the city launched. Monotonic; the leader's total defines the chart max and all bars are drawn relative to it.
-- **Engine:** **Roll our own**, extending the existing `all_time_trips` bar pattern. Add a `requestAnimationFrame` clock and d3 interpolation for smooth within-month growth. No new dependencies (`d3` is already installed). Third-party race libraries own their own render and can't host the animated `Biker` per-city liveries.
-- **City set:** **All 26 configured `systems`** are eligible; the top-12 window emerges from the data each frame and changes as cities launch and overtake.
-- **Controls:** Play/pause, timeline scrubber (drag to any month, shows month/year), speed control (months-per-second multiplier), and replay at the end.
+## Key decisions (as built)
 
-## Building blocks we reuse
+- **Bar metric:** cumulative total trips since a city's launch (monotonic).
+- **X-axis:** fixed at the **current milestone goal**, not the leader. The race
+  steps through `[1M, 10M, 50M, 100M, 200M, 300M, 400M]` (see §6). Bars are `value
+  / goal`, so each segment is a real "race to the line."
+- **Engine:** rolled our own — a `requestAnimationFrame` clock plus imperative
+  DOM updates. No new dependencies (`d3` already present, used only for the biker
+  speed scale).
+- **City set:** all configured `systems` are eligible; the top-12 window emerges
+  from the data each frame.
+- **Playback:** play/pause, timeline scrubber (with year ticks), speed
+  multiplier (0.5×/1×/2×/4×), replay at the end.
+- **Final-month cap:** the race runs only to and including `FINAL_MONTH`
+  (currently **Dec 2025**); see §8.
 
-- `fetchAllTimeTrips()` / `useAllTimeTrips()` — already fetches every city's `visuals.json` in parallel (memoized), returning `AllTimeCityTrips[]` with `months: [{ year, month, trips }]` sorted chronologically. No data-layer changes needed.
-- `Biker` (`src/app/components/Biker`) — takes a `speed` prop (radians/frame; `DEFAULT_SPEED` in `geometry.ts`) and a cropped `viewBox`.
-- `CITY_BIKE_CONFIG` (`src/app/components/Biker/cityBikeConfig.ts`) — per-city livery (colors, basket, skirt guard, down tube). All 26 systems are configured.
-- `systems` (`src/app/constants/cities.ts`) — `metroArea` labels, etc.
-- FLIP / width-transition ideas from `charts/AllTimeTripsBar` — but the race uses a simpler absolute-position + `translateY` transition for swaps (see below), because we drive width imperatively every frame.
-- `CityLabel` + the outside-click-close logic in `AllTimeTripsBar/index.tsx` — an existing click-to-open info icon + popover next to a city name. The "data ended" marker (below) reuses this pattern directly.
+## Building blocks reused
+
+- `useAllTimeTrips()` / `fetchAllTimeTrips()` — fetches every city's
+  `visuals.json` in parallel (memoized) → `AllTimeCityTrips[]` with
+  `months: [{ year, month, trips }]`. **No data-layer changes**; the race
+  augments this in memory (see §7).
+- `Biker` (`components/Biker`) — `speed` prop in rad/frame (`DEFAULT_SPEED` in
+  `geometry.ts`), cropped `viewBox`; `CITY_BIKE_CONFIG` per-city liveries;
+  `systems` for `metroArea` labels.
+- The click-to-open info icon + outside-click-close pattern from
+  `AllTimeTripsBar` — reused for the "data ends" marker.
 
 ## Architecture
 
-### 1. Timeline model (pure, testable) — `buildRaceTimeline.ts`
+### 1. Timeline model — `buildRaceTimeline.ts` (pure)
 
-Transform `AllTimeCityTrips[]` into a frame-ready model:
+`buildRaceTimeline(data, finalMonth?)` → `{ months, cities: RaceCity[] }`.
 
-- **Month axis:** find the earliest and latest `(year, month)` across all cities; build an ordered array `months: { year, month }[]`. `monthIndex` (0-based) is the clock's unit.
-- **Per-city cumulative series** indexed by `monthIndex`:
-  - `firstIndex` — the month index of the city's first row with data (when it "joins").
-  - `lastIndex` — the month index of the city's last row with data (after which it is "exhausted"; see endpoints below).
-  - `cumulative[i]` — running sum of trips up to and including month `i`. Undefined/absent before `firstIndex` (the city is not rendered until it joins). From `lastIndex` onward it holds flat at the city's final total.
-  - `monthlyTrips[i]` — that month's trips (the growth rate; drives biker speed). Missing interior months carry the previous cumulative forward with `monthlyTrips = 0` so interpolation stays well-defined and gaps read as "coasting".
-- Output: `{ months, cities: RaceCity[] }` where each `RaceCity` has `{ city, metroArea, firstIndex, lastIndex, cumulative, monthlyTrips }`.
+- **Month axis:** earliest→latest `(year, month)` across all cities, capped at
+  `finalMonth` when given. `monthIndex` (0-based) is the clock's unit.
+- Each `RaceCity` has `firstIndex`, `lastIndex` (its **true** last data month —
+  may sit *beyond* a capped axis, so a city still reporting past the cap is never
+  marked exhausted), `cumulative[]` (running total; `undefined` before it joins,
+  flat after `lastIndex`; index `firstIndex-1` seeded to 0 so it ramps in rather
+  than pops in), and `monthlyTrips[]` (0 for gaps/pre-join/post-exhaust).
+- Cities that only launch after the cap are dropped.
+- Interpolation helpers: `valueAt(c, t)` lerps cumulative within a month;
+  `growthAt(c, t)` is the current month's trips (constant within a month → drives
+  biker cadence; changes only at month boundaries).
 
-**Ragged endpoints (resolved): keep all data, mark exhaustion.** Every city's feed ends at a different real month (e.g. Taipei ~Feb 2026, most US cities ~May, Mexico City ~June), and some end because the system genuinely shut down. We keep every city's full series and run the clock over the entire earliest→latest span rather than truncating to a shared "safe" month — truncation would discard recent data and hide real shutdowns. A city is **exhausted** at clock month `M` when `M > lastIndex`: its cumulative is already flat by construction, so the bar simply stops growing and (via `monthlyTrips = 0`) its biker stops pedaling. Exhaustion is surfaced honestly in the UI with a marker (see `RaceRow`), so a frozen bar reads as "data ended," not "declined." Interior gaps are *not* exhaustion — the city resumes, so it carries forward with no marker.
+### 2. Milestones — `milestones.ts` (pure)
 
-_Deferred:_ we are **not** trimming a partial trailing month for now. A feed whose last row is a stub (e.g. an export landing on the 1st of a month with a handful of trips) will show one flat month before the exhaustion marker appears. Acceptable for v1; a value-based trim can be layered into this model later without changing anything downstream.
-
-### 2. Interpolation (continuous growth)
-
-At clock time `t` (a float in monthIndex units): `M = floor(t)`, `frac = t - M`.
-- `value(city, t) = lerp(cumulative[M], cumulative[M+1], frac)` → smooth, continuous increase.
-- `growthRate(city, t) = cumulative[M+1] - cumulative[M]` = `monthlyTrips[M+1]` → constant within a month (step function), so biker speed only needs updating at month boundaries.
+- `leaderValueAt(cities, t)` — the max cumulative across all cities (the leader,
+  whoever it is).
+- `computeMilestoneTimes(cities, MILESTONES, maxT)` — one forward pass returning
+  the (fractional) time the leader first reaches each milestone. Drives the goal
+  axis, the playback holds, and the finish. `Infinity` for never-reached goals.
+- `goalIndexAt(t, times)` — the active goal index at time `t` (count of
+  milestones reached, clamped).
+- `firstCrossing(prev, t, times)` — the milestone crossed in `(prev, t]`, or -1.
+  The half-open interval means held/seeked frames never re-trigger.
 
 ### 3. Clock — `useRaceClock.ts`
 
-- `requestAnimationFrame` loop advancing `t += (dtSeconds * monthsPerSecond)`.
-- `monthsPerSecond` default `0.5` (2 s/month); speed control scales it (0.5×/1×/2×/4×).
-- State/API: `t` (via ref for per-frame reads), `playing`, `play()`, `pause()`, `seek(t)`, `setSpeed()`, and an `onEnd` when `t` reaches `months.length - 1` (stop + allow replay).
-- Respects `prefers-reduced-motion`: no auto-run; scrubber still works, bikers render paused.
+rAF loop advancing `t += dt * monthsPerSecond`. API: `tRef` (per-frame reads
+without re-render), `playing`, `play`/`pause`/`seek`, `onEnd` (at `maxT`), and
+**`hold(ms)`** — freezes time without changing `playing`, repainting the frozen
+frame, then calling `onHoldEnd`. Default pace `DEFAULT_MONTHS_PER_SEC = 2`
+(the whole race ≈ 1.5 min at 1×); speed buttons scale it.
 
 ### 4. Rendering strategy (performance)
 
-26 cities at 60 fps — avoid a React re-render every frame:
+Everything continuous is **imperative** (via refs), so React re-renders are rare:
 
-- **Every frame (imperative, via refs):** set each visible bar's `width` and value-label text; update the scrubber/progress position. No CSS width transition (rAF already interpolates smoothly).
-- **On month change (React state `monthIndex`):** update each Biker's `speed` prop (growth rate is constant within a month) and the month/year readout, and toggle any city that just crossed `lastIndex` into the exhausted state (marker on, biker paused).
-- **On rank-order change (React state):** compute the sort order each frame in the rAF; only `setState` when the actual top-12 order changes. Rows are keyed by city id and absolutely positioned at `translateY(rank * ROW_HEIGHT)` with a `transform` transition (~400 ms ease) — so a swap slides smoothly while widths keep updating imperatively. Cities entering the top 12 fade/slide in; cities dropping off fade out.
+- **Every frame:** bar widths, value labels, the month/year readout, the goal
+  label, the top-axis ticks, and the scrubber position — all set on refs. No CSS
+  width transition (rAF already interpolates).
+- **On month change (state):** biker `speed` props and the exhausted flags.
+- **On rank-order change (state):** rows are keyed by city and absolutely
+  positioned at `translateY(rank * ROW_HEIGHT)` with a `transform` transition, so
+  a swap slides while widths keep updating imperatively.
 
-Net: React re-renders only on swaps and month boundaries (both rare vs. 60 fps); everything continuous is imperative.
+### 5. Biker speed — `speed.ts`
 
-### 5. Biker speed mapping — `speed.ts`
+`makeSpeedScale(referenceGrowth)` maps a month's growth rate → biker cadence with
+`d3.scaleSqrt` (small systems still visibly pedal), clamped to
+`[MIN_SPEED, MAX_SPEED]` around the biker's `DEFAULT_SPEED`. `referenceGrowth` is
+a fixed high percentile of monthly trips (stable across the race). Exhausted /
+paused / scrubbing → `paused` bikers.
 
-Map a city's current `growthRate` (trips/month) to a pleasant pedaling cadence. Use a `d3.scaleSqrt` (so small systems still visibly pedal) from `[0, referenceGrowth]` → `[MIN_SPEED, MAX_SPEED]` in rad/frame, anchored around `DEFAULT_SPEED`. `referenceGrowth` = a fixed high-percentile of monthly trips across the dataset (stable, not per-frame, so cadence is comparable across the race). Paused/scrubbing → `paused` bikers.
+### 6. Milestone goal axis + rescale choreography
 
-### 6. Chart max / relative bars
+Bars are `value / currentGoal` (capped at `BAR_MAX_PCT`). When the leader reaches
+the current goal, the clock **freezes and runs a three-beat transition** (each
+1 s: `REACHED_MS`, `EASE_MS`, `HOLD_MS`), driven imperatively from a `transition`
+ref while `t` is clamped to the crossing:
 
-Each frame, `max = value(rank-1 city, t)`. Bar width % = `value / max`. Leader stays near full; others are relative shares, so a bar visibly shrinks as the leader pulls ahead (matches the "bars can shrink and expand" requirement). Cap the longest bar short of full width (reuse `BAR_MAX_PCT` idea) so the trailing biker always has room.
+1. **Reached** — hold at the line, leader's bar full, label shows the goal reached.
+2. **Ease** — the axis eases open from the reached goal to the next
+   (`smoothstep`); every bar shrinks smoothly into the new scale. The top-axis
+   intermediate ticks fade out and a single "traveler" max marker peels off the
+   old right edge and slides to its home on the new scale.
+3. **Hold** — new-scale ticks fade in, traveler crossfades out; a beat to
+   re-orient before resuming.
 
-### 7. Exhausted-city marker
+The **final goal (400M)** is a finish line: it's crossed *without* a hold
+(`k < MILESTONES.length - 1` in the crossing check) and the winning bar is allowed
+to overshoot past `BAR_MAX_PCT` up to `BAR_HARD_MAX_PCT` (88%).
 
-When a city passes its `lastIndex`, `RaceRow` shows an info marker next to the city name whose popover reads "Data ends MMM YYYY" (from the city's last month), and the city's biker renders `paused`. This reuses the existing `CityLabel` icon + popover pattern and the outside-click-close logic from `AllTimeTripsBar/index.tsx`. Design notes: don't encode meaning by color alone — pair any red tint with a distinct shape (info/finish-flag) and a descriptive `aria-label`; optionally also show an always-visible "ended MMM YYYY" gray sub-label (the row already supports `subLabel`) so it reads without a click on a moving chart.
+### 7. Historical backfills — `backfill.ts` (+ per-city loaders)
 
-## File-by-file plan
+Some cities have pre-`visuals.json` history available only as **annual** totals.
+These are folded into the race in memory (race-only; other charts are untouched)
+via a small config-driven pipeline:
 
 ```
-src/pages/visualizations/bike_growth_race.tsx      # route + page shell (mirrors all_time_trips.tsx)
+BACKFILLS = [
+  { city: 'taipei',   mode: 'sum',  load: loadYouBike1 },      // youbike1.ts
+  { city: 'montreal', mode: 'fill', load: loadMontrealBixi },  // montrealBixi.ts
+]
+```
+
+- **`mode: 'sum'`** — a distinct co-running system; overlapping months add
+  (Taipei YouBike 1.0 ran alongside 2.0).
+- **`mode: 'fill'`** — the same system extended backward; real months always win,
+  the backfill only fills months with no real data (Montreal BIXI pre-2014).
+- `useBackfills()` loads all in parallel (a failure is logged and skipped, never
+  blocking the race); `applyBackfills(trips, byCity)` merges each into its city.
+- Only **raw official figures** are stored (in `public/data/`); every monthly
+  value is derived at load time — nothing pre-computed is saved:
+  - `taipei_youbike_1.0.json` (annual) + `taipei_youbike_1.0_2021_monthly.json`
+    (reported Apr–Dec 2021). `expandYouBike1`: 2012 = December only; 2013–2020 =
+    annual/12; 2021 = reported months + Jan–Mar as the averaged remainder.
+    Result: Taipei ≈ **414M** (197M 1.0 + 216M 2.0) → **wins the race**.
+  - `montreal_bixi_backfill.json` (annual 2009–2013, with sources/notes as
+    provenance). `expandMontrealBixi`: annual spread across the **operating
+    season** only (Apr–Nov; May–Nov in 2009), matching BIXI's seasonal data.
+    Result: Montreal **joins in May 2009 and leads the early race** (1M, 10M)
+    before Taipei takes over in 2014.
+
+A footnote under the chart discloses both estimates.
+
+### 8. Final-month cap — `FINAL_MONTH`
+
+`buildRaceTimeline(augmentedTrips, FINAL_MONTH)` caps the axis at (and including)
+`FINAL_MONTH` (currently Dec 2025; set `null` for the latest available month).
+Because each city keeps its true `lastIndex`, cities still reporting past the cap
+stay "live" (no exhausted marker) — only cities that genuinely stopped earlier
+(e.g. Seoul, Jun 2025) get one. Handy side effect: the race **finishes on the
+winner** — Taipei crosses 400M right around Dec 2025 instead of trailing on with
+frozen bars.
+
+### 9. Exhausted-city marker — `RaceRow.tsx`
+
+When `monthTick ≥ lastIndex`, the row shows a red info marker (filled dot + "i",
+not color alone) with an `aria-label`; clicking opens a "Data ends MMM YYYY"
+popover, and the biker parks. Reuses the `AllTimeTripsBar` popover pattern +
+outside-click-close.
+
+## File map
+
+```
+src/pages/visualizations/bike_growth_race.tsx   # page shell
 src/app/components/charts/BikeGrowthRace/
-  index.tsx            # orchestrator: hook -> timeline -> clock -> rows + controls
-  buildRaceTimeline.ts # pure: AllTimeCityTrips[] -> { months, cities } (cumulative + monthlyTrips)
-  useRaceClock.ts      # rAF clock: t, play/pause/seek/speed, onEnd
-  RaceRow.tsx          # one city: label (+ exhausted marker) + bar + Biker, positioned by rank; width set via ref
-  Controls.tsx         # play/pause, scrubber (month/year), speed buttons, replay
-  speed.ts             # growthRate -> biker speed scale (d3.scaleSqrt)
-  constants.ts         # timing, ROW_HEIGHT, TOP_N=12, MONTHS_PER_SEC, speed range, colors
+  index.tsx            # orchestrator: data → timeline → clock → imperative paint + rows + axis
+  buildRaceTimeline.ts # pure timeline model (+ optional finalMonth cap), valueAt/growthAt
+  milestones.ts        # leaderValueAt, computeMilestoneTimes, goalIndexAt, firstCrossing
+  useRaceClock.ts      # rAF clock: play/pause/seek/hold, onEnd/onHoldEnd
+  speed.ts             # growthRate → biker cadence (d3.scaleSqrt)
+  RaceRow.tsx          # one city: name (+ exhausted marker) + bar + Biker + value
+  barColor.ts          # bar fill derived from the city's Biker livery
+  Controls.tsx         # play/pause, scrubber + year ticks, speed buttons, replay
+  backfill.ts          # generalized backfill config + merge (sum/fill) + useBackfills
+  youbike1.ts          # Taipei YouBike 1.0 loader/expander
+  montrealBixi.ts      # Montreal BIXI loader/expander (season-aware)
+  constants.ts         # sizes, timing, MILESTONES, FINAL_MONTH, formatters
+public/data/
+  taipei_youbike_1.0.json, taipei_youbike_1.0_2021_monthly.json
+  montreal_bixi_backfill.json
 ```
 
-Reused unchanged: `fetchAllTimeTrips`, `useAllTimeTrips`, `Biker`, `CITY_BIKE_CONFIG`, `systems`.
+## Open items / follow-ups
 
-## Phased implementation
-
-1. **Timeline model + tests.** `buildRaceTimeline.ts` with cumulative + monthly series, join indices, month axis, gap carry-forward. Sanity-check against a couple of real `visuals.json` payloads.
-2. **Static frame.** Render the top-12 at a fixed `monthIndex` (no motion): label + relative bar + resting Biker. Validates layout, sizing, and livery wiring.
-3. **Clock + continuous growth.** Add `useRaceClock`, drive bar widths imperatively each frame, add the month/year readout. Verify smooth within-month growth.
-4. **Ranking swaps + join/drop.** Absolute `translateY` positioning by rank with transition; cities enter on launch, drop when they fall out of the top 12.
-5. **Exhausted marker.** When a city passes `lastIndex`, show the "Data ends MMM YYYY" info marker and pause its biker (reuses the `CityLabel` icon/popover pattern).
-6. **Biker speed.** Wire `growthRate` → `speed` at month boundaries; tune the scale so cadence reads well.
-7. **Controls.** Play/pause, scrubber (seek + live position), speed multiplier, replay; wire reduced-motion.
-8. **Polish.** Page copy/title, mobile sizing, `prefers-reduced-motion`, and a `/run` pass to confirm it works in the real app.
-
-## Open questions / risks
-
-- **Data volume & the earliest year.** The earliest city (likely an early-2010s US system, or Taipei-adjacent) sets `t=0`; with 2 s/month a 15-year span is ~6 min at 1×. The speed control and scrubber mitigate this, but we may want a higher default (e.g. 1–1.5 months/sec) — easy to tune in `constants.ts`.
-- **Partial trailing month (deferred).** We keep all data for v1, so a feed whose last row is a partial/stub month (e.g. London's `2026-06 = 3 trips`) shows one flat month before its exhaustion marker. Accepted for now; a value-based trim can be added to `buildRaceTimeline.ts` later.
-- **Very small early systems** may pedal too slowly; the sqrt scale + `MIN_SPEED` floor addresses this, but needs a visual tuning pass.
-- **`metroArea` label width** on mobile for a 12-row stack — reuse the compact label column from `AllTimeTripsBar`.
+- **Adding a backfill** is now a one-liner: a loader + a `{ city, mode, load }`
+  entry. New estimates should keep raw figures in `public/data/` and expand at
+  load time.
+- **Milestone ladder** is tuned for the current data (Taipei ≈ 414M). If totals
+  change materially, re-check pacing and the 400M finish in `constants.ts`.
+- **`FINAL_MONTH`** is a config constant; could be exposed as an in-chart control.
+- **Partial trailing month** is still not trimmed (kept simple); a value-based
+  trim could be added to the timeline model later.
+- **Initial load** fetches all cities' `visuals.json` + the backfill files (~8 s);
+  a nicer progress state could replace the plain "Loading…".
 ```

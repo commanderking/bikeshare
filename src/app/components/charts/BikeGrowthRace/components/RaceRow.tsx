@@ -13,7 +13,7 @@ import {
   NAME_COL_PX,
   REORDER_MS,
   ROW_HEIGHT,
-} from './constants'
+} from '../constants'
 
 export type BikerConfig = {
   colors?: Partial<BikerColors>

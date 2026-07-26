@@ -20,8 +20,8 @@ export const expandMontrealBixi = (annual: AnnualRow[]): VolumeByMonth[] => {
     const start = year === LAUNCH_YEAR ? LAUNCH_SEASON_START : DEFAULT_SEASON_START
     const monthsInSeason = SEASON_END - start + 1
     const perMonth = Math.round(trips / monthsInSeason)
-    for (let m = start; m <= SEASON_END; m++) {
-      rows.push({ year, month: m, trips: perMonth })
+    for (let month = start; month <= SEASON_END; month++) {
+      rows.push({ year, month, trips: perMonth })
     }
   }
   return rows
@@ -29,6 +29,6 @@ export const expandMontrealBixi = (annual: AnnualRow[]): VolumeByMonth[] => {
 
 // Loads Montreal's BIXI backfill (2009–2013) and expands it to monthly rows.
 export const loadMontrealBixi = async (): Promise<VolumeByMonth[]> => {
-  const annual: AnnualRow[] = await fetch(URL).then((r) => r.json())
+  const annual: AnnualRow[] = await fetch(URL).then((response) => response.json())
   return expandMontrealBixi(annual)
 }

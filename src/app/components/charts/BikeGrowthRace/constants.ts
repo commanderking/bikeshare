@@ -47,6 +47,8 @@ export const MILESTONES = [
 // room for its value label + biker. Above BAR_MAX_PCT; only the final segment
 // ever exceeds BAR_MAX_PCT.
 export const BAR_HARD_MAX_PCT = 88
+// Number of intervals on the top x-axis (→ TICK_INTERVALS + 1 ticks/labels).
+export const TICK_INTERVALS = 10
 // At a reached milestone the clock freezes through three beats: a moment at the
 // line with the bar full (REACHED_MS), the axis easing open to the next goal
 // (EASE_MS), then a hold at the new scale so the viewer can re-orient (HOLD_MS).
@@ -63,19 +65,19 @@ const compact = new Intl.NumberFormat('en', {
   minimumFractionDigits: 1,
   maximumFractionDigits: 1,
 })
-export const formatValue = (n: number): string => compact.format(n)
+export const formatValue = (value: number): string => compact.format(value)
 
 // Axis-tick labels: compact, no forced decimals ("0", "10M", "1.5M").
 const compactAxis = new Intl.NumberFormat('en', {
   notation: 'compact',
   maximumFractionDigits: 1,
 })
-export const formatAxis = (n: number): string =>
-  n < 1 ? '0' : compactAxis.format(n)
+export const formatAxis = (value: number): string =>
+  value < 1 ? '0' : compactAxis.format(value)
 
 const MONTH_NAMES = [
   'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
 ]
-export const formatMonth = (m: { year: number; month: number }): string =>
-  `${MONTH_NAMES[m.month - 1]} ${m.year}`
+export const formatMonth = (month: { year: number; month: number }): string =>
+  `${MONTH_NAMES[month.month - 1]} ${month.year}`
