@@ -1,0 +1,12 @@
+[
+  { "year": 2012, "stations": 48, "bikes": 1684, "trips": 999000 },
+  { "year": 2013, "stations": 136, "bikes": 4545, "trips": 10985000 },
+  { "year": 2014, "stations": 196, "bikes": 6406, "trips": 22580000 },
+  { "year": 2015, "stations": 212, "bikes": 6934, "trips": 20083000 },
+  { "year": 2016, "stations": 288, "bikes": 9442, "trips": 18431000 },
+  { "year": 2017, "stations": 400, "bikes": 13072, "trips": 21954000 },
+  { "year": 2018, "stations": 400, "bikes": 13072, "trips": 26253000 },
+  { "year": 2019, "stations": 400, "bikes": 13072, "trips": 28465000 },
+  { "year": 2020, "stations": 400, "bikes": 13072, "trips": 27894000 },
+  { "year": 2021, "stations": 400, "bikes": 13072, "trips": 19653000 }
+]

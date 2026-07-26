@@ -1,0 +1,67 @@
+[
+  {
+    "year": 2009,
+    "trips": 1096172,
+    "sources": [
+      "BIXI/Société de vélo en libre-service 2011 press release, via Le Lézard (https://www.lelezard.com/communique-1024462.html)",
+      "Radio-Canada, autumn 2009 (https://ici.radio-canada.ca/nouvelle/451252/bixi-bilan-suggestions)"
+    ],
+    "trips_notes": [
+      "The 2011 BIXI press release retroactively lists 2009 ridership at 1,096,172 trips (the figure used here).",
+      "Before the season had fully ended, Radio-Canada reported Montrealers had already pedaled the bikes over 900,000 times since the May launch — a partial-season count, not the final total."
+    ]
+  },
+  {
+    "year": 2010,
+    "trips": 3344747,
+    "sources": [
+      "BIXI/Société de vélo en libre-service 2011 press release, via Le Lézard (https://www.lelezard.com/communique-1024462.html)",
+      "French Wikipedia, BIXI (Montréal) (https://fr.wikipedia.org/wiki/BIXI_(Montr%C3%A9al))",
+      "McGill/ScienceDirect land-use and bicycle flows study (https://tram.mcgill.ca/Research/Publications/Bixi_transport_geography.pdf)"
+    ],
+    "trips_notes": [
+      "The 2011 press release puts 2010 ridership at 3,344,747 trips (the figure used here).",
+      "French Wikipedia notes BIXI ended its second season on November 30, 2010 with 3.3 million trips and nearly 30,000 members, almost triple the prior year's 11,000.",
+      "A related academic study on BIXI usage patterns similarly notes the system aggregated more than 3.4 million trips around this period."
+    ]
+  },
+  {
+    "year": 2011,
+    "trips": 4174917,
+    "sources": [
+      "BIXI/Société de vélo en libre-service press release, Nov 18, 2011, via Le Lézard (https://www.lelezard.com/communique-1024462.html)"
+    ],
+    "trips_notes": [
+      "Announcing season-end results, board chair Roger Plamondon reported 4,174,917 trips for the 2011 season, a more than 25% increase over 2010."
+    ]
+  },
+  {
+    "year": 2012,
+    "trips": 4400000,
+    "sources": [
+      "Journal Métro, 2015 retrospective (https://journalmetro.com/actualites/montreal/886724/35-millions-de-deplacements-en-bixi-en-2015/)",
+      "BIXI mid-season press release, Aug 16, 2012, via CNW Telbec/Newswire (https://www.newswire.ca/fr/news-releases/un-bilan-de-mi-saison-positif-pour-bixi-510590181.html)",
+      "CIRRELT/Polytechnique Montréal research paper, Morency et al. 2017 (https://www.cirrelt.ca/documentstravail/cirrelt-2017-33.pdf)"
+    ],
+    "trips_notes": [
+      "Journal Métro (2015) states 2011 and 2012 had 4.1 and 4.4 million trips respectively — a rounded figure, not an exact press-release total like 2009-2011.",
+      "Mid-way through 2012, BIXI had already reported trips up 10%, surpassing 2.7 million and representing 54% of its 2012 target.",
+      "The CIRRELT paper, using BIXI's raw transaction data, independently confirms the system reached a peak of 4.4 million transactions and 40,000 members in 2012."
+    ]
+  },
+  {
+    "year": 2013,
+    "trips": 4300000,
+    "sources": [
+      "CIRRELT/Polytechnique Montréal research paper, Morency et al. 2017 (https://www.cirrelt.ca/documentstravail/cirrelt-2017-33.pdf)",
+      "Le Devoir, Nov 2014, bilan de la saison 2014 (https://www.ledevoir.com/politique/montreal/424739/bilan-2014)",
+      "toolsofchange.com case study (https://toolsofchange.com/en/case-studies/detail/660/)"
+    ],
+    "trips_notes": [
+      "IMPORTANT: this figure is an ESTIMATE, not a confirmed exact total — no press release or dataset with a precise 2013 year-end trip count was found.",
+      "The CIRRELT paper states ridership peaked in 2012 and was stable since; its regression tables show 2013 had 81,722 station-days of activity versus 83,193 in 2012, implying a near-identical scale of operation.",
+      "Le Devoir reports 2014 had 33,216 active members, down 6.5% from 35,548 in 2013, and 3.2 million trips in 2014 (4% below the five-year average) — implying 2013 was meaningfully above 3.2 million.",
+      "toolsofchange.com states more than 13 million trips had been made since the 2009 launch by 2013 — but this is lower than simply summing the confirmed 2009-2012 totals (~13.0 million), so it's a loosely rounded milestone, not a precise year-end tally, and was not used to derive the estimate above."
+    ]
+  }
+]

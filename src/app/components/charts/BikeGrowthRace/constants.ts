@@ -24,14 +24,24 @@ export const DEFAULT_MONTHS_PER_SEC = 2
 // Speed multipliers offered in the controls (relative to the 1x pace above).
 export const SPEED_OPTIONS = [0.5, 1, 2, 4] as const
 
+// Cap the race at a final month, inclusive: it runs only up to and including
+// this month. Data past it is ignored, and cities still reporting past it are
+// not marked exhausted. Set to null to run through the latest available month.
+export const FINAL_MONTH: { year: number; month: number } | null = {
+  year: 2025,
+  month: 12,
+}
+
 // Milestone goals the race steps through. The x-axis is fixed at the current
 // goal (not the leader), so each segment is a distinct race to a line. When the
 // leader reaches a goal, the clock holds briefly then snaps to the next goal.
-// The final goal (300M) is a marked finish line the leader crosses *and keeps
-// going* past — the axis stays at the 300M scale and the bar overshoots the
-// line, so reaching 300M gets no hold (see the crossing check in index.tsx).
+// The final goal (400M) is a marked finish line the leader (Taipei, ~414M once
+// YouBike 1.0 is included) crosses *and keeps going* past — the axis stays at the
+// 400M scale and the bar overshoots the line, so reaching 400M gets no hold (see
+// the crossing check in index.tsx).
 export const MILESTONES = [
   1_000_000, 10_000_000, 50_000_000, 100_000_000, 200_000_000, 300_000_000,
+  400_000_000,
 ]
 // Hard cap on bar width (% of track) so an overshooting final bar still leaves
 // room for its value label + biker. Above BAR_MAX_PCT; only the final segment

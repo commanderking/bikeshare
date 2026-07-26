@@ -13,6 +13,7 @@ import {
 } from './buildRaceTimeline'
 import { makeSpeedScale, referenceGrowth } from './speed'
 import { useRaceClock } from './useRaceClock'
+import { applyBackfills, useBackfills } from './backfill'
 import {
   computeMilestoneTimes,
   firstCrossing,
@@ -27,6 +28,7 @@ import {
   BAR_MAX_PCT,
   DEFAULT_MONTHS_PER_SEC,
   EASE_MS,
+  FINAL_MONTH,
   formatAxis,
   formatMonth,
   formatValue,
@@ -46,9 +48,20 @@ const TICK_INTERVALS = 10
 type Frame = { monthTick: number; order: string[] }
 
 const BikeGrowthRace = () => {
-  const { trips, loading } = useAllTimeTrips()
+  const { trips, loading: tripsLoading } = useAllTimeTrips()
+  const { byCity: backfills, loading: backfillLoading } = useBackfills()
+  const loading = tripsLoading || backfillLoading
 
-  const timeline = useMemo(() => buildRaceTimeline(trips), [trips])
+  // Race-only: fold each city's historical backfill into its series (Taipei
+  // YouBike 1.0, Montreal BIXI's pre-2014 seasons). Other charts are unaffected.
+  const augmentedTrips = useMemo(
+    () => applyBackfills(trips, backfills),
+    [trips, backfills]
+  )
+  const timeline = useMemo(
+    () => buildRaceTimeline(augmentedTrips, FINAL_MONTH),
+    [augmentedTrips]
+  )
   const { months, cities } = timeline
   const maxT = Math.max(0, months.length - 1)
 
@@ -232,8 +245,8 @@ const BikeGrowthRace = () => {
       let t = tIn
       // Did the leader just cross the next milestone this frame? If so, clamp to
       // the line and freeze the clock through the reached / ease / hold beats.
-      // The final milestone (300M) is a finish line the leader crosses without
-      // stopping, so it gets no hold — the bar simply overshoots it.
+      // The final milestone (the finish line) is crossed without stopping, so it
+      // gets no hold — the bar simply overshoots it.
       const k = firstCrossing(prevT.current, t, milestoneTimes)
       if (k !== -1 && k < MILESTONES.length - 1 && clockRef.current) {
         t = milestoneTimes[k]
@@ -375,7 +388,9 @@ const BikeGrowthRace = () => {
               bikerSpeed={speed}
               bikerPaused={exhausted || !clock.playing}
               exhausted={exhausted}
-              dataEndsLabel={formatMonth(months[c.lastIndex])}
+              dataEndsLabel={formatMonth(
+                months[Math.min(c.lastIndex, months.length - 1)]
+              )}
               infoOpen={openInfo === cityId}
               onToggleInfo={() =>
                 setOpenInfo((prev) => (prev === cityId ? null : cityId))
@@ -411,6 +426,15 @@ const BikeGrowthRace = () => {
         scrubberRef={scrubberRef}
         yearTicks={yearTicks}
       />
+
+      <p className="mt-4 text-xs leading-snug text-gray-500 dark:text-gray-400">
+        Taipei includes YouBike 1.0 (Dec 2012–2021), estimated by spreading
+        official annual trip totals evenly across each year — 2021 uses reported
+        monthly figures for Apr–Dec. YouBike 2.0 data begins Apr 2020; where the
+        two systems overlap, their trips are summed. Montreal includes BIXI&apos;s
+        pre-2014 seasons (2009–2013), estimated by spreading official annual
+        totals across each operating season (Apr–Nov; May–Nov in 2009).
+      </p>
     </div>
   )
 }

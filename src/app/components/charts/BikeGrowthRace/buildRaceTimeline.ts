@@ -36,10 +36,14 @@ const keyOf = (ordinal: number): MonthKey => ({
 // a single month axis spanning the earliest to latest data across all cities,
 // plus per-city cumulative + monthly series aligned to that axis.
 //
-// Endpoints are kept as-is (no truncation): a city's series holds flat past its
-// last data month so the UI can mark it "exhausted" rather than hide it.
+// A city's series holds flat past its last data month so the UI can mark it
+// "exhausted" rather than hide it. An optional `finalMonth` caps the axis: the
+// race runs only to and including that month, data past it is ignored, and a
+// city still reporting past the cap keeps its true (beyond-axis) lastIndex so it
+// is never flagged exhausted at the finish.
 export const buildRaceTimeline = (
-  data: AllTimeCityTrips[]
+  data: AllTimeCityTrips[],
+  finalMonth?: MonthKey | null
 ): RaceTimeline => {
   // Cities with at least one month of data, each reduced to an ordinal->trips map
   // (summing any duplicate rows defensively).
@@ -65,31 +69,52 @@ export const buildRaceTimeline = (
     }
   }
 
-  const length = maxOrd - minOrd + 1
+  const capOrd = finalMonth
+    ? ordinalOf(finalMonth.year, finalMonth.month)
+    : maxOrd
+  const axisMaxOrd = Math.min(maxOrd, capOrd)
+  if (axisMaxOrd < minOrd) return { months: [], cities: [] }
+
+  const length = axisMaxOrd - minOrd + 1
   const months: MonthKey[] = Array.from({ length }, (_, i) => keyOf(minOrd + i))
 
-  const cities: RaceCity[] = prepared.map((p) => {
-    const ordinals = [...p.byOrdinal.keys()]
-    const firstIndex = Math.min(...ordinals) - minOrd
-    const lastIndex = Math.max(...ordinals) - minOrd
+  const cities: RaceCity[] = prepared
+    .map((p): RaceCity | null => {
+      const ordinals = [...p.byOrdinal.keys()]
+      const firstIndex = Math.min(...ordinals) - minOrd
+      // A city that only launches after the cap isn't in this race at all.
+      if (firstIndex >= length) return null
+      // True last-data index — may sit beyond the capped axis, in which case the
+      // city is still "live" at the finish (never flagged exhausted).
+      const lastIndex = Math.max(...ordinals) - minOrd
 
-    const cumulative: (number | undefined)[] = new Array(length).fill(undefined)
-    const monthlyTrips: number[] = new Array(length).fill(0)
+      const cumulative: (number | undefined)[] = new Array(length).fill(undefined)
+      const monthlyTrips: number[] = new Array(length).fill(0)
 
-    let running = 0
-    for (let i = firstIndex; i <= lastIndex; i++) {
-      const trips = p.byOrdinal.get(minOrd + i) ?? 0 // 0 for interior gaps
-      running += trips
-      monthlyTrips[i] = trips
-      cumulative[i] = running
-    }
-    // Hold flat at the final total after the city is exhausted.
-    for (let i = lastIndex + 1; i < length; i++) cumulative[i] = running
-    // Ramp in from zero across the launch month (so it grows in, not pops in).
-    if (firstIndex > 0) cumulative[firstIndex - 1] = 0
+      let running = 0
+      const end = Math.min(lastIndex, length - 1)
+      for (let i = firstIndex; i <= end; i++) {
+        const trips = p.byOrdinal.get(minOrd + i) ?? 0 // 0 for interior gaps
+        running += trips
+        monthlyTrips[i] = trips
+        cumulative[i] = running
+      }
+      // If the city's data ends within the axis, hold flat afterward (exhausted).
+      // If it extends past the cap, this loop is a no-op (axis ends mid-series).
+      for (let i = lastIndex + 1; i < length; i++) cumulative[i] = running
+      // Ramp in from zero across the launch month (so it grows in, not pops in).
+      if (firstIndex > 0) cumulative[firstIndex - 1] = 0
 
-    return { city: p.city, metroArea: p.metroArea, firstIndex, lastIndex, cumulative, monthlyTrips }
-  })
+      return {
+        city: p.city,
+        metroArea: p.metroArea,
+        firstIndex,
+        lastIndex,
+        cumulative,
+        monthlyTrips,
+      }
+    })
+    .filter((c): c is RaceCity => c !== null)
 
   return { months, cities }
 }

@@ -1,0 +1,11 @@
+[
+  { "month": 4, "trips": 2408000 },
+  { "month": 5, "trips": 1596000 },
+  { "month": 6, "trips": 880000 },
+  { "month": 7, "trips": 1133000 },
+  { "month": 8, "trips": 1365000 },
+  { "month": 9, "trips": 1479000 },
+  { "month": 10, "trips": 1364000 },
+  { "month": 11, "trips": 1285000 },
+  { "month": 12, "trips": 1170000 }
+]
