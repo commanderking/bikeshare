@@ -32,29 +32,48 @@ export const FINAL_MONTH: { year: number; month: number } | null = {
   month: 12,
 }
 
-// Milestone goals the race steps through. The x-axis is fixed at the current
-// goal (not the leader), so each segment is a distinct race to a line. When the
-// leader reaches a goal, the clock holds briefly then snaps to the next goal.
-// The final goal (400M) is a marked finish line the leader (Taipei, ~414M once
-// YouBike 1.0 is included) crosses *and keeps going* past — the axis stays at the
-// 400M scale and the bar overshoots the line, so reaching 400M gets no hold (see
-// the crossing check in index.tsx).
-export const MILESTONES = [
-  1_000_000, 10_000_000, 50_000_000, 100_000_000, 200_000_000, 300_000_000,
-  400_000_000,
+// The x-axis scale is pinned to the calendar year, not the leader: the race
+// pauses at each year end (see computeYearEndTimes) and, when the year about to
+// play needs more room, the axis eases open to a wider max. Each entry is the max
+// that holds from `fromYear` until the next entry supersedes it. Ticks fall out
+// of the max automatically (TICK_INTERVALS steps), so 10M reads "0, 1M … 10M".
+// Breakpoints were chosen so every year's leader fits under its max, verified
+// against the data — 10M ends at 2011 because the leader crosses it during 2012.
+export const AXIS_RESCALES = [
+  { fromYear: 2009, max: 10_000_000 }, // 2009–2011
+  { fromYear: 2012, max: 50_000_000 }, // 2012–2014
+  { fromYear: 2015, max: 100_000_000 }, // 2015–2017
+  { fromYear: 2018, max: 200_000_000 }, // 2018–2020
+  { fromYear: 2021, max: 300_000_000 }, // 2021–2023
+  // 2024 onward. Taipei (~414M once YouBike 1.0 is folded in) crosses 400M and
+  // keeps going, so the final bar overshoots the line (see BAR_HARD_MAX_PCT).
+  { fromYear: 2024, max: 400_000_000 },
 ]
+
+// The axis max in force during a calendar year: the last rescale whose `fromYear`
+// has arrived. Years before the first entry fall back to the first max.
+export const axisMaxForYear = (year: number): number => {
+  let max = AXIS_RESCALES[0].max
+  for (const rescale of AXIS_RESCALES) if (year >= rescale.fromYear) max = rescale.max
+  return max
+}
+
 // Hard cap on bar width (% of track) so an overshooting final bar still leaves
-// room for its value label + biker. Above BAR_MAX_PCT; only the final segment
-// ever exceeds BAR_MAX_PCT.
+// room for its value label + biker. Above BAR_MAX_PCT; only the final year's
+// leader ever exceeds BAR_MAX_PCT.
 export const BAR_HARD_MAX_PCT = 88
 // Number of intervals on the top x-axis (→ TICK_INTERVALS + 1 ticks/labels).
 export const TICK_INTERVALS = 10
-// At a reached milestone the clock freezes through three beats: a moment at the
-// line with the bar full (REACHED_MS), the axis easing open to the next goal
-// (EASE_MS), then a hold at the new scale so the viewer can re-orient (HOLD_MS).
-export const REACHED_MS = 1000
-export const EASE_MS = 1000
-export const HOLD_MS = 1000
+
+// --- Year-end pauses ---
+// The race freezes at each year end so the finished year can be read. A year
+// whose successor needs a wider axis instead runs the choreographed rescale
+// (reach → ease → hold): the two still beats sum to YEAR_END_HOLD_MS, so a
+// rescale pause is a normal pause plus the EASE_MS the axis takes to open.
+export const YEAR_END_HOLD_MS = 3000
+export const REACHED_MS = 1500 // beat 1: hold the finished year at the old scale
+export const EASE_MS = 1000 // beat 2: axis eases open to the new scale
+export const HOLD_MS = 1500 // beat 3: settle at the new scale
 // During beat 3 (HOLD_MS), how long the new-scale ticks take to fade in (and the
 // traveling max marker to fade out). Kept < HOLD_MS so they settle before resume.
 export const AXIS_FADE_MS = 500

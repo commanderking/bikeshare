@@ -24,7 +24,7 @@ type RaceClock = {
   pause: () => void
   seek: (time: number) => void
   // Freeze time (without changing `playing`) for `ms`, then resume. Used to pause
-  // briefly at a reached milestone. The frozen frame keeps re-rendering.
+  // at a year end. The frozen frame keeps re-rendering.
   hold: (ms: number) => void
 }
 
@@ -67,7 +67,7 @@ export const useRaceClock = ({
       const dt = (ts - lastTsRef.current) / 1000
       lastTsRef.current = ts
 
-      // Frozen at a milestone: keep repainting the same frame until the hold is up.
+      // Frozen at a year end: keep repainting the same frame until the hold is up.
       if (holdUntilRef.current != null) {
         if (ts < holdUntilRef.current) {
           onFrameRef.current(tRef.current)

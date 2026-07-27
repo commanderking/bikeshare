@@ -8,7 +8,7 @@ import {
 import { scoreCities } from './timeline/buildRaceTimeline'
 import { computeAxisState, Transition } from './render/axisState'
 import { paintAxis, paintBars, paintReadouts } from './render/paint'
-import { firstCrossing } from './timeline/milestones'
+import { firstCrossing } from './timeline/yearScale'
 import { useRaceData } from './hooks/useRaceData'
 import { useRaceRefs } from './hooks/useRaceRefs'
 import { useRaceClock } from './hooks/useRaceClock'
@@ -20,9 +20,9 @@ import {
   DEFAULT_MONTHS_PER_SEC,
   EASE_MS,
   HOLD_MS,
-  MILESTONES,
   REACHED_MS,
   TOP_N,
+  YEAR_END_HOLD_MS,
 } from './constants'
 
 // Current-frame render state. Bar widths + value text are driven imperatively
@@ -37,7 +37,8 @@ const BikeGrowthRace = () => {
     maxT,
     cityMap,
     speedScale,
-    milestoneTimes,
+    yearEndTimes,
+    axisMaxByMonthIndex,
     yearTicks,
   } = useRaceData()
   const refs = useRaceRefs()
@@ -58,10 +59,10 @@ const BikeGrowthRace = () => {
     return () => document.removeEventListener('mousedown', handleOutsideMouseDown)
   }, [openInfo])
 
-  // Milestone playback state (refs — the goal axis is applied imperatively).
-  // `prevT` brackets each frame's advance to detect a crossing; `transition`, when
-  // set, means we've reached a milestone and the clock is frozen while the axis
-  // eases to the next goal. `clockRef` lets handleFrame reach the clock it feeds.
+  // Year-end playback state (refs — the axis is applied imperatively). `prevT`
+  // brackets each frame's advance to detect a year-end crossing; `transition`,
+  // when set, means we're paused at a year end and the axis is easing to the next
+  // year's scale. `clockRef` lets handleFrame reach the clock it feeds.
   const prevT = useRef(0)
   const transition = useRef<Transition | null>(null)
   const clockRef = useRef<ReturnType<typeof useRaceClock>>()
@@ -75,34 +76,43 @@ const BikeGrowthRace = () => {
   const scoreAndPaint = useCallback(
     (time: number): string[] => {
       const top = scoreCities(cities, time, TOP_N)
-      const axis = computeAxisState(time, transition.current, milestoneTimes)
+      const axis = computeAxisState(time, transition.current, axisMaxByMonthIndex)
       paintAxis(refs, axis)
       paintBars(refs, top, axis.axisValue)
       paintReadouts(refs, time, months)
       return top.map(([raceCity]) => raceCity.city)
     },
-    [cities, months, milestoneTimes, refs]
+    [cities, months, axisMaxByMonthIndex, refs]
   )
 
   const handleFrame = useCallback(
     (incomingTime: number) => {
       let time = incomingTime
-      // Did the leader just cross the next milestone this frame? If so, clamp to
-      // the line and freeze the clock through the reached / ease / hold beats. The
-      // final milestone (the finish line) is crossed without stopping — no hold.
-      const crossedIndex = firstCrossing(prevT.current, time, milestoneTimes)
+      // Did the clock just pass a year end this frame? If so, clamp to it and
+      // freeze: a plain hold, or — when the next year needs a wider axis — the
+      // choreographed rescale (reach → ease → hold). The final year end is the
+      // finish line and is never held; the clock ends there.
+      const crossedIndex = firstCrossing(prevT.current, time, yearEndTimes)
       if (
         crossedIndex !== -1 &&
-        crossedIndex < MILESTONES.length - 1 &&
+        crossedIndex < yearEndTimes.length - 1 &&
         clockRef.current
       ) {
-        time = milestoneTimes[crossedIndex]
+        time = yearEndTimes[crossedIndex]
         clockRef.current.tRef.current = time
-        transition.current = {
-          milestoneIndex: crossedIndex,
-          startMs: performance.now(),
+        const endingMax = axisMaxByMonthIndex[time]
+        const nextMax = axisMaxByMonthIndex[time + 1] ?? endingMax
+        if (nextMax > endingMax) {
+          transition.current = {
+            fromMax: endingMax,
+            toMax: nextMax,
+            startMs: performance.now(),
+          }
+          clockRef.current.hold(REACHED_MS + EASE_MS + HOLD_MS)
+        } else {
+          transition.current = null
+          clockRef.current.hold(YEAR_END_HOLD_MS)
         }
-        clockRef.current.hold(REACHED_MS + EASE_MS + HOLD_MS)
       }
       prevT.current = time
 
@@ -117,7 +127,7 @@ const BikeGrowthRace = () => {
         setFrame({ monthTick, order })
       }
     },
-    [scoreAndPaint, milestoneTimes]
+    [scoreAndPaint, yearEndTimes, axisMaxByMonthIndex]
   )
 
   const clock = useRaceClock({
@@ -151,7 +161,7 @@ const BikeGrowthRace = () => {
     if (ended) {
       setEnded(false)
       transition.current = null
-      prevT.current = 0 // replay from the start; re-arm milestone detection
+      prevT.current = 0 // replay from the start; re-arm year-end detection
       clock.play()
     } else if (clock.playing) {
       clock.pause()
@@ -179,7 +189,6 @@ const BikeGrowthRace = () => {
   if (months.length === 0)
     return <p className="py-8 text-center italic">No data available.</p>
 
-  console.log({ frame })
   return (
     <div>
       <TopAxis

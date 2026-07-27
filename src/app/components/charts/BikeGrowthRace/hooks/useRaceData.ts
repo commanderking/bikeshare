@@ -4,9 +4,12 @@ import { useMemo } from 'react'
 import { useAllTimeTrips } from '@/app/hooks/useAllTimeTrips'
 import { applyBackfills } from '../backfill/backfill'
 import { buildRaceTimeline, MonthKey, RaceCity } from '../timeline/buildRaceTimeline'
-import { computeMilestoneTimes } from '../timeline/milestones'
+import {
+  computeAxisMaxByMonthIndex,
+  computeYearEndTimes,
+} from '../timeline/yearScale'
 import { makeSpeedScale, referenceGrowth } from '../render/speed'
-import { FINAL_MONTH, MILESTONES } from '../constants'
+import { FINAL_MONTH } from '../constants'
 import { useBackfills } from './useBackfills'
 
 export type YearTick = { year: number; monthIndex: number }
@@ -18,7 +21,8 @@ export type RaceData = {
   maxT: number
   cityMap: Map<string, RaceCity>
   speedScale: (growth: number) => number
-  milestoneTimes: number[]
+  yearEndTimes: number[]
+  axisMaxByMonthIndex: number[]
   yearTicks: YearTick[]
 }
 
@@ -51,11 +55,12 @@ export const useRaceData = (): RaceData => {
     () => makeSpeedScale(referenceGrowth(cities)),
     [cities]
   )
-  // Time at which the leader reaches each milestone — drives the goal axis and
-  // the playback holds.
-  const milestoneTimes = useMemo(
-    () => computeMilestoneTimes(cities, MILESTONES, maxT),
-    [cities, maxT]
+  // Clock time of each year end — where the race pauses. The axis max for each
+  // month index (from its calendar year) drives the axis scale between pauses.
+  const yearEndTimes = useMemo(() => computeYearEndTimes(months), [months])
+  const axisMaxByMonthIndex = useMemo(
+    () => computeAxisMaxByMonthIndex(months),
+    [months]
   )
   // First month index of each calendar year — the scrubber's timeline ticks.
   const yearTicks = useMemo(() => {
@@ -77,7 +82,8 @@ export const useRaceData = (): RaceData => {
     maxT,
     cityMap,
     speedScale,
-    milestoneTimes,
+    yearEndTimes,
+    axisMaxByMonthIndex,
     yearTicks,
   }
 }
