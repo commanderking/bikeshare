@@ -1,18 +1,16 @@
 import { smoothstep } from '@/app/components/Biker/geometry'
-import { goalIndexAt } from '../timeline/milestones'
 import {
   AXIS_FADE_MS,
   BAR_MAX_PCT,
   EASE_MS,
   formatAxis,
-  MILESTONES,
   REACHED_MS,
   TICK_INTERVALS,
 } from '../constants'
 
-// An in-progress milestone rescale: we reached milestone `milestoneIndex` at
-// `startMs`, and the axis is easing from that goal to the next.
-export type Transition = { milestoneIndex: number; startMs: number }
+// An in-progress rescale at a year end: the axis is easing from `fromMax` (the
+// finished year's scale) to `toMax` (the year about to play), begun at `startMs`.
+export type Transition = { fromMax: number; toMax: number; startMs: number }
 
 // Everything the top axis needs for one frame: the chart's current max scale
 // (`axisValue`), the value the fixed ticks are labeled against (`tickScale`),
@@ -27,18 +25,27 @@ export type AxisState = {
 }
 
 // Computes the axis state at a given `time`. In steady state the axis sits at the
-// current milestone goal, all ticks solid, no traveler. During a rescale it's
-// choreographed across three beats (timings in constants): reach (hold at the
-// line) → ease (intermediate ticks fade; the max marker peels off the right edge
+// current year's max, all ticks solid, no traveler. During a rescale it's
+// choreographed across three beats (timings in constants): reach (hold at the old
+// scale) → ease (intermediate ticks fade; the max marker peels off the right edge
 // and travels) → hold (new-scale ticks fade in; the traveler fades out).
 export const computeAxisState = (
   time: number,
   transition: Transition | null,
-  milestoneTimes: number[],
+  axisMaxByMonthIndex: number[],
   now = performance.now()
 ): AxisState => {
   if (!transition) {
-    const axisValue = MILESTONES[goalIndexAt(time, milestoneTimes)]
+    // Track the year of the month currently filling (floor(time) + 1), not the
+    // one just completed. A year-end pause sits on December — the finished year —
+    // so keying off floor(time) would snap the axis back to that year's (narrower)
+    // scale for the frames between resume and crossing into January, undoing the
+    // rescale that just eased open. The filling month is already in the new year.
+    const fillingMonth = Math.min(
+      Math.floor(time) + 1,
+      axisMaxByMonthIndex.length - 1
+    )
+    const axisValue = axisMaxByMonthIndex[fillingMonth]
     return {
       axisValue,
       tickScale: axisValue,
@@ -49,8 +56,7 @@ export const computeAxisState = (
     }
   }
 
-  const from = MILESTONES[transition.milestoneIndex]
-  const to = MILESTONES[transition.milestoneIndex + 1] ?? from
+  const { fromMax: from, toMax: to } = transition
   const elapsed = now - transition.startMs
   const progress =
     elapsed <= REACHED_MS ? 0 : Math.min((elapsed - REACHED_MS) / EASE_MS, 1)
