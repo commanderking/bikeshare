@@ -8,7 +8,7 @@ import {
 import { scoreCities } from './timeline/buildRaceTimeline'
 import { computeAxisState, Transition } from './render/axisState'
 import { paintAxis, paintBars, paintReadouts } from './render/paint'
-import { firstCrossing } from './timeline/yearScale'
+import { getNextCrossingIndex } from './timeline/yearScale'
 import { useRaceData } from './hooks/useRaceData'
 import { useRaceRefs } from './hooks/useRaceRefs'
 import { useRaceClock } from './hooks/useRaceClock'
@@ -53,10 +53,12 @@ const BikeGrowthRace = () => {
   useEffect(() => {
     if (!openInfo) return
     const handleOutsideMouseDown = (event: MouseEvent) => {
-      if (!(event.target as Element).closest('[data-info-ui]')) setOpenInfo(null)
+      if (!(event.target as Element).closest('[data-info-ui]'))
+        setOpenInfo(null)
     }
     document.addEventListener('mousedown', handleOutsideMouseDown)
-    return () => document.removeEventListener('mousedown', handleOutsideMouseDown)
+    return () =>
+      document.removeEventListener('mousedown', handleOutsideMouseDown)
   }, [openInfo])
 
   // Year-end playback state (refs — the axis is applied imperatively). `prevT`
@@ -76,7 +78,11 @@ const BikeGrowthRace = () => {
   const scoreAndPaint = useCallback(
     (time: number): string[] => {
       const top = scoreCities(cities, time, TOP_N)
-      const axis = computeAxisState(time, transition.current, axisMaxByMonthIndex)
+      const axis = computeAxisState(
+        time,
+        transition.current,
+        axisMaxByMonthIndex
+      )
       paintAxis(refs, axis)
       paintBars(refs, top, axis.axisValue)
       paintReadouts(refs, time, months)
@@ -92,7 +98,11 @@ const BikeGrowthRace = () => {
       // freeze: a plain hold, or — when the next year needs a wider axis — the
       // choreographed rescale (reach → ease → hold). The final year end is the
       // finish line and is never held; the clock ends there.
-      const crossedIndex = firstCrossing(prevT.current, time, yearEndTimes)
+      const crossedIndex = getNextCrossingIndex(
+        prevT.current,
+        time,
+        yearEndTimes
+      )
       if (
         crossedIndex !== -1 &&
         crossedIndex < yearEndTimes.length - 1 &&

@@ -19,10 +19,12 @@ export const computeYearEndTimes = (months: MonthKey[]): number[] => {
 export const computeAxisMaxByMonthIndex = (months: MonthKey[]): number[] =>
   months.map((month) => axisMaxForYear(month.year))
 
-// The smallest stop time in (prev, time], or -1 — the frame the clock crosses a
-// year end so it can pause. The half-open interval means a held/frozen frame
-// (prev === time) never re-triggers, and a seek (prev reset to time) never does.
-export const firstCrossing = (
+// Index of the earliest stop in (prev, time], or -1 — the next year end the clock
+// has reached this frame, so it can pause there. The earliest (not latest) so a
+// frame whose advance spans several stops pauses at each in order rather than
+// skipping ahead. The half-open interval means a held/frozen frame (prev === time)
+// never re-triggers, and a seek (prev reset to time) never does.
+export const getNextCrossingIndex = (
   prev: number,
   time: number,
   stopTimes: number[]

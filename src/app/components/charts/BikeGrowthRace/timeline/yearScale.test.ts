@@ -3,7 +3,7 @@ import type { MonthKey } from './buildRaceTimeline'
 import {
   computeAxisMaxByMonthIndex,
   computeYearEndTimes,
-  firstCrossing,
+  getNextCrossingIndex,
 } from './yearScale'
 
 // Nov 2011 → Feb 2012: indices 0..3, straddling the 10M → 50M rescale.
@@ -37,19 +37,23 @@ describe('computeAxisMaxByMonthIndex', () => {
   })
 })
 
-describe('firstCrossing', () => {
+describe('getNextCrossingIndex', () => {
   const stopTimes = [1, 5, 9]
 
   it('detects a stop whose time falls in (prev, time]', () => {
-    expect(firstCrossing(0, 1, stopTimes)).toBe(0)
-    expect(firstCrossing(4.5, 5.2, stopTimes)).toBe(1)
+    expect(getNextCrossingIndex(0, 1, stopTimes)).toBe(0)
+    expect(getNextCrossingIndex(4.5, 5.2, stopTimes)).toBe(1)
+  })
+
+  it('returns the earliest stop when a frame spans several', () => {
+    expect(getNextCrossingIndex(0, 9, stopTimes)).toBe(0)
   })
 
   it('does not re-trigger on a held/seeked frame where prev === time', () => {
-    expect(firstCrossing(1, 1, stopTimes)).toBe(-1)
+    expect(getNextCrossingIndex(1, 1, stopTimes)).toBe(-1)
   })
 
   it('returns -1 when nothing crosses', () => {
-    expect(firstCrossing(5.1, 8, stopTimes)).toBe(-1)
+    expect(getNextCrossingIndex(5.1, 8, stopTimes)).toBe(-1)
   })
 })
