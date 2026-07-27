@@ -31,8 +31,10 @@ export const DEFAULT_COLORS: BikerColors = {
   saddle: '#2e2e2e',
   shirt: '#3b6ea5',
   shirtBack: '#2f5985',
-  pants: '#eef1f5',
-  pantsBack: '#cfd6dc',
+  // Black legs read clearly against every livery, so the pedaling stroke stays
+  // legible even at small sizes. The far leg (pantsBack) is drawn muted.
+  pants: '#1c1c1c',
+  pantsBack: '#2a2a2a',
   shoe: '#2b2b2b',
   skin: '#caa07a',
   helmet: '#d9534f',
