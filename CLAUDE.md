@@ -21,6 +21,13 @@ these — they consistently matter more than shipping fast.
   (`prepare → bounds → build → assemble`), with the dense work in well-named
   helpers underneath.
 
+## Comments explain *why*, not *what*
+
+- A comment should carry context the code doesn't — a source quirk, a historical
+  reason, cross-file coupling. **Don't restate the line below it**, and don't
+  repeat repo-wide principles (e.g. re-tagging every validator "fail loud");
+  those are understood.
+
 ## Naming is scrutinized closely
 
 - **Functions lead with a verb**: `getX`, `buildX`, `computeX`, `groupX`,
