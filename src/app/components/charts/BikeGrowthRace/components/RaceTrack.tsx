@@ -14,6 +14,9 @@ type Props = {
   months: MonthKey[]
   speedScale: (growth: number) => number
   playing: boolean
+  // True while the clock is holding (a year-end pause): time is frozen, so no
+  // trips accrue and the bikers park even though playback is technically active.
+  frozen: boolean
   reduceMotion: boolean
   openInfo: string | null
   onToggleInfo: (city: string) => void
@@ -34,6 +37,7 @@ const RaceTrack = ({
   months,
   speedScale,
   playing,
+  frozen,
   reduceMotion,
   openInfo,
   onToggleInfo,
@@ -46,7 +50,12 @@ const RaceTrack = ({
       const raceCity = cityMap.get(cityId)
       if (!raceCity) return null
       const exhausted = monthTick >= raceCity.lastIndex
-      const speed = speedScale(getGrowthAt(raceCity, monthTick))
+      const growth = getGrowthAt(raceCity, monthTick)
+      const speed = speedScale(growth)
+      // Park the biker whenever no trips are accruing this frame: paused/ended
+      // playback, a year-end hold, past the city's data, or a zero-trip month
+      // (an off-season gap) — pedalling should track trips, not just motion.
+      const bikerPaused = !playing || frozen || exhausted || growth <= 0
       const config = CITY_BIKE_CONFIG[cityId] as BikerConfig | undefined
       return (
         <RaceRow
@@ -58,7 +67,7 @@ const RaceTrack = ({
           rank={rank}
           reduceMotion={reduceMotion}
           bikerSpeed={speed}
-          bikerPaused={exhausted || !playing}
+          bikerPaused={bikerPaused}
           exhausted={exhausted}
           dataEndsLabel={formatMonth(
             months[Math.min(raceCity.lastIndex, months.length - 1)]

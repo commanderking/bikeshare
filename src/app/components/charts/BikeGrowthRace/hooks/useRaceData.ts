@@ -6,8 +6,8 @@ import { applyBackfills } from '../backfill/backfill'
 import { buildRaceTimeline, MonthKey, RaceCity } from '../timeline/buildRaceTimeline'
 import {
   computeAxisMaxByMonthIndex,
-  computeYearEndTimes,
-} from '../timeline/yearScale'
+  computeEraEndTimes,
+} from '../timeline/eraScale'
 import { makeSpeedScale, referenceGrowth } from '../render/speed'
 import { FINAL_MONTH } from '../constants'
 import { useBackfills } from './useBackfills'
@@ -21,7 +21,7 @@ export type RaceData = {
   maxT: number
   cityMap: Map<string, RaceCity>
   speedScale: (growth: number) => number
-  yearEndTimes: number[]
+  eraEndTimes: number[]
   axisMaxByMonthIndex: number[]
   yearTicks: YearTick[]
 }
@@ -55,9 +55,9 @@ export const useRaceData = (): RaceData => {
     () => makeSpeedScale(referenceGrowth(cities)),
     [cities]
   )
-  // Clock time of each year end — where the race pauses. The axis max for each
-  // month index (from its calendar year) drives the axis scale between pauses.
-  const yearEndTimes = useMemo(() => computeYearEndTimes(months), [months])
+  // Clock time of each era end — where the race pauses. The axis max for each
+  // month index (from its era) drives the axis scale between pauses.
+  const eraEndTimes = useMemo(() => computeEraEndTimes(months), [months])
   const axisMaxByMonthIndex = useMemo(
     () => computeAxisMaxByMonthIndex(months),
     [months]
@@ -82,7 +82,7 @@ export const useRaceData = (): RaceData => {
     maxT,
     cityMap,
     speedScale,
-    yearEndTimes,
+    eraEndTimes,
     axisMaxByMonthIndex,
     yearTicks,
   }

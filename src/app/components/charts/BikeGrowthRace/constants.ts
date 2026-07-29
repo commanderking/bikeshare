@@ -32,45 +32,55 @@ export const FINAL_MONTH: { year: number; month: number } | null = {
   month: 12,
 }
 
-// The x-axis scale is pinned to the calendar year, not the leader: the race
-// pauses at each year end (see computeYearEndTimes) and, when the year about to
-// play needs more room, the axis eases open to a wider max. Each entry is the max
-// that holds from `fromYear` until the next entry supersedes it. Ticks fall out
-// of the max automatically (TICK_INTERVALS steps), so 10M reads "0, 1M … 10M".
-// Breakpoints were chosen so every year's leader fits under its max, verified
-// against the data — 10M ends at 2011 because the leader crosses it during 2012.
-export const AXIS_RESCALES = [
-  { fromYear: 2009, max: 10_000_000 }, // 2009–2011
-  { fromYear: 2012, max: 50_000_000 }, // 2012–2014
-  { fromYear: 2015, max: 100_000_000 }, // 2015–2017
-  { fromYear: 2018, max: 200_000_000 }, // 2018–2020
-  { fromYear: 2021, max: 300_000_000 }, // 2021–2023
-  // 2024 onward. Taipei (~414M once YouBike 1.0 is folded in) crosses 400M and
-  // keeps going, so the final bar overshoots the line (see BAR_HARD_MAX_PCT).
-  { fromYear: 2024, max: 400_000_000 },
+// The race advances through "eras" — spans of years that share one x-axis scale.
+// It pauses only at an era's end (not every year); the axis then eases open to the
+// next era's max during that pause. Because the scale is fixed for a whole era,
+// each max must hold the era's peak — the leader's total at its final year — so
+// these are sized against the data (the leader is monotonic, so end-of-era is the
+// peak). Ticks fall out of the max (TICK_INTERVALS steps), so 50M reads "0, 5M …".
+// `startYear` opens an era; it runs until the next era opens.
+//
+// Paris (Vélib', from 2007) leads every year, so the maxes track its running
+// cumulative at each era end — each sits just above that total so its bar nears
+// full at the pause.
+export const ERAS = [
+  { startYear: 2007, max: 50_000_000 }, // 2007–2008, Paris 40.5M
+  { startYear: 2009, max: 120_000_000 }, // 2009–2011, Paris 119.3M
+  { startYear: 2012, max: 250_000_000 }, // 2012–2014, Paris 227.9M
+  { startYear: 2015, max: 350_000_000 }, // 2015–2017, Paris 343.6M
+  { startYear: 2018, max: 400_000_000 }, // 2018–2019, Paris 374.6M
+  { startYear: 2020, max: 500_000_000 }, // 2020–2022, Paris 490.9M
+  { startYear: 2023, max: 650_000_000 }, // 2023–2025, Paris 632.4M
 ]
 
-// The axis max in force during a calendar year: the last rescale whose `fromYear`
-// has arrived. Years before the first entry fall back to the first max.
+// The last year of every era except the final one — the years the race pauses at
+// (its December). An era ends the year before the next opens; the final era runs
+// to the finish line, which never holds.
+export const ERA_END_YEARS = ERAS.slice(1).map((era) => era.startYear - 1)
+
+// The axis max in force during a calendar year: the max of the era it falls in
+// (the last era to have opened). Years before the first era fall back to its max.
 export const axisMaxForYear = (year: number): number => {
-  let max = AXIS_RESCALES[0].max
-  for (const rescale of AXIS_RESCALES) if (year >= rescale.fromYear) max = rescale.max
+  let max = ERAS[0].max
+  for (const era of ERAS) if (year >= era.startYear) max = era.max
   return max
 }
 
-// Hard cap on bar width (% of track) so an overshooting final bar still leaves
-// room for its value label + biker. Above BAR_MAX_PCT; only the final year's
-// leader ever exceeds BAR_MAX_PCT.
+// Defensive hard cap on bar width (% of track) so a bar that ever exceeds its
+// axis max still leaves room for its value label + biker. Above BAR_MAX_PCT.
+// With the current era maxes no bar reaches it (Paris leads each era end at
+// ~82%), but it guards against a future city outrunning its era's scale.
 export const BAR_HARD_MAX_PCT = 88
 // Number of intervals on the top x-axis (→ TICK_INTERVALS + 1 ticks/labels).
 export const TICK_INTERVALS = 10
 
-// --- Year-end pauses ---
-// The race freezes at each year end so the finished year can be read. A year
-// whose successor needs a wider axis instead runs the choreographed rescale
-// (reach → ease → hold): the two still beats sum to YEAR_END_HOLD_MS, so a
-// rescale pause is a normal pause plus the EASE_MS the axis takes to open.
-export const YEAR_END_HOLD_MS = 3000
+// --- Era-end pauses ---
+// The race freezes at each era end so the finished era can be read. When the next
+// era needs a wider axis (every boundary, as it happens) it runs the choreographed
+// rescale (reach → ease → hold): the two still beats sum to ERA_END_HOLD_MS, so a
+// rescale pause is a plain pause plus the EASE_MS the axis takes to open. The
+// plain-hold path only fires if two adjacent eras ever share a max.
+export const ERA_END_HOLD_MS = 3000
 export const REACHED_MS = 1500 // beat 1: hold the finished year at the old scale
 export const EASE_MS = 1000 // beat 2: axis eases open to the new scale
 export const HOLD_MS = 1500 // beat 3: settle at the new scale
