@@ -97,6 +97,14 @@ export const systems: { [key: string]: System } = {
     longitude: -118.2437,
     latitude: 34.0522,
   },
+  madrid: {
+    id: 'madrid',
+    metroArea: 'Madrid',
+    city: 'madrid',
+    country: 'Spain',
+    longitude: -3.7038,
+    latitude: 40.4168,
+  },
   mexico_city: {
     id: 'mexico_city',
     metroArea: 'Mexico City',
