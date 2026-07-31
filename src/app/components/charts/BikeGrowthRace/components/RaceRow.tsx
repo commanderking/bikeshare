@@ -6,14 +6,8 @@ import Biker, {
   DownTubeCurve,
   SkirtGuard,
 } from '@/app/components/Biker'
-import {
-  BAR_HEIGHT,
-  BIKER_VIEWBOX,
-  BIKER_WIDTH,
-  NAME_COL_PX,
-  REORDER_MS,
-  ROW_HEIGHT,
-} from '../constants'
+import { BIKER_VIEWBOX, REORDER_MS } from '../constants'
+import { SizeScale } from '../sizing'
 
 export type BikerConfig = {
   colors?: Partial<BikerColors>
@@ -31,6 +25,8 @@ type Props = {
   // Vertical slot; the row slides between slots on a rank change.
   rank: number
   reduceMotion: boolean
+  // Current layout dimensions (grows in fullscreen).
+  size: SizeScale
   // Crank speed for this month; ignored while paused.
   bikerSpeed: number
   bikerPaused: boolean
@@ -55,6 +51,7 @@ const RaceRow = ({
   barColor,
   rank,
   reduceMotion,
+  size,
   bikerSpeed,
   bikerPaused,
   exhausted,
@@ -68,8 +65,8 @@ const RaceRow = ({
     className="absolute left-0 right-0 flex items-center gap-1"
     style={{
       top: 0,
-      height: ROW_HEIGHT,
-      transform: `translateY(${rank * ROW_HEIGHT}px)`,
+      height: size.rowHeight,
+      transform: `translateY(${rank * size.rowHeight}px)`,
       transition: reduceMotion ? undefined : `transform ${REORDER_MS}ms ease`,
       // The row's transform makes it its own stacking context, so the popover's
       // own z-index can't rise above sibling rows below it. Lift the whole row
@@ -79,8 +76,8 @@ const RaceRow = ({
   >
     {/* Name column, right-aligned toward the bars. */}
     <div
-      className="relative shrink-0 pr-1 text-right text-xs leading-tight"
-      style={{ width: NAME_COL_PX }}
+      className="relative shrink-0 pr-1 text-right leading-tight"
+      style={{ width: size.nameColPx, fontSize: size.labelFontPx }}
     >
       <span className="inline-flex items-center justify-end gap-0.5 align-middle">
         <span className="truncate">{metroArea}</span>
@@ -120,17 +117,17 @@ const RaceRow = ({
         className="rounded-r"
         style={{
           width: 0,
-          height: BAR_HEIGHT,
+          height: size.barHeight,
           background: barColor,
         }}
       />
       {/* Biker rides right at the bar's end, so it tracks the bar smoothly and
           never shifts with the (variable-width) number, which now trails it. */}
-      <div className="shrink-0" style={{ width: BIKER_WIDTH }}>
+      <div className="shrink-0" style={{ width: size.bikerWidth }}>
         {config && (
           <Biker
             {...config}
-            width={BIKER_WIDTH}
+            width={size.bikerWidth}
             viewBox={BIKER_VIEWBOX}
             speed={bikerSpeed}
             paused={bikerPaused}
@@ -141,7 +138,8 @@ const RaceRow = ({
       </div>
       <span
         ref={valueRef}
-        className="shrink-0 whitespace-nowrap text-xs font-medium tabular-nums text-gray-700 dark:text-gray-200"
+        className="shrink-0 whitespace-nowrap font-medium tabular-nums text-gray-700 dark:text-gray-200"
+        style={{ fontSize: size.labelFontPx }}
       />
     </div>
   </div>

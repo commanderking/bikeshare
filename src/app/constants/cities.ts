@@ -134,6 +134,8 @@ export const systems: { [key: string]: System } = {
     metroArea: 'Paris',
     city: 'paris',
     country: 'France',
+    longitude: 2.3522,
+    latitude: 48.8566,
   },
   philadelphia: {
     id: 'philadelphia',

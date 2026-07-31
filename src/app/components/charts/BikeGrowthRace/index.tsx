@@ -12,6 +12,8 @@ import { getNextCrossingIndex } from './timeline/eraScale'
 import { useRaceData } from './hooks/useRaceData'
 import { useRaceRefs } from './hooks/useRaceRefs'
 import { useRaceClock } from './hooks/useRaceClock'
+import { useFullscreen } from './hooks/useFullscreen'
+import { useFitSizing } from './hooks/useFitSizing'
 import TopAxis from './components/TopAxis'
 import RaceTrack from './components/RaceTrack'
 import Controls from './components/Controls'
@@ -42,6 +44,14 @@ const BikeGrowthRace = () => {
     yearTicks,
   } = useRaceData()
   const refs = useRaceRefs()
+
+  // Fullscreen fills the screen: the chart root goes fullscreen (hiding the page
+  // chrome for free), and the track area's measured height drives the size scale
+  // so rows, bikers, and text all grow to fit.
+  const rootRef = useRef<HTMLDivElement>(null)
+  const trackAreaRef = useRef<HTMLDivElement>(null)
+  const { isFullscreen, toggle: toggleFullscreen } = useFullscreen(rootRef)
+  const size = useFitSizing(trackAreaRef, isFullscreen)
 
   const [reduceMotion] = useState(prefersReducedMotion)
   const [frame, setFrame] = useState<Frame>({ monthTick: 0, order: [] })
@@ -197,31 +207,61 @@ const BikeGrowthRace = () => {
     return <p className="py-8 text-center italic">No data available.</p>
 
   return (
-    <div>
+    <div
+      ref={rootRef}
+      className={
+        isFullscreen
+          ? 'flex h-full flex-col bg-white p-8 dark:bg-gray-900'
+          : undefined
+      }
+    >
+      <div className="flex justify-end pb-1">
+        <button
+          type="button"
+          onClick={toggleFullscreen}
+          className="text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+        >
+          {isFullscreen ? 'Exit full screen' : 'Full screen'}
+        </button>
+      </div>
+
       <TopAxis
         tickWrapRefs={refs.axisTickWrapRefs}
         tickLabelRefs={refs.axisTickRefs}
         travelerRef={refs.travelerRef}
         travelerLabelRef={refs.travelerLabelRef}
+        size={size}
       />
 
-      <RaceTrack
-        order={frame.order}
-        monthTick={frame.monthTick}
-        cityMap={cityMap}
-        months={months}
-        speedScale={speedScale}
-        playing={clock.playing}
-        frozen={clock.holding}
-        reduceMotion={reduceMotion}
-        openInfo={openInfo}
-        onToggleInfo={(city) =>
-          setOpenInfo((prev) => (prev === city ? null : city))
+      {/* In fullscreen this fills the leftover height and centers the track; its
+          measured height is what useFitSizing splits across the rows. */}
+      <div
+        ref={trackAreaRef}
+        className={
+          isFullscreen
+            ? 'flex min-h-0 flex-1 flex-col justify-center overflow-hidden'
+            : undefined
         }
-        barRefs={refs.barRefs}
-        valueRefs={refs.valueRefs}
-        monthLabelRef={refs.monthLabelRef}
-      />
+      >
+        <RaceTrack
+          order={frame.order}
+          monthTick={frame.monthTick}
+          cityMap={cityMap}
+          months={months}
+          speedScale={speedScale}
+          playing={clock.playing}
+          size={size}
+          frozen={clock.holding}
+          reduceMotion={reduceMotion}
+          openInfo={openInfo}
+          onToggleInfo={(city) =>
+            setOpenInfo((prev) => (prev === city ? null : city))
+          }
+          barRefs={refs.barRefs}
+          valueRefs={refs.valueRefs}
+          monthLabelRef={refs.monthLabelRef}
+        />
+      </div>
 
       <Controls
         playing={clock.playing}
@@ -235,7 +275,7 @@ const BikeGrowthRace = () => {
         yearTicks={yearTicks}
       />
 
-      <EstimateNote />
+      {!isFullscreen && <EstimateNote />}
     </div>
   )
 }

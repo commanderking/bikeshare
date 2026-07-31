@@ -2,7 +2,8 @@ import { MutableRefObject, RefObject } from 'react'
 import { CITY_BIKE_CONFIG } from '@/app/components/Biker/cityBikeConfig'
 import { getGrowthAt, MonthKey, RaceCity } from '../timeline/buildRaceTimeline'
 import { barColorFor } from '../render/barColor'
-import { formatMonth, ROW_HEIGHT, TOP_N } from '../constants'
+import { formatMonth, TOP_N } from '../constants'
+import { SizeScale } from '../sizing'
 import RaceRow, { BikerConfig } from './RaceRow'
 
 type Props = {
@@ -14,6 +15,8 @@ type Props = {
   months: MonthKey[]
   speedScale: (growth: number) => number
   playing: boolean
+  // Current layout dimensions; grows to fill the screen in fullscreen.
+  size: SizeScale
   // True while the clock is holding (a year-end pause): time is frozen, so no
   // trips accrue and the bikers park even though playback is technically active.
   frozen: boolean
@@ -37,6 +40,7 @@ const RaceTrack = ({
   months,
   speedScale,
   playing,
+  size,
   frozen,
   reduceMotion,
   openInfo,
@@ -45,7 +49,7 @@ const RaceTrack = ({
   valueRefs,
   monthLabelRef,
 }: Props) => (
-  <div className="relative" style={{ height: TOP_N * ROW_HEIGHT }}>
+  <div className="relative" style={{ height: TOP_N * size.rowHeight }}>
     {order.map((cityId, rank) => {
       const raceCity = cityMap.get(cityId)
       if (!raceCity) return null
@@ -66,6 +70,7 @@ const RaceTrack = ({
           barColor={barColorFor(config)}
           rank={rank}
           reduceMotion={reduceMotion}
+          size={size}
           bikerSpeed={speed}
           bikerPaused={bikerPaused}
           exhausted={exhausted}
@@ -90,7 +95,8 @@ const RaceTrack = ({
         few (smallest) cities never reach it. */}
     <div
       ref={monthLabelRef}
-      className="pointer-events-none absolute bottom-0 right-0 text-4xl font-bold tabular-nums text-gray-800 dark:text-gray-100"
+      className="pointer-events-none absolute bottom-0 right-0 font-bold tabular-nums text-gray-800 dark:text-gray-100"
+      style={{ fontSize: size.monthFontPx }}
     />
   </div>
 )
