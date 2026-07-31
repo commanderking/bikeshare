@@ -2,11 +2,11 @@ import { describe, it, expect } from 'vitest'
 import type { MonthKey } from './buildRaceTimeline'
 import {
   computeAxisMaxByMonthIndex,
-  computeYearEndTimes,
+  computeEraEndTimes,
   getNextCrossingIndex,
-} from './yearScale'
+} from './eraScale'
 
-// Nov 2011 → Feb 2012: indices 0..3, straddling the 10M → 50M rescale.
+// Nov 2011 → Feb 2012: indices 0..3, straddling the 120M → 250M era boundary.
 const months: MonthKey[] = [
   { year: 2011, month: 11 },
   { year: 2011, month: 12 },
@@ -14,25 +14,28 @@ const months: MonthKey[] = [
   { year: 2012, month: 2 },
 ]
 
-describe('computeYearEndTimes', () => {
-  it('returns the month index of each December', () => {
-    expect(computeYearEndTimes(months)).toEqual([1])
+describe('computeEraEndTimes', () => {
+  it('returns only the Decembers that close an era, skipping interior ones', () => {
+    // Dec 2011 and Dec 2014 end eras; Dec 2012/2013 fall inside the 2012–2014 era.
+    const span: MonthKey[] = [
+      { year: 2011, month: 12 }, // 0 — era end
+      { year: 2012, month: 12 }, // 1 — interior
+      { year: 2013, month: 12 }, // 2 — interior
+      { year: 2014, month: 12 }, // 3 — era end
+    ]
+    expect(computeEraEndTimes(span)).toEqual([0, 3])
   })
 
-  it('finds every December across multiple years', () => {
-    const twoYears: MonthKey[] = [
-      { year: 2011, month: 12 },
-      { year: 2012, month: 6 },
-      { year: 2012, month: 12 },
-    ]
-    expect(computeYearEndTimes(twoYears)).toEqual([0, 2])
+  it('does not list the final era’s end (the finish never holds)', () => {
+    // 2025 closes the last era, so its December is not a stop.
+    expect(computeEraEndTimes([{ year: 2025, month: 12 }])).toEqual([])
   })
 })
 
 describe('computeAxisMaxByMonthIndex', () => {
-  it('maps each month to its year’s axis max (10M through 2011, 50M from 2012)', () => {
+  it('maps each month to its era’s axis max (120M through 2011, 250M from 2012)', () => {
     expect(computeAxisMaxByMonthIndex(months)).toEqual([
-      10_000_000, 10_000_000, 50_000_000, 50_000_000,
+      120_000_000, 120_000_000, 250_000_000, 250_000_000,
     ])
   })
 })

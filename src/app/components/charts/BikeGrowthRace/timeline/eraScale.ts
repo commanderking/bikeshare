@@ -1,15 +1,15 @@
 import { MonthKey } from './buildRaceTimeline'
-import { axisMaxForYear } from '../constants'
+import { axisMaxForYear, ERA_END_YEARS } from '../constants'
 
-// The clock time of each year end: the month index of that year's December. At
-// this time December's trips have finished filling, so the bar shows the year's
-// final total and the race pauses. The shared axis spans continuous months, so
-// every year on it has a December. The last entry is the finish line; the caller
-// leaves it un-held (the clock ends there).
-export const computeYearEndTimes = (months: MonthKey[]): number[] => {
+// The clock time of each era end: the month index of the December that closes an
+// era (its year is in ERA_END_YEARS). At that time December's trips have finished
+// filling, so the bar shows the era's final total and the race pauses. The final
+// era isn't listed — it runs to the finish, which the clock ends at without a hold.
+export const computeEraEndTimes = (months: MonthKey[]): number[] => {
+  const eraEndYears = new Set(ERA_END_YEARS)
   const times: number[] = []
   months.forEach((month, monthIndex) => {
-    if (month.month === 12) times.push(monthIndex)
+    if (month.month === 12 && eraEndYears.has(month.year)) times.push(monthIndex)
   })
   return times
 }
@@ -19,7 +19,7 @@ export const computeYearEndTimes = (months: MonthKey[]): number[] => {
 export const computeAxisMaxByMonthIndex = (months: MonthKey[]): number[] =>
   months.map((month) => axisMaxForYear(month.year))
 
-// Index of the earliest stop in (prev, time], or -1 — the next year end the clock
+// Index of the earliest stop in (prev, time], or -1 — the next era end the clock
 // has reached this frame, so it can pause there. The earliest (not latest) so a
 // frame whose advance spans several stops pauses at each in order rather than
 // skipping ahead. The half-open interval means a held/frozen frame (prev === time)

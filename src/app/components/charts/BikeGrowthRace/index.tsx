@@ -8,7 +8,7 @@ import {
 import { scoreCities } from './timeline/buildRaceTimeline'
 import { computeAxisState, Transition } from './render/axisState'
 import { paintAxis, paintBars, paintReadouts } from './render/paint'
-import { getNextCrossingIndex } from './timeline/yearScale'
+import { getNextCrossingIndex } from './timeline/eraScale'
 import { useRaceData } from './hooks/useRaceData'
 import { useRaceRefs } from './hooks/useRaceRefs'
 import { useRaceClock } from './hooks/useRaceClock'
@@ -19,10 +19,10 @@ import EstimateNote from './components/EstimateNote'
 import {
   DEFAULT_MONTHS_PER_SEC,
   EASE_MS,
+  ERA_END_HOLD_MS,
   HOLD_MS,
   REACHED_MS,
   TOP_N,
-  YEAR_END_HOLD_MS,
 } from './constants'
 
 // Current-frame render state. Bar widths + value text are driven imperatively
@@ -37,7 +37,7 @@ const BikeGrowthRace = () => {
     maxT,
     cityMap,
     speedScale,
-    yearEndTimes,
+    eraEndTimes,
     axisMaxByMonthIndex,
     yearTicks,
   } = useRaceData()
@@ -61,10 +61,10 @@ const BikeGrowthRace = () => {
       document.removeEventListener('mousedown', handleOutsideMouseDown)
   }, [openInfo])
 
-  // Year-end playback state (refs — the axis is applied imperatively). `prevT`
-  // brackets each frame's advance to detect a year-end crossing; `transition`,
-  // when set, means we're paused at a year end and the axis is easing to the next
-  // year's scale. `clockRef` lets handleFrame reach the clock it feeds.
+  // Era-end playback state (refs — the axis is applied imperatively). `prevT`
+  // brackets each frame's advance to detect an era-end crossing; `transition`,
+  // when set, means we're paused at an era end and the axis is easing to the next
+  // era's scale. `clockRef` lets handleFrame reach the clock it feeds.
   const prevT = useRef(0)
   const transition = useRef<Transition | null>(null)
   const clockRef = useRef<ReturnType<typeof useRaceClock>>()
@@ -94,21 +94,17 @@ const BikeGrowthRace = () => {
   const handleFrame = useCallback(
     (incomingTime: number) => {
       let time = incomingTime
-      // Did the clock just pass a year end this frame? If so, clamp to it and
-      // freeze: a plain hold, or — when the next year needs a wider axis — the
-      // choreographed rescale (reach → ease → hold). The final year end is the
-      // finish line and is never held; the clock ends there.
+      // Did the clock just pass an era end this frame? If so, clamp to it and
+      // freeze while the axis eases to the next era's (wider) scale via the
+      // choreographed rescale (reach → ease → hold). The finish line isn't an era
+      // end, so it's never held; the clock ends there.
       const crossedIndex = getNextCrossingIndex(
         prevT.current,
         time,
-        yearEndTimes
+        eraEndTimes
       )
-      if (
-        crossedIndex !== -1 &&
-        crossedIndex < yearEndTimes.length - 1 &&
-        clockRef.current
-      ) {
-        time = yearEndTimes[crossedIndex]
+      if (crossedIndex !== -1 && clockRef.current) {
+        time = eraEndTimes[crossedIndex]
         clockRef.current.tRef.current = time
         const endingMax = axisMaxByMonthIndex[time]
         const nextMax = axisMaxByMonthIndex[time + 1] ?? endingMax
@@ -120,8 +116,9 @@ const BikeGrowthRace = () => {
           }
           clockRef.current.hold(REACHED_MS + EASE_MS + HOLD_MS)
         } else {
+          // Adjacent eras share a max (no rescale): a plain still pause.
           transition.current = null
-          clockRef.current.hold(YEAR_END_HOLD_MS)
+          clockRef.current.hold(ERA_END_HOLD_MS)
         }
       }
       prevT.current = time
@@ -137,7 +134,7 @@ const BikeGrowthRace = () => {
         setFrame({ monthTick, order })
       }
     },
-    [scoreAndPaint, yearEndTimes, axisMaxByMonthIndex]
+    [scoreAndPaint, eraEndTimes, axisMaxByMonthIndex]
   )
 
   const clock = useRaceClock({
@@ -171,7 +168,7 @@ const BikeGrowthRace = () => {
     if (ended) {
       setEnded(false)
       transition.current = null
-      prevT.current = 0 // replay from the start; re-arm year-end detection
+      prevT.current = 0 // replay from the start; re-arm era-end detection
       clock.play()
     } else if (clock.playing) {
       clock.pause()
@@ -215,6 +212,7 @@ const BikeGrowthRace = () => {
         months={months}
         speedScale={speedScale}
         playing={clock.playing}
+        frozen={clock.holding}
         reduceMotion={reduceMotion}
         openInfo={openInfo}
         onToggleInfo={(city) =>

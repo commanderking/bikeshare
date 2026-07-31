@@ -20,11 +20,14 @@ type RaceClock = {
   // Current clock time. A ref so per-frame reads never trigger a re-render.
   tRef: React.MutableRefObject<number>
   playing: boolean
+  // True while a `hold` is in effect — playing, but time is frozen. Lets the UI
+  // park the bikers (no trips accrue) even though `playing` stays true.
+  holding: boolean
   play: () => void
   pause: () => void
   seek: (time: number) => void
   // Freeze time (without changing `playing`) for `ms`, then resume. Used to pause
-  // at a year end. The frozen frame keeps re-rendering.
+  // at an era end. The frozen frame keeps re-rendering.
   hold: (ms: number) => void
 }
 
@@ -39,6 +42,7 @@ export const useRaceClock = ({
 }: Options): RaceClock => {
   const tRef = useRef(0)
   const [playing, setPlaying] = useState(false)
+  const [holding, setHolding] = useState(false)
 
   const rafRef = useRef<number>()
   const lastTsRef = useRef<number>()
@@ -75,6 +79,7 @@ export const useRaceClock = ({
           return
         }
         holdUntilRef.current = null
+        setHolding(false)
         onHoldEndRef.current()
       }
 
@@ -104,6 +109,7 @@ export const useRaceClock = ({
   const seek = useCallback(
     (time: number) => {
       holdUntilRef.current = null // scrubbing cancels any in-progress hold
+      setHolding(false)
       tRef.current = Math.max(0, Math.min(time, maxT))
       onFrameRef.current(tRef.current)
     },
@@ -112,6 +118,7 @@ export const useRaceClock = ({
 
   const hold = useCallback((ms: number) => {
     holdUntilRef.current = performance.now() + ms
+    setHolding(true)
   }, [])
 
   useEffect(() => {
@@ -124,5 +131,5 @@ export const useRaceClock = ({
     return stop
   }, [playing, loop, stop])
 
-  return { tRef, playing, play, pause, seek, hold }
+  return { tRef, playing, holding, play, pause, seek, hold }
 }

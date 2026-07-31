@@ -20,17 +20,27 @@ export const useBackfills = (): UseBackfills => {
             city: backfill.city,
             rows: await backfill.load(),
             mode: backfill.mode,
+            metroArea: backfill.metroArea,
           }
         } catch (error) {
           console.error(`backfill failed for ${backfill.city}`, error)
-          return { city: backfill.city, rows: [] as VolumeByMonth[], mode: backfill.mode }
+          return {
+            city: backfill.city,
+            rows: [] as VolumeByMonth[],
+            mode: backfill.mode,
+            metroArea: backfill.metroArea,
+          }
         }
       })
     ).then((results) => {
       if (cancelled) return
       const byCity = new Map<string, Loaded>()
       for (const result of results) {
-        byCity.set(result.city, { rows: result.rows, mode: result.mode })
+        byCity.set(result.city, {
+          rows: result.rows,
+          mode: result.mode,
+          metroArea: result.metroArea,
+        })
       }
       setState({ byCity, loading: false })
     })

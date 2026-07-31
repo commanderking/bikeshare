@@ -69,6 +69,32 @@ describe('applyBackfills', () => {
     expect(other.months).toEqual([{ year: 2020, month: 6, trips: 50 }])
   })
 
+  it('creates a new city from a whole_city backfill with no real data', () => {
+    const byCity = new Map<string, Loaded>([
+      [
+        'paris',
+        {
+          mode: 'whole_city',
+          metroArea: 'Paris',
+          rows: [
+            { year: 2007, month: 8, trips: 5 },
+            { year: 2007, month: 7, trips: 3 }, // out of order → sorted
+          ],
+        },
+      ],
+    ])
+    const result = applyBackfills(base, byCity)
+    const paris = result.find((cityTrips) => cityTrips.city === 'paris')!
+    expect(paris.metroArea).toBe('Paris')
+    expect(paris.months).toEqual([
+      { year: 2007, month: 7, trips: 3 },
+      { year: 2007, month: 8, trips: 5 },
+    ])
+    expect(paris.totalTrips).toBe(8)
+    // Existing cities are untouched by the new arrival.
+    expect(result).toHaveLength(base.length + 1)
+  })
+
   it('is a no-op when there are no backfills', () => {
     expect(applyBackfills(base, null)).toBe(base)
   })
