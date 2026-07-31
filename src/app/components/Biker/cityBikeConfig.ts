@@ -584,6 +584,32 @@ export const CITY_BIKE_CONFIG: Record<string, CityBikeConfig> = {
       crank: '#2a2a2a',
     },
   },
+  madrid: {
+    basketType: 'rack',
+    // BiciMAD has no branded rear panel — a blue mudguard rib arcs over the rear
+    // wheel, modeled as a CRESCENT in the frame blue (cf. Paris/Vélib).
+    skirtGuard: {
+      type: 'LEVEL_1',
+      color: '#1369d3',
+      outerGuard: {
+        color: '1a1a1a',
+      },
+    },
+    colors: {
+      frame: '#1369d3',
+      frontFender: '#1369d3',
+      frameDark: '#0d4fa0',
+      basket: '#1c1c1c',
+      saddle: '#1b1b1b',
+      tire: '#1a1a1a',
+      // Black e-bike rims, not the usual cream — kept dark, just above the tire.
+      wheelRim: '#4a4d50',
+      spoke: '#8a8d90',
+      hub: '#3f3f3f',
+      ring: '#2a2a2a',
+      crank: '#2a2a2a',
+    },
+  },
 }
 
 /** City ids that have a bike config, in display order. */

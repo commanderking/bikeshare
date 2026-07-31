@@ -36,6 +36,8 @@ export const CITY_IMAGE_URL: Record<string, string> = {
     'https://specials-images.forbesimg.com/imageserve/5f22f2118b8b903778058bf4/960x0.jpg',
   los_angeles:
     'https://nextcity.org/images/daily/_resized/LA_MetroBikeShare.jpg',
+  madrid:
+    'https://www.bicimad.com/sites/default/files/styles/features/public/2023-02/bike.png.webp?itok=0IVY1Tue',
   montreal: 'https://cdn.bixi.com/wp-content/uploads/2025/03/WR_6815.jpg',
   philadelphia:
     'https://www.rideindego.com/wp-content/uploads/2023/06/20230517-2.0-classic-png.jpg',
