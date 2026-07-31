@@ -1,5 +1,5 @@
 // Number of cities visible at once.
-export const TOP_N = 12
+export const TOP_N = 10
 
 // --- Row / bar layout ---
 export const BAR_HEIGHT = 30 // bar thickness, sized to sit level with the biker

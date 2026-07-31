@@ -566,6 +566,24 @@ export const CITY_BIKE_CONFIG: Record<string, CityBikeConfig> = {
       crank: '#9a9a9a',
     },
   },
+  paris: {
+    basketType: 'rack',
+    // Vélib' has no branded rear panel — just a green fender rib over the wheel.
+    skirtGuard: { type: 'CRESCENT', color: '#85bf42' },
+    colors: {
+      frame: '#74736e',
+      frontFender: '#1a1a1a',
+      frameDark: '#5a5a55',
+      basket: '#85bf42',
+      saddle: '#1b1b1b',
+      tire: '#1a1a1a',
+      wheelRim: '#c8cbce',
+      spoke: '#c8cbce',
+      hub: '#7a7a7a',
+      ring: '#85bf42',
+      crank: '#2a2a2a',
+    },
+  },
 }
 
 /** City ids that have a bike config, in display order. */

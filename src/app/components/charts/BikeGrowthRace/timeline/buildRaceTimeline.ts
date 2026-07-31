@@ -154,7 +154,12 @@ export const buildRaceTimeline = (
   const bounds = getAxisBounds(prepared, finalMonth)
   if (!bounds) return { months: [], cities: [] }
 
-  const { minOrdinal, length } = bounds
+  // Open on an empty month before any city has data, so the chart starts blank
+  // and the first tick fills the first month from zero — the same zero-ramp every
+  // joining city gets (see buildCity's firstIndex-1 seed), now applied to the
+  // earliest city too instead of it popping in fully formed.
+  const minOrdinal = bounds.minOrdinal - 1
+  const length = bounds.length + 1
   const months = Array.from({ length }, (_, monthIndex) =>
     getMonthKey(minOrdinal + monthIndex)
   )
@@ -200,7 +205,9 @@ export const scoreCities = (
   const scored: Array<[RaceCity, number]> = []
   for (const city of cities) {
     const value = getValueAt(city, time)
-    if (value !== undefined) scored.push([city, value])
+    // Skip cities still at zero (the pre-launch ramp seed) so the chart opens
+    // blank and a city surfaces only once it has trips.
+    if (value !== undefined && value > 0) scored.push([city, value])
   }
   scored.sort((a, b) => b[1] - a[1])
   return scored.slice(0, topN)
