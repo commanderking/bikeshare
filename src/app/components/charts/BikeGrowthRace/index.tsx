@@ -94,7 +94,8 @@ const BikeGrowthRace = () => {
         axisMaxByMonthIndex
       )
       paintAxis(refs, axis)
-      paintBars(refs, top, axis.axisValue)
+      // The break slides + dissolves off the in-flight rescale (see paintBars).
+      paintBars(refs, top, axis.axisValue, transition.current)
       paintReadouts(refs, time, months)
       return top.map(([raceCity]) => raceCity.city)
     },

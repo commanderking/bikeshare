@@ -6,22 +6,22 @@ import {
   getNextCrossingIndex,
 } from './eraScale'
 
-// Nov 2011 → Feb 2012: indices 0..3, straddling the 120M → 250M era boundary.
+// Nov 2014 → Feb 2015: indices 0..3, straddling the 50M → 125M era boundary.
 const months: MonthKey[] = [
-  { year: 2011, month: 11 },
-  { year: 2011, month: 12 },
-  { year: 2012, month: 1 },
-  { year: 2012, month: 2 },
+  { year: 2014, month: 11 },
+  { year: 2014, month: 12 },
+  { year: 2015, month: 1 },
+  { year: 2015, month: 2 },
 ]
 
 describe('computeEraEndTimes', () => {
   it('returns only the Decembers that close an era, skipping interior ones', () => {
-    // Dec 2011 and Dec 2014 end eras; Dec 2012/2013 fall inside the 2012–2014 era.
+    // Dec 2014 and Dec 2017 end eras; Dec 2015/2016 fall inside the 2015–2017 era.
     const span: MonthKey[] = [
-      { year: 2011, month: 12 }, // 0 — era end
-      { year: 2012, month: 12 }, // 1 — interior
-      { year: 2013, month: 12 }, // 2 — interior
-      { year: 2014, month: 12 }, // 3 — era end
+      { year: 2014, month: 12 }, // 0 — era end
+      { year: 2015, month: 12 }, // 1 — interior
+      { year: 2016, month: 12 }, // 2 — interior
+      { year: 2017, month: 12 }, // 3 — era end
     ]
     expect(computeEraEndTimes(span)).toEqual([0, 3])
   })
@@ -33,9 +33,9 @@ describe('computeEraEndTimes', () => {
 })
 
 describe('computeAxisMaxByMonthIndex', () => {
-  it('maps each month to its era’s axis max (120M through 2011, 250M from 2012)', () => {
+  it('maps each month to its era’s axis max (50M through 2014, 125M from 2015)', () => {
     expect(computeAxisMaxByMonthIndex(months)).toEqual([
-      120_000_000, 120_000_000, 250_000_000, 250_000_000,
+      50_000_000, 50_000_000, 125_000_000, 125_000_000,
     ])
   })
 })

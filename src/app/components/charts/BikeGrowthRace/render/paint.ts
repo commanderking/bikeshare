@@ -1,5 +1,5 @@
 import { MutableRefObject, RefObject } from 'react'
-import { AxisState } from './axisState'
+import { AxisState, Transition } from './axisState'
 import { MonthKey, RaceCity } from '../timeline/buildRaceTimeline'
 import {
   BAR_HARD_MAX_PCT,
@@ -44,18 +44,59 @@ export const paintAxis = (refs: RaceRefs, axis: AxisState): void => {
   }
 }
 
-// Sizes each visible bar to the current axis (the final-segment leader may
-// overshoot BAR_MAX_PCT, capped at BAR_HARD_MAX_PCT) and writes its value label.
+// Places the off-chart break for one bar. It enters once the value passes the
+// axis max — the bar crossing the last tick (only Paris does). Steady state:
+// parked at that tick. During a rescale it keys off the *old* max, so the break
+// stays with Paris through the whole ease rather than dropping as the bar unpins;
+// and when the new scale takes Paris back under its max (the 2023 finale), it
+// slides inward — tracking the old max to its place on the opening axis — while
+// dissolving, so it's gone and Paris's green has filled back in by the time the
+// axis settles. Slide and fade both run off `axisValue`, so they finish together.
+const paintOffChartBreak = (
+  bar: HTMLDivElement,
+  value: number,
+  axisValue: number,
+  transition: Transition | null
+): void => {
+  const breakMark = bar.parentElement?.querySelector<HTMLElement>(
+    '[data-off-chart-break]'
+  )
+  if (!breakMark) return
+
+  const oldMax = transition ? transition.fromMax : axisValue
+  if (value <= oldMax) {
+    breakMark.style.opacity = '0' // within the axis — no break
+    return
+  }
+
+  if (transition && value <= transition.toMax) {
+    // Healing into the finale: slide with the old max, dissolving as it opens.
+    breakMark.style.left = `${(transition.fromMax / axisValue) * BAR_MAX_PCT}%`
+    const opened =
+      (axisValue - transition.fromMax) / (transition.toMax - transition.fromMax)
+    breakMark.style.opacity = `${Math.max(0, 1 - opened)}`
+  } else {
+    // Still past the axis (steady state or a non-final rescale): park at the tick.
+    breakMark.style.left = `${BAR_MAX_PCT}%`
+    breakMark.style.opacity = '1'
+  }
+}
+
+// Sizes each visible bar to the current axis, writes its value label, and places
+// the off-chart break (see paintOffChartBreak). `transition` is the in-flight
+// rescale, if any — it drives the break's slide-and-dissolve into the finale.
 export const paintBars = (
   refs: RaceRefs,
   top: Array<[RaceCity, number]>,
-  axisValue: number
+  axisValue: number,
+  transition: Transition | null = null
 ): void => {
   for (const [raceCity, value] of top) {
     const bar = refs.barRefs.current.get(raceCity.city)
     if (bar) {
-      const pct = Math.min((value / axisValue) * BAR_MAX_PCT, BAR_HARD_MAX_PCT)
-      bar.style.width = `${pct}%`
+      const rawPct = (value / axisValue) * BAR_MAX_PCT
+      bar.style.width = `${rawPct > BAR_HARD_MAX_PCT ? BAR_HARD_MAX_PCT : rawPct}%`
+      paintOffChartBreak(bar, value, axisValue, transition)
     }
     const label = refs.valueRefs.current.get(raceCity.city)
     if (label) label.textContent = formatValue(value)

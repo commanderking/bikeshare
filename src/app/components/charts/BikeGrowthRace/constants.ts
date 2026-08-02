@@ -2,9 +2,9 @@
 export const TOP_N = 10
 
 // --- Row / bar layout ---
-export const BAR_HEIGHT = 30 // bar thickness, sized to sit level with the biker
+export const BAR_HEIGHT = 36 // bar thickness; leaves a 6px gap within the row pitch
 export const ROW_HEIGHT = 42 // vertical pitch between rows (bar + gap)
-export const BIKER_WIDTH = 30
+export const BIKER_WIDTH = 36 // matches BAR_HEIGHT so the bike fills the bar's height
 // The default biker viewBox has ~45px of empty padding each side; crop to the
 // bike's horizontal bounds so it hugs the end of the bar (matches AllTimeTripsBar).
 export const BIKER_VIEWBOX = '44 0 116 112'
@@ -34,23 +34,32 @@ export const FINAL_MONTH: { year: number; month: number } | null = {
 
 // The race advances through "eras" — spans of years that share one x-axis scale.
 // It pauses only at an era's end (not every year); the axis then eases open to the
-// next era's max during that pause. Because the scale is fixed for a whole era,
-// each max must hold the era's peak — the leader's total at its final year — so
-// these are sized against the data (the leader is monotonic, so end-of-era is the
-// peak). Ticks fall out of the max (TICK_INTERVALS steps), so 50M reads "0, 5M …".
-// `startYear` opens an era; it runs until the next era opens.
+// next era's max during that pause. Ticks fall out of the max (TICK_INTERVALS
+// steps), so 40M reads "0, 4M …". `startYear` opens an era; it runs until the next
+// opens.
 //
-// Paris (Vélib', from 2007) leads every year, so the maxes track its running
-// cumulative at each era end — each sits just above that total so its bar nears
-// full at the pause.
+// Three regimes:
+//   2007–2014 — the axis holds at 50M. Paris passes 50M in 2009 and breaks off
+//     the chart (see BAR_HARD_MAX_PCT), so this whole stretch is the rest of the
+//     field climbing toward that mark — by end-2014 the chasers (Taipei 34.6M,
+//     London 32.1M) reach ~65–70% of it. The first pause is Dec 2014, when that
+//     climb pays off.
+//   2015–2022 — the axis is sized to the *runner-up*: each max puts the 2nd-place
+//     city at ~75% of the axis at the era's end, leaving headroom that reads as
+//     Paris's continuing dominance while keeping the pack legible. This works
+//     because the runner-up is monotonic (the 2nd-largest of monotonically-growing
+//     cumulatives only grows), so its era-end value is the era's peak — the number
+//     each max clears. Paris stays off the chart, but by less each era.
+//   2023–2025 — the finale switches to Paris's *own* total (650M), so the leader
+//     drops back onto the chart as a whole bar (~82%) and the off-chart break
+//     heals: as the axis opens into this era the break fades and Paris's green
+//     fills back in (see paintBars). The runner-up (Taipei) sits ~52% here.
 export const ERAS = [
-  { startYear: 2007, max: 50_000_000 }, // 2007–2008, Paris 40.5M
-  { startYear: 2009, max: 120_000_000 }, // 2009–2011, Paris 119.3M
-  { startYear: 2012, max: 250_000_000 }, // 2012–2014, Paris 227.9M
-  { startYear: 2015, max: 350_000_000 }, // 2015–2017, Paris 343.6M
-  { startYear: 2018, max: 400_000_000 }, // 2018–2019, Paris 374.6M
-  { startYear: 2020, max: 500_000_000 }, // 2020–2022, Paris 490.9M
-  { startYear: 2023, max: 650_000_000 }, // 2023–2025, Paris 632.4M
+  { startYear: 2007, max: 50_000_000 }, //  2007–2014 held at 50M
+  { startYear: 2015, max: 125_000_000 }, // #2 Taipei 95.0M → 76%  (Paris 343.6M)
+  { startYear: 2018, max: 200_000_000 }, // #2 Taipei 149.8M → 75% (Paris 374.6M)
+  { startYear: 2020, max: 310_000_000 }, // #2 Taipei 232.8M → 75% (Paris 490.9M)
+  { startYear: 2023, max: 650_000_000 }, // Paris's own scale — leader 632.4M → 82%
 ]
 
 // The last year of every era except the final one — the years the race pauses at
@@ -66,10 +75,10 @@ export const axisMaxForYear = (year: number): number => {
   return max
 }
 
-// Defensive hard cap on bar width (% of track) so a bar that ever exceeds its
-// axis max still leaves room for its value label + biker. Above BAR_MAX_PCT.
-// With the current era maxes no bar reaches it (Paris leads each era end at
-// ~82%), but it guards against a future city outrunning its era's scale.
+// The pin for a bar that overshoots its axis. Paris runs past every era's scale
+// up to 2022 (the 2023 finale is sized to Paris itself, so it fits); its bar
+// clamps here, just past the last tick, while its value label carries the true
+// total. Above BAR_MAX_PCT so the pinned bar still leaves room for that label + biker.
 export const BAR_HARD_MAX_PCT = 88
 // Number of intervals on the top x-axis (→ TICK_INTERVALS + 1 ticks/labels).
 export const TICK_INTERVALS = 10

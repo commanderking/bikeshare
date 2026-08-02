@@ -6,7 +6,7 @@ import Biker, {
   DownTubeCurve,
   SkirtGuard,
 } from '@/app/components/Biker'
-import { BIKER_VIEWBOX, REORDER_MS } from '../constants'
+import { BAR_MAX_PCT, BIKER_VIEWBOX, REORDER_MS } from '../constants'
 import { SizeScale } from '../sizing'
 
 export type BikerConfig = {
@@ -111,7 +111,7 @@ const RaceRow = ({
 
     {/* Track: bar grows, pushing the biker (snug against its end) and then the
         value label toward the right. */}
-    <div className="flex min-w-0 flex-1 items-center gap-1">
+    <div className="relative flex min-w-0 flex-1 items-center gap-1">
       <div
         ref={barRef}
         className="rounded-r"
@@ -121,6 +121,25 @@ const RaceRow = ({
           background: barColor,
         }}
       />
+      {/* Off-chart break: a whitespace gap flanked by two black lines standing 3px
+          past the bar top and bottom. The painter drives its x + opacity each
+          frame — parked at the max tick while Paris runs off the chart, then
+          sliding inward and dissolving as the axis opens into the finale. `left`
+          here is just the initial park spot. */}
+      <div
+        data-off-chart-break
+        className="pointer-events-none absolute flex items-center opacity-0"
+        style={{
+          left: `${BAR_MAX_PCT}%`,
+          top: '50%',
+          height: size.barHeight + 6,
+          transform: 'translate(-50%, -50%)',
+        }}
+      >
+        <div className="bg-black dark:bg-white" style={{ width: 2, height: '100%' }} />
+        <div className="bg-white dark:bg-gray-900" style={{ width: 5, height: size.barHeight }} />
+        <div className="bg-black dark:bg-white" style={{ width: 2, height: '100%' }} />
+      </div>
       {/* Biker rides right at the bar's end, so it tracks the bar smoothly and
           never shifts with the (variable-width) number, which now trails it. */}
       <div className="shrink-0" style={{ width: size.bikerWidth }}>
