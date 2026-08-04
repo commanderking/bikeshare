@@ -1,5 +1,19 @@
+import type {
+  BasketType,
+  BikerColors,
+  DownTubeCurve,
+  SkirtGuard,
+} from '@/app/components/Biker'
 import { BAR_COLOR } from '../constants'
-import type { BikerConfig } from '../components/RaceRow'
+
+// A city's Biker configuration as the race stores it (see cityBikeConfig) — the
+// livery parts that vary per city, and the shape barColorFor reads.
+export type BikerConfig = {
+  colors?: Partial<BikerColors>
+  basketType?: BasketType
+  skirtGuard?: SkirtGuard
+  downTube?: DownTubeCurve
+}
 
 // A color is "pale" — near-white or light-gray — when even its darkest channel
 // is bright. This keys on paleness, not luminance, so saturated colors that

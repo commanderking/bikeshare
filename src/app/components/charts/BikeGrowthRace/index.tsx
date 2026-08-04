@@ -6,134 +6,66 @@ import {
   prefersReducedMotion,
 } from '@/app/components/charts/AllTimeTripsBar/motion'
 import { scoreCities } from './timeline/buildRaceTimeline'
-import { computeAxisState, Transition } from './render/axisState'
-import { paintAxis, paintBars, paintReadouts } from './render/paint'
-import { getNextCrossingIndex } from './timeline/eraScale'
 import { useRaceData } from './hooks/useRaceData'
-import { useRaceRefs } from './hooks/useRaceRefs'
 import { useRaceClock } from './hooks/useRaceClock'
 import { useFullscreen } from './hooks/useFullscreen'
-import { useFitSizing } from './hooks/useFitSizing'
-import TopAxis from './components/TopAxis'
-import RaceTrack from './components/RaceTrack'
+import { useZoomFit } from './hooks/useZoomFit'
+import ZoomRaceTrack, { ZoomTrackHandle } from './components/ZoomRaceTrack'
 import Controls from './components/Controls'
 import EstimateNote from './components/EstimateNote'
-import {
-  DEFAULT_MONTHS_PER_SEC,
-  EASE_MS,
-  ERA_END_HOLD_MS,
-  HOLD_MS,
-  REACHED_MS,
-  TOP_N,
-} from './constants'
+import { DEFAULT_MONTHS_PER_SEC, TOP_N } from './constants'
 
 // Current-frame render state. Bar widths + value text are driven imperatively
 // every frame; React only re-renders when the rank order or the month changes.
 type Frame = { monthTick: number; order: string[] }
 
+// Duration of the end-of-race morph into the full stacked layout.
+const MORPH_MS = 2500
+
 const BikeGrowthRace = () => {
-  const {
-    loading,
-    months,
-    cities,
-    maxT,
-    cityMap,
-    speedScale,
-    eraEndTimes,
-    axisMaxByMonthIndex,
-    yearTicks,
-  } = useRaceData()
-  const refs = useRaceRefs()
+  const { loading, months, cities, maxT, cityMap, speedScale, yearTicks } =
+    useRaceData()
 
   // Fullscreen fills the screen: the chart root goes fullscreen (hiding the page
-  // chrome for free), and the track area's measured height drives the size scale
-  // so rows, bikers, and text all grow to fit.
+  // chrome for free), and the track area's measured height drives the size scale so
+  // Paris, the pack, bikers, and text all grow to fit.
   const rootRef = useRef<HTMLDivElement>(null)
   const trackAreaRef = useRef<HTMLDivElement>(null)
   const { isFullscreen, toggle: toggleFullscreen } = useFullscreen(rootRef)
-  const size = useFitSizing(trackAreaRef, isFullscreen)
+  const size = useZoomFit(trackAreaRef, isFullscreen)
 
   const [reduceMotion] = useState(prefersReducedMotion)
   const [frame, setFrame] = useState<Frame>({ monthTick: 0, order: [] })
   const [ended, setEnded] = useState(false)
   const [speedMul, setSpeedMul] = useState(1)
   const speedMulRef = useRef(1)
-  const [openInfo, setOpenInfo] = useState<string | null>(null)
-  // Close the "data ends" popover on any outside click.
-  useEffect(() => {
-    if (!openInfo) return
-    const handleOutsideMouseDown = (event: MouseEvent) => {
-      if (!(event.target as Element).closest('[data-info-ui]'))
-        setOpenInfo(null)
-    }
-    document.addEventListener('mousedown', handleOutsideMouseDown)
-    return () =>
-      document.removeEventListener('mousedown', handleOutsideMouseDown)
-  }, [openInfo])
+  // Bumped on replay to remount the view, clearing the morph's imperative styles so
+  // it snaps cleanly back to the zoom layout.
+  const [replayCount, setReplayCount] = useState(0)
 
-  // Era-end playback state (refs — the axis is applied imperatively). `prevT`
-  // brackets each frame's advance to detect an era-end crossing; `transition`,
-  // when set, means we're paused at an era end and the axis is easing to the next
-  // era's scale. `clockRef` lets handleFrame reach the clock it feeds.
-  const prevT = useRef(0)
-  const transition = useRef<Transition | null>(null)
   const clockRef = useRef<ReturnType<typeof useRaceClock>>()
+  // The view paints itself imperatively through this handle each frame.
+  const zoomTrackRef = useRef<ZoomTrackHandle>(null)
+  const scrubberRef = useRef<HTMLInputElement>(null)
 
   // Change detection for setFrame.
   const lastMonthTick = useRef(-1)
   const lastOrder = useRef<string[]>([])
 
-  // Score the field at t and paint the bars/axis/readouts imperatively; returns
-  // the top-N order. No React state is touched here.
+  // Score the field at t, paint the view imperatively, and sync the scrubber;
+  // returns the top-N order. No React state is touched here.
   const scoreAndPaint = useCallback(
     (time: number): string[] => {
       const top = scoreCities(cities, time, TOP_N)
-      const axis = computeAxisState(
-        time,
-        transition.current,
-        axisMaxByMonthIndex
-      )
-      paintAxis(refs, axis)
-      // The break slides + dissolves off the in-flight rescale (see paintBars).
-      paintBars(refs, top, axis.axisValue, transition.current)
-      paintReadouts(refs, time, months)
+      zoomTrackRef.current?.paint(time)
+      if (scrubberRef.current) scrubberRef.current.value = String(time)
       return top.map(([raceCity]) => raceCity.city)
     },
-    [cities, months, axisMaxByMonthIndex, refs]
+    [cities]
   )
 
   const handleFrame = useCallback(
-    (incomingTime: number) => {
-      let time = incomingTime
-      // Did the clock just pass an era end this frame? If so, clamp to it and
-      // freeze while the axis eases to the next era's (wider) scale via the
-      // choreographed rescale (reach → ease → hold). The finish line isn't an era
-      // end, so it's never held; the clock ends there.
-      const crossedIndex = getNextCrossingIndex(
-        prevT.current,
-        time,
-        eraEndTimes
-      )
-      if (crossedIndex !== -1 && clockRef.current) {
-        time = eraEndTimes[crossedIndex]
-        clockRef.current.tRef.current = time
-        const endingMax = axisMaxByMonthIndex[time]
-        const nextMax = axisMaxByMonthIndex[time + 1] ?? endingMax
-        if (nextMax > endingMax) {
-          transition.current = {
-            fromMax: endingMax,
-            toMax: nextMax,
-            startMs: performance.now(),
-          }
-          clockRef.current.hold(REACHED_MS + EASE_MS + HOLD_MS)
-        } else {
-          // Adjacent eras share a max (no rescale): a plain still pause.
-          transition.current = null
-          clockRef.current.hold(ERA_END_HOLD_MS)
-        }
-      }
-      prevT.current = time
-
+    (time: number) => {
       const order = scoreAndPaint(time)
       const monthTick = Math.floor(time)
       const orderChanged =
@@ -145,7 +77,7 @@ const BikeGrowthRace = () => {
         setFrame({ monthTick, order })
       }
     },
-    [scoreAndPaint, eraEndTimes, axisMaxByMonthIndex]
+    [scoreAndPaint]
   )
 
   const clock = useRaceClock({
@@ -153,12 +85,28 @@ const BikeGrowthRace = () => {
     getMonthsPerSec: () => DEFAULT_MONTHS_PER_SEC * speedMulRef.current,
     onFrame: handleFrame,
     onEnd: () => setEnded(true),
-    // Freeze finished (axis fully eased + held): clear the transition and resume.
-    onHoldEnd: () => {
-      transition.current = null
-    },
+    onHoldEnd: () => {}, // the view never holds — it runs straight through
   })
   clockRef.current = clock
+
+  // The finale: once the race ends, morph the layout toward the full stacked view
+  // over MORPH_MS — dissolve the magnifier chrome, then travel the bars out. Driven
+  // imperatively (no per-frame React re-render); snaps back on replay (ended → false).
+  useEffect(() => {
+    if (!ended) {
+      zoomTrackRef.current?.paint(clockRef.current?.tRef.current ?? 0, 0)
+      return
+    }
+    const startMs = performance.now()
+    let raf = 0
+    const step = () => {
+      const morph = Math.min((performance.now() - startMs) / MORPH_MS, 1)
+      zoomTrackRef.current?.paint(clockRef.current?.tRef.current ?? maxT, morph)
+      if (morph < 1) raf = requestAnimationFrame(step)
+    }
+    raf = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(raf)
+  }, [ended, maxT])
 
   // Initialize (and, unless reduced motion, auto-play) once the data is in.
   useIsomorphicLayoutEffect(() => {
@@ -178,8 +126,7 @@ const BikeGrowthRace = () => {
   const handlePlayPause = () => {
     if (ended) {
       setEnded(false)
-      transition.current = null
-      prevT.current = 0 // replay from the start; re-arm era-end detection
+      setReplayCount((count) => count + 1) // remount the view (clears the morph)
       clock.play()
     } else if (clock.playing) {
       clock.pause()
@@ -191,10 +138,6 @@ const BikeGrowthRace = () => {
   const handleScrub = (time: number) => {
     clock.pause()
     if (ended) setEnded(false)
-    // A scrub is a jump, not a crossing: cancel any transition and move the
-    // bracket to `time` so the seek's frame doesn't fire a hold.
-    transition.current = null
-    prevT.current = time
     clock.seek(time)
   }
 
@@ -226,16 +169,8 @@ const BikeGrowthRace = () => {
         </button>
       </div>
 
-      <TopAxis
-        tickWrapRefs={refs.axisTickWrapRefs}
-        tickLabelRefs={refs.axisTickRefs}
-        travelerRef={refs.travelerRef}
-        travelerLabelRef={refs.travelerLabelRef}
-        size={size}
-      />
-
-      {/* In fullscreen this fills the leftover height and centers the track; its
-          measured height is what useFitSizing splits across the rows. */}
+      {/* In fullscreen this fills the leftover height and centers the view; its
+          measured height is what useZoomFit scales the layout against. */}
       <div
         ref={trackAreaRef}
         className={
@@ -244,23 +179,17 @@ const BikeGrowthRace = () => {
             : undefined
         }
       >
-        <RaceTrack
+        <ZoomRaceTrack
+          key={replayCount}
+          ref={zoomTrackRef}
           order={frame.order}
-          monthTick={frame.monthTick}
           cityMap={cityMap}
+          monthTick={frame.monthTick}
           months={months}
+          reduceMotion={reduceMotion}
+          size={size}
           speedScale={speedScale}
           playing={clock.playing}
-          size={size}
-          frozen={clock.holding}
-          reduceMotion={reduceMotion}
-          openInfo={openInfo}
-          onToggleInfo={(city) =>
-            setOpenInfo((prev) => (prev === city ? null : city))
-          }
-          barRefs={refs.barRefs}
-          valueRefs={refs.valueRefs}
-          monthLabelRef={refs.monthLabelRef}
         />
       </div>
 
@@ -272,7 +201,7 @@ const BikeGrowthRace = () => {
         onSpeedChange={handleSpeedChange}
         maxT={maxT}
         onScrub={handleScrub}
-        scrubberRef={refs.scrubberRef}
+        scrubberRef={scrubberRef}
         yearTicks={yearTicks}
       />
 
