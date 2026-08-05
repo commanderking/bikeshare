@@ -3,9 +3,14 @@
 import { useMemo } from 'react'
 import { useAllTimeTrips } from '@/app/hooks/useAllTimeTrips'
 import { applyBackfills } from '../backfill/backfill'
-import { buildRaceTimeline, MonthKey, RaceCity } from '../timeline/buildRaceTimeline'
+import {
+  buildRaceTimeline,
+  getEverTopCities,
+  MonthKey,
+  RaceCity,
+} from '../timeline/buildRaceTimeline'
 import { makeSpeedScale, referenceGrowth } from '../render/speed'
-import { FINAL_MONTH } from '../constants'
+import { FINAL_MONTH, TOP_N } from '../constants'
 import { useBackfills } from './useBackfills'
 
 export type YearTick = { year: number; monthIndex: number }
@@ -16,6 +21,8 @@ export type RaceData = {
   cities: RaceCity[]
   maxT: number
   cityMap: Map<string, RaceCity>
+  // Cities that reach the top-N at any point — the field allowed on the chase path.
+  everTopCities: Set<string>
   speedScale: (growth: number) => number
   yearTicks: YearTick[]
 }
@@ -45,6 +52,10 @@ export const useRaceData = (): RaceData => {
     () => new Map(cities.map((raceCity) => [raceCity.city, raceCity])),
     [cities]
   )
+  const everTopCities = useMemo(
+    () => getEverTopCities(cities, months.length, TOP_N),
+    [cities, months.length]
+  )
   const speedScale = useMemo(
     () => makeSpeedScale(referenceGrowth(cities)),
     [cities]
@@ -68,6 +79,7 @@ export const useRaceData = (): RaceData => {
     cities,
     maxT,
     cityMap,
+    everTopCities,
     speedScale,
     yearTicks,
   }

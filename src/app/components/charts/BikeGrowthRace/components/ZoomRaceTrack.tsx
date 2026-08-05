@@ -14,6 +14,7 @@ import {
 import { paintZoomFrame } from '../render/paintZoom'
 import { useZoomRefs } from '../hooks/useZoomRefs'
 import ParisLeader from './zoom/ParisLeader'
+import ChasingBikers from './zoom/ChasingBikers'
 import ConnectorBand from './zoom/ConnectorBand'
 import PackPanel from './zoom/PackPanel'
 import PackRow from './zoom/PackRow'
@@ -29,6 +30,8 @@ type Props = {
   // Top-N city ids, ranked; [0] is Paris (the leader), the rest are the pack.
   order: string[]
   cityMap: Map<string, RaceCity>
+  // Cities that ever reach the top-N — the only ones put on the chase path.
+  everTopCities: Set<string>
   monthTick: number
   months: MonthKey[]
   reduceMotion: boolean
@@ -55,6 +58,7 @@ const ZoomRaceTrack = forwardRef<ZoomTrackHandle, Props>(function ZoomRaceTrack(
   {
     order,
     cityMap,
+    everTopCities,
     monthTick,
     months,
     reduceMotion,
@@ -78,7 +82,7 @@ const ZoomRaceTrack = forwardRef<ZoomTrackHandle, Props>(function ZoomRaceTrack(
 
   // Value-independent geometry + sizing for the shell.
   const geom = computeZoomLayout([])
-  const bandTop = size.leaderTop + size.barHeight + size.bandGap
+  const bandTop = size.leaderTop + size.leaderBarHeight + size.bandGap
   const bandHeight = size.panelTop - bandTop
   const leaderMetro = order[0] ? cityMap.get(order[0])?.metroArea : undefined
   const monthKey = months[Math.min(Math.max(monthTick, 0), months.length - 1)]
@@ -100,6 +104,27 @@ const ZoomRaceTrack = forwardRef<ZoomTrackHandle, Props>(function ZoomRaceTrack(
   }
   const leaderCity = order[0]
   const leaderBiker = leaderCity ? getBikerProps(leaderCity) : null
+  // Every city that ever contends (reaches the top-N at some month), except the
+  // leader, rides Paris's bar — a trimmed field, not literally every city. Only cities
+  // with bike art are drawn, sorted by order of appearance (each city's firstIndex,
+  // its join month on the axis) so joinOrder staggers them earliest-first.
+  const chasingBikers = [...cityMap.values()]
+    .filter(
+      (raceCity) =>
+        raceCity.city !== leaderCity &&
+        everTopCities.has(raceCity.city) &&
+        CITY_BIKE_CONFIG[raceCity.city]
+    )
+    .sort(
+      (cityA, cityB) =>
+        cityA.firstIndex - cityB.firstIndex ||
+        cityA.city.localeCompare(cityB.city)
+    )
+    .map((raceCity, joinOrder) => ({
+      city: raceCity.city,
+      joinOrder,
+      biker: getBikerProps(raceCity.city),
+    }))
   const rowLeft = `calc(${formatPct(geom.panelLeft)} + ${size.rowInset}px)`
   const rowRight = `calc(${formatPct(1 - geom.panelRight)} + ${size.rowInset}px)`
   const rightColumnLeft = formatPct(geom.panelRight + 0.04)
@@ -125,6 +150,12 @@ const ZoomRaceTrack = forwardRef<ZoomTrackHandle, Props>(function ZoomRaceTrack(
           markerRef={refs.marker}
         />
       )}
+
+      <ChasingBikers
+        bikers={chasingBikers}
+        size={size}
+        registerRef={(city) => setRef(refs.chasingBikers.current, city)}
+      />
 
       <ConnectorBand
         top={bandTop}

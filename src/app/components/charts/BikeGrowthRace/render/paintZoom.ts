@@ -1,8 +1,15 @@
 import { getValueAt, RaceCity } from '../timeline/buildRaceTimeline'
-import { BAR_HEIGHT, BAR_MAX_PCT, formatValue, ROW_HEIGHT } from '../constants'
+import {
+  BAR_HEIGHT,
+  BAR_MAX_PCT,
+  formatValue,
+  REAR_WHEEL_FRAC,
+  ROW_HEIGHT,
+} from '../constants'
 import {
   computeZoomLayout,
   formatPct,
+  getBarFracOnLeader,
   getZoomStageHeight,
   RankedCity,
   SECOND_PLACE_PCT,
@@ -138,6 +145,28 @@ const paintPlay = (refs: ZoomRefs, frame: Frame) => {
   }
 }
 
+// The bikers riding Paris's bar — the whole field, not just the top-N pack. Each is
+// parked so its rear wheel (REAR_WHEEL_FRAC into the box) lands on its own value's x
+// on Paris's scale; the px offset goes through calc so it stays wheel-accurate at any
+// stage width. Hidden until the city launches; all dissolve with the chrome at the
+// finale. Runs every frame (both beats), keyed by the live chase-biker refs.
+const paintChaseBikers = (
+  refs: ZoomRefs,
+  inputs: ZoomPaintInputs,
+  frame: Frame,
+  time: number
+) => {
+  const { cityMap, size } = inputs
+  const wheelOffset = REAR_WHEEL_FRAC * size.bikerWidth
+  refs.chasingBikers.current.forEach((el, city) => {
+    const raceCity = cityMap.get(city)
+    const value = raceCity ? getValueAt(raceCity, time) ?? 0 : 0
+    el.style.opacity = value > 0 ? String(frame.chrome) : '0'
+    const chaseX = getBarFracOnLeader(value, frame.layout.refMax)
+    el.style.left = `calc(${formatPct(chaseX)} - ${wheelOffset}px)`
+  })
+}
+
 // Beat 2 (finale): travel every bar from the zoom layout to the absolute stacked one,
 // interpolated by `settle`. `stageW` converts the layout's stage-fractions to px.
 const paintMorph = (
@@ -159,7 +188,7 @@ const paintMorph = (
     getAbsBarFrac(layout.leader?.value ?? 0),
     settle
   )
-  const lHeight = lerp(size.barHeight, absBarH, settle)
+  const lHeight = lerp(size.leaderBarHeight, absBarH, settle)
   // Bar left = name column + a tailGap (the same gap the pack rows put between their
   // name and bar), so Paris lines up with them at the finish.
   const barLeftPx = ABS_NAME_FRAC * stageW * settle + size.tailGap * settle
@@ -235,6 +264,7 @@ export const paintZoomFrame = (
 ) => {
   const frame = readFrame(inputs, time, morph)
   paintChrome(refs, frame, inputs.size)
+  paintChaseBikers(refs, inputs, frame, time)
   if (morph <= 0) {
     paintPlay(refs, frame)
     return
