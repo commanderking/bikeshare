@@ -18,6 +18,10 @@ export type ZoomLayout = {
 
 export const SECOND_PLACE_PCT = 75 // #2 fills 75% of the pack's bar track
 
+// A stage-fraction as a CSS percentage string — the bridge from this file's [0..1]
+// coordinates to the styles the render and paint apply.
+export const formatPct = (fraction: number) => `${fraction * 100}%`
+
 const PANEL_LEFT = 0.03 // stage-fraction
 const PANEL_WIDTH = 0.63 // extends into the halved left padding (right edge unchanged)
 const PANEL_RIGHT = PANEL_LEFT + PANEL_WIDTH
@@ -115,11 +119,11 @@ export const makeZoomSize = (scale: number): ZoomSize => ({
   yearFont: BASE_ZOOM.yearFont * scale,
 })
 
-export const zoomPanelHeight = (size: ZoomSize): number =>
+export const getZoomPanelHeight = (size: ZoomSize): number =>
   size.panelPadTop + (TOP_N - 1) * size.rowPitch + size.panelPadBottom
 
-export const zoomStageHeight = (size: ZoomSize): number =>
-  size.panelTop + zoomPanelHeight(size)
+export const getZoomStageHeight = (size: ZoomSize): number =>
+  size.panelTop + getZoomPanelHeight(size)
 
 // The natural (unscaled) stage height — the reference a fullscreen fit scales from.
-export const BASE_ZOOM_STAGE_HEIGHT = zoomStageHeight(BASE_ZOOM)
+export const BASE_ZOOM_STAGE_HEIGHT = getZoomStageHeight(BASE_ZOOM)
