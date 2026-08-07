@@ -212,3 +212,20 @@ export const scoreCities = (
   scored.sort((a, b) => b[1] - a[1])
   return scored.slice(0, topN)
 }
+
+// Every city that reaches the top `topN` at any point in the race — a superset of any
+// single frame's field, computed once by sampling each month index. Used to put just
+// the cities that ever contend (not the whole field) on the chase path.
+export const getEverTopCities = (
+  cities: RaceCity[],
+  monthCount: number,
+  topN: number
+): Set<string> => {
+  const everTop = new Set<string>()
+  for (let monthIndex = 0; monthIndex < monthCount; monthIndex++) {
+    for (const [raceCity] of scoreCities(cities, monthIndex, topN)) {
+      everTop.add(raceCity.city)
+    }
+  }
+  return everTop
+}
