@@ -1,5 +1,5 @@
 import { RefCallback } from 'react'
-import { ZoomSize } from '../../render/zoomLayout'
+import { getChaseBikerWidth, ZoomSize } from '../../render/zoomLayout'
 import RaceBiker, { BikerRender } from './RaceBiker'
 
 export type ChasingBiker = {
@@ -20,6 +20,7 @@ type Props = {
 // so each is nudged up a step by join order to fan them out; the earliest joiner sits
 // lowest and on top (z-index falls off with join order).
 export default function ChasingBikers({ bikers, size, registerRef }: Props) {
+  const bikerWidth = getChaseBikerWidth(size)
   return (
     <>
       {bikers.map(({ city, joinOrder, biker }) => (
@@ -30,12 +31,12 @@ export default function ChasingBikers({ bikers, size, registerRef }: Props) {
           style={{
             top: size.leaderTop - joinOrder * size.bikerStackStep,
             left: 0,
-            width: size.bikerWidth,
+            width: bikerWidth,
             height: size.leaderBarHeight, // items-center keeps the bike centered on Paris's bar
             zIndex: 100 - joinOrder,
           }}
         >
-          <RaceBiker biker={biker} width={size.bikerWidth} />
+          <RaceBiker biker={biker} width={bikerWidth} />
         </div>
       ))}
     </>

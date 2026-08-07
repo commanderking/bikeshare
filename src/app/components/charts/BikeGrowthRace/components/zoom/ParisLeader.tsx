@@ -1,5 +1,5 @@
 import { RefObject } from 'react'
-import { ZoomSize } from '../../render/zoomLayout'
+import { getLeaderBikerWidth, ZoomSize } from '../../render/zoomLayout'
 import RaceBiker, { BikerRender } from './RaceBiker'
 
 type Props = {
@@ -93,7 +93,7 @@ export default function ParisLeader({
           gap: size.tailGap,
         }}
       >
-        <RaceBiker biker={biker} width={size.bikerWidth} />
+        <RaceBiker biker={biker} width={getLeaderBikerWidth(size)} />
         <span
           ref={valueRef}
           className="shrink-0 whitespace-nowrap font-bold tabular-nums text-gray-700 dark:text-gray-100"

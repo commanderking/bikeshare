@@ -7,10 +7,9 @@ export const ROW_HEIGHT = 42 // vertical pitch between rows (bar + gap)
 // The default biker viewBox has ~45px of empty padding each side; crop to the
 // bike's horizontal bounds so it hugs the end of the bar (matches AllTimeTripsBar).
 export const BIKER_VIEWBOX = '44 0 116 112'
-// The rear wheel's center as a fraction of the rendered biker width. The wheel is
-// drawn at cx=66 and BIKER_VIEWBOX crops to x∈[44,160] (width 116), so it lands at
-// (66-44)/116 of the box — the offset for parking a bike's back wheel on a mark.
-export const REAR_WHEEL_FRAC = (66 - 44) / 116
+// The rendered biker's width ÷ height, from BIKER_VIEWBOX's 116×112 crop. Lets a
+// caller size a bike by a target height: width = height × BIKER_ASPECT.
+export const BIKER_ASPECT = 116 / 112
 export const BAR_COLOR = '#2563eb'
 // Cap the longest bar short of full width so the value label + trailing biker
 // always have room.

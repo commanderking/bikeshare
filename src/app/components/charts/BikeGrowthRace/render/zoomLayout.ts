@@ -1,4 +1,4 @@
-import { TOP_N } from '../constants'
+import { BIKER_ASPECT, TOP_N } from '../constants'
 
 // Pure geometry for the zoom view. Horizontal positions are fractions [0..1] of
 // the track width (fluid); pixel sizing lives in ZoomSize below and scales in
@@ -86,10 +86,10 @@ export type ZoomSize = {
 const BASE_ZOOM: ZoomSize = {
   scale: 1,
   leaderTop: 16,
-  leaderBarHeight: 36,
+  leaderBarHeight: 50,
   barHeight: 31,
   bikerWidth: 31,
-  bikerStackStep: 2,
+  bikerStackStep: 1.5,
   rowPitch: 37,
   panelPadTop: 34,
   panelPadBottom: 12,
@@ -132,6 +132,17 @@ export const makeZoomSize = (scale: number): ZoomSize => ({
   monthFont: BASE_ZOOM.monthFont * scale,
   yearFont: BASE_ZOOM.yearFont * scale,
 })
+
+// The width for a bike ridden on Paris's bar — sized so its height matches the bar,
+// so both the chase bikers and Paris's own tail biker scale with leaderBarHeight
+// rather than the pack's fixed bikerWidth.
+export const getLeaderBikerWidth = (size: ZoomSize): number =>
+  size.leaderBarHeight * BIKER_ASPECT
+
+// Chase bikers ride a bit smaller than Paris's own, so the leader stays the biggest
+// bike on the bar.
+export const getChaseBikerWidth = (size: ZoomSize): number =>
+  getLeaderBikerWidth(size) * 0.8
 
 export const getZoomPanelHeight = (size: ZoomSize): number =>
   size.panelPadTop + (TOP_N - 1) * size.rowPitch + size.panelPadBottom

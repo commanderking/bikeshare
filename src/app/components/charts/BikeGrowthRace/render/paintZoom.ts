@@ -1,15 +1,10 @@
 import { getValueAt, RaceCity } from '../timeline/buildRaceTimeline'
-import {
-  BAR_HEIGHT,
-  BAR_MAX_PCT,
-  formatValue,
-  REAR_WHEEL_FRAC,
-  ROW_HEIGHT,
-} from '../constants'
+import { BAR_HEIGHT, BAR_MAX_PCT, formatValue, ROW_HEIGHT } from '../constants'
 import {
   computeZoomLayout,
   formatPct,
   getBarFracOnLeader,
+  getChaseBikerWidth,
   getZoomStageHeight,
   RankedCity,
   SECOND_PLACE_PCT,
@@ -146,10 +141,11 @@ const paintPlay = (refs: ZoomRefs, frame: Frame) => {
 }
 
 // The bikers riding Paris's bar — the whole field, not just the top-N pack. Each is
-// parked so its rear wheel (REAR_WHEEL_FRAC into the box) lands on its own value's x
-// on Paris's scale; the px offset goes through calc so it stays wheel-accurate at any
-// stage width. Hidden until the city launches; all dissolve with the chrome at the
-// finale. Runs every frame (both beats), keyed by the live chase-biker refs.
+// parked so its horizontal center lands on its own value's x on Paris's scale, so a
+// city entering at 0 sits centered on the track's origin; the px offset goes through
+// calc so it stays accurate at any stage width. Hidden until the city launches; all
+// dissolve with the chrome at the finale. Runs every frame (both beats), keyed by the
+// live chase-biker refs.
 const paintChaseBikers = (
   refs: ZoomRefs,
   inputs: ZoomPaintInputs,
@@ -157,13 +153,13 @@ const paintChaseBikers = (
   time: number
 ) => {
   const { cityMap, size } = inputs
-  const wheelOffset = REAR_WHEEL_FRAC * size.bikerWidth
+  const centerOffset = getChaseBikerWidth(size) / 2
   refs.chasingBikers.current.forEach((el, city) => {
     const raceCity = cityMap.get(city)
     const value = raceCity ? getValueAt(raceCity, time) ?? 0 : 0
     el.style.opacity = value > 0 ? String(frame.chrome) : '0'
     const chaseX = getBarFracOnLeader(value, frame.layout.refMax)
-    el.style.left = `calc(${formatPct(chaseX)} - ${wheelOffset}px)`
+    el.style.left = `calc(${formatPct(chaseX)} - ${centerOffset}px)`
   })
 }
 

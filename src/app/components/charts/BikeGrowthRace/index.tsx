@@ -202,17 +202,20 @@ const BikeGrowthRace = () => {
         />
       </div>
 
-      <Controls
-        playing={clock.playing}
-        ended={ended}
-        onPlayPause={handlePlayPause}
-        speedMul={speedMul}
-        onSpeedChange={handleSpeedChange}
-        maxT={maxT}
-        onScrub={handleScrub}
-        scrubberRef={scrubberRef}
-        yearTicks={yearTicks}
-      />
+      {/* Fullscreen hides the controls so the race art gets the whole screen. */}
+      {!isFullscreen && (
+        <Controls
+          playing={clock.playing}
+          ended={ended}
+          onPlayPause={handlePlayPause}
+          speedMul={speedMul}
+          onSpeedChange={handleSpeedChange}
+          maxT={maxT}
+          onScrub={handleScrub}
+          scrubberRef={scrubberRef}
+          yearTicks={yearTicks}
+        />
+      )}
 
       {!isFullscreen && <EstimateNote />}
     </div>
