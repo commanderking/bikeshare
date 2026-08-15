@@ -23,8 +23,16 @@ type Frame = { monthTick: number; order: string[] }
 const MORPH_MS = 2500
 
 const BikeGrowthRace = () => {
-  const { loading, months, cities, maxT, cityMap, speedScale, yearTicks } =
-    useRaceData()
+  const {
+    loading,
+    months,
+    cities,
+    maxT,
+    cityMap,
+    everTopCities,
+    speedScale,
+    yearTicks,
+  } = useRaceData()
 
   // Fullscreen fills the screen: the chart root goes fullscreen (hiding the page
   // chrome for free), and the track area's measured height drives the size scale so
@@ -184,6 +192,7 @@ const BikeGrowthRace = () => {
           ref={zoomTrackRef}
           order={frame.order}
           cityMap={cityMap}
+          everTopCities={everTopCities}
           monthTick={frame.monthTick}
           months={months}
           reduceMotion={reduceMotion}
@@ -193,17 +202,20 @@ const BikeGrowthRace = () => {
         />
       </div>
 
-      <Controls
-        playing={clock.playing}
-        ended={ended}
-        onPlayPause={handlePlayPause}
-        speedMul={speedMul}
-        onSpeedChange={handleSpeedChange}
-        maxT={maxT}
-        onScrub={handleScrub}
-        scrubberRef={scrubberRef}
-        yearTicks={yearTicks}
-      />
+      {/* Fullscreen hides the controls so the race art gets the whole screen. */}
+      {!isFullscreen && (
+        <Controls
+          playing={clock.playing}
+          ended={ended}
+          onPlayPause={handlePlayPause}
+          speedMul={speedMul}
+          onSpeedChange={handleSpeedChange}
+          maxT={maxT}
+          onScrub={handleScrub}
+          scrubberRef={scrubberRef}
+          yearTicks={yearTicks}
+        />
+      )}
 
       {!isFullscreen && <EstimateNote />}
     </div>

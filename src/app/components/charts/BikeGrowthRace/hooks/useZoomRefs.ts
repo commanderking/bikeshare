@@ -22,6 +22,8 @@ export type ZoomRefs = {
   packNames: MutableRefObject<Map<string, HTMLSpanElement>>
   packBars: MutableRefObject<Map<string, HTMLDivElement>>
   packValues: MutableRefObject<Map<string, HTMLSpanElement>>
+  // Pack bikers riding along Paris's own bar, keyed by city id.
+  chasingBikers: MutableRefObject<Map<string, HTMLDivElement>>
 }
 
 export const useZoomRefs = (): ZoomRefs => ({
@@ -43,4 +45,5 @@ export const useZoomRefs = (): ZoomRefs => ({
   packNames: useRef(new Map<string, HTMLSpanElement>()),
   packBars: useRef(new Map<string, HTMLDivElement>()),
   packValues: useRef(new Map<string, HTMLSpanElement>()),
+  chasingBikers: useRef(new Map<string, HTMLDivElement>()),
 })

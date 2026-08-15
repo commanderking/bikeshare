@@ -1,5 +1,5 @@
 import { RefObject } from 'react'
-import { ZoomSize } from '../../render/zoomLayout'
+import { getLeaderBikerWidth, ZoomSize } from '../../render/zoomLayout'
 import RaceBiker, { BikerRender } from './RaceBiker'
 
 type Props = {
@@ -53,7 +53,7 @@ export default function ParisLeader({
           top: size.leaderTop,
           right: '100%',
           width: 0,
-          height: size.barHeight,
+          height: size.leaderBarHeight,
           fontSize: size.packFont,
         }}
       >
@@ -66,7 +66,7 @@ export default function ParisLeader({
           top: size.leaderTop,
           left: 0,
           width: 0,
-          height: size.barHeight,
+          height: size.leaderBarHeight,
           background: color,
         }}
       />
@@ -77,7 +77,7 @@ export default function ParisLeader({
           top: size.leaderTop,
           left: 0,
           width: 0,
-          height: size.barHeight,
+          height: size.leaderBarHeight,
           background: 'rgba(255,255,255,0.28)',
           borderRight: '1px dashed rgba(255,255,255,0.6)',
         }}
@@ -88,29 +88,17 @@ export default function ParisLeader({
         style={{
           top: size.leaderTop,
           left: 0,
-          height: size.barHeight,
+          height: size.leaderBarHeight,
           paddingLeft: size.tailGap,
           gap: size.tailGap,
         }}
       >
-        <RaceBiker biker={biker} width={size.bikerWidth} />
+        <RaceBiker biker={biker} width={getLeaderBikerWidth(size)} />
         <span
           ref={valueRef}
           className="shrink-0 whitespace-nowrap font-bold tabular-nums text-gray-700 dark:text-gray-100"
           style={{ fontSize: size.emphFont }}
         />
-      </div>
-      <div
-        ref={markerRef}
-        className="absolute opacity-0"
-        style={{
-          top: size.leaderTop - 4 * size.scale,
-          left: 0,
-          height: size.barHeight + size.bandGap,
-          width: 0,
-        }}
-      >
-        <div className="absolute inset-y-0 -left-px w-0.5 rounded bg-gray-900 dark:bg-gray-100" />
       </div>
     </>
   )

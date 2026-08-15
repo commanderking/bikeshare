@@ -1,4 +1,4 @@
-import { TOP_N } from '../constants'
+import { BIKER_ASPECT, TOP_N } from '../constants'
 
 // Pure geometry for the zoom view. Horizontal positions are fractions [0..1] of
 // the track width (fluid); pixel sizing lives in ZoomSize below and scales in
@@ -12,6 +12,7 @@ export type ZoomLayout = {
   // PARIS_INTRO_MAX, then pins at LEADER_MAX once it's the runaway leader.
   leaderWidth: number
   markerX: number // #2 marker on Paris's bar (stage-fraction, shares Paris's ref)
+  refMax: number // the value Paris's bar scale is measured against (see below)
   panelLeft: number // stage-fraction
   panelRight: number
 }
@@ -32,6 +33,12 @@ const LEADER_MAX = 0.88
 // climbing before it's the runaway giant. Mirrors the absolute view's 50M opening.
 const PARIS_INTRO_MAX = 50_000_000
 
+// A value's x on Paris's bar as a stage-fraction. Everything drawn against Paris's
+// scale — its own bar, the #2 marker, and the pack bikers chasing along it — goes
+// through here so they share one reference.
+export const getBarFracOnLeader = (value: number, refMax: number) =>
+  refMax > 0 ? (value / refMax) * LEADER_MAX : 0
+
 export const computeZoomLayout = (ranked: RankedCity[]): ZoomLayout => {
   const leader = ranked[0] ?? null
   const leaderValue = leader?.value ?? 0
@@ -42,8 +49,9 @@ export const computeZoomLayout = (ranked: RankedCity[]): ZoomLayout => {
 
   return {
     leader,
-    leaderWidth: refMax > 0 ? (leaderValue / refMax) * LEADER_MAX : 0,
-    markerX: refMax > 0 ? (second / refMax) * LEADER_MAX : 0,
+    leaderWidth: getBarFracOnLeader(leaderValue, refMax),
+    markerX: getBarFracOnLeader(second, refMax),
+    refMax,
     panelLeft: PANEL_LEFT,
     panelRight: PANEL_RIGHT,
   }
@@ -54,8 +62,10 @@ export const computeZoomLayout = (ranked: RankedCity[]): ZoomLayout => {
 export type ZoomSize = {
   scale: number
   leaderTop: number // Paris bar's y
+  leaderBarHeight: number // Paris's bar — taller than the pack bars, for the chase bikers
   barHeight: number
   bikerWidth: number
+  bikerStackStep: number // y stagger per join order, so chase bikers don't overlap flat
   rowPitch: number // pack row pitch
   panelPadTop: number // caption room above the first pack row
   panelPadBottom: number
@@ -76,8 +86,10 @@ export type ZoomSize = {
 const BASE_ZOOM: ZoomSize = {
   scale: 1,
   leaderTop: 16,
+  leaderBarHeight: 50,
   barHeight: 31,
   bikerWidth: 31,
+  bikerStackStep: 1.5,
   rowPitch: 37,
   panelPadTop: 34,
   panelPadBottom: 12,
@@ -100,8 +112,10 @@ export const BASE_ZOOM_SIZE = BASE_ZOOM
 export const makeZoomSize = (scale: number): ZoomSize => ({
   scale,
   leaderTop: BASE_ZOOM.leaderTop * scale,
+  leaderBarHeight: BASE_ZOOM.leaderBarHeight * scale,
   barHeight: BASE_ZOOM.barHeight * scale,
   bikerWidth: BASE_ZOOM.bikerWidth * scale,
+  bikerStackStep: BASE_ZOOM.bikerStackStep * scale,
   rowPitch: BASE_ZOOM.rowPitch * scale,
   panelPadTop: BASE_ZOOM.panelPadTop * scale,
   panelPadBottom: BASE_ZOOM.panelPadBottom * scale,
@@ -118,6 +132,17 @@ export const makeZoomSize = (scale: number): ZoomSize => ({
   monthFont: BASE_ZOOM.monthFont * scale,
   yearFont: BASE_ZOOM.yearFont * scale,
 })
+
+// The width for a bike ridden on Paris's bar — sized so its height matches the bar,
+// so both the chase bikers and Paris's own tail biker scale with leaderBarHeight
+// rather than the pack's fixed bikerWidth.
+export const getLeaderBikerWidth = (size: ZoomSize): number =>
+  size.leaderBarHeight * BIKER_ASPECT
+
+// Chase bikers ride a bit smaller than Paris's own, so the leader stays the biggest
+// bike on the bar.
+export const getChaseBikerWidth = (size: ZoomSize): number =>
+  getLeaderBikerWidth(size) * 0.8
 
 export const getZoomPanelHeight = (size: ZoomSize): number =>
   size.panelPadTop + (TOP_N - 1) * size.rowPitch + size.panelPadBottom
