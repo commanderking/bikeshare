@@ -100,18 +100,6 @@ export default function ParisLeader({
           style={{ fontSize: size.emphFont }}
         />
       </div>
-      <div
-        ref={markerRef}
-        className="absolute opacity-0"
-        style={{
-          top: size.leaderTop - 4 * size.scale,
-          left: 0,
-          height: size.leaderBarHeight + size.bandGap,
-          width: 0,
-        }}
-      >
-        <div className="absolute inset-y-0 -left-px w-0.5 rounded bg-gray-900 dark:bg-gray-100" />
-      </div>
     </>
   )
 }
