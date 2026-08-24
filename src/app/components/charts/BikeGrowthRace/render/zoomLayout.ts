@@ -81,6 +81,8 @@ export type ZoomSize = {
   capFont: number // panel caption
   monthFont: number
   yearFont: number
+  highlightTitleFont: number
+  highlightBodyFont: number
 }
 
 const BASE_ZOOM: ZoomSize = {
@@ -105,6 +107,8 @@ const BASE_ZOOM: ZoomSize = {
   capFont: 10,
   monthFont: 15,
   yearFont: 44,
+  highlightTitleFont: 17,
+  highlightBodyFont: 14,
 }
 
 export const BASE_ZOOM_SIZE = BASE_ZOOM
@@ -131,6 +135,8 @@ export const makeZoomSize = (scale: number): ZoomSize => ({
   capFont: BASE_ZOOM.capFont * scale,
   monthFont: BASE_ZOOM.monthFont * scale,
   yearFont: BASE_ZOOM.yearFont * scale,
+  highlightTitleFont: BASE_ZOOM.highlightTitleFont * scale,
+  highlightBodyFont: BASE_ZOOM.highlightBodyFont * scale,
 })
 
 // The width for a bike ridden on Paris's bar — sized so its height matches the bar,

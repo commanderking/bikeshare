@@ -3,7 +3,7 @@
 import { forwardRef, useImperativeHandle } from 'react'
 import { CITY_BIKE_CONFIG } from '@/app/components/Biker/cityBikeConfig'
 import { getGrowthAt, MonthKey, RaceCity } from '../timeline/buildRaceTimeline'
-import { barColorFor, BikerConfig } from '../render/barColor'
+import { BikerConfig, getCityBarColor } from '../render/barColor'
 import {
   computeZoomLayout,
   formatPct,
@@ -43,8 +43,6 @@ type Props = {
   playing: boolean
 }
 
-const getBarColor = (city: string) =>
-  barColorFor(CITY_BIKE_CONFIG[city] as BikerConfig | undefined)
 // A callback ref that registers/unregisters an element in a per-city map, so paint
 // can reach each pack row's DOM node by city id.
 const setRef =
@@ -139,7 +137,7 @@ const ZoomRaceTrack = forwardRef<ZoomTrackHandle, Props>(function ZoomRaceTrack(
         <ParisLeader
           size={size}
           metro={leaderMetro}
-          color={getBarColor(leaderCity)}
+          color={getCityBarColor(leaderCity)}
           biker={leaderBiker}
           nameRef={refs.leaderName}
           colNameRef={refs.leaderColName}
@@ -185,7 +183,7 @@ const ZoomRaceTrack = forwardRef<ZoomTrackHandle, Props>(function ZoomRaceTrack(
           size={size}
           reduceMotion={reduceMotion}
           metro={cityMap.get(city)?.metroArea}
-          color={getBarColor(city)}
+          color={getCityBarColor(city)}
           biker={getBikerProps(city)}
           rowLeft={rowLeft}
           rowRight={rowRight}
@@ -207,6 +205,9 @@ const ZoomRaceTrack = forwardRef<ZoomTrackHandle, Props>(function ZoomRaceTrack(
         highlightRef={refs.highlight}
         size={size}
         left={rightColumnLeft}
+        months={months}
+        monthTick={monthTick}
+        reduceMotion={reduceMotion}
       />
     </div>
   )

@@ -167,15 +167,19 @@ const BikeGrowthRace = () => {
           : undefined
       }
     >
-      <div className="flex justify-end pb-1">
-        <button
-          type="button"
-          onClick={toggleFullscreen}
-          className="text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-        >
-          {isFullscreen ? 'Exit full screen' : 'Full screen'}
-        </button>
-      </div>
+      {/* Hidden in fullscreen so the race art gets the whole screen; Esc exits, and
+          useFullscreen picks that up. */}
+      {!isFullscreen && (
+        <div className="flex justify-end pb-1">
+          <button
+            type="button"
+            onClick={toggleFullscreen}
+            className="text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          >
+            Full screen
+          </button>
+        </div>
+      )}
 
       {/* In fullscreen this fills the leftover height and centers the view; its
           measured height is what useZoomFit scales the layout against. */}

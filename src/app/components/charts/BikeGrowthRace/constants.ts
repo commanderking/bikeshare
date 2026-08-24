@@ -18,6 +18,9 @@ export const BAR_MAX_PCT = 84
 // --- Motion timing ---
 // Row slide on a rank swap (ms).
 export const REORDER_MS = 500
+// Highlight card fade in/out (ms). Real time, unlike the card's lifetime, which is
+// counted in race months.
+export const HIGHLIGHT_FADE_MS = 400
 // Clock pace: months advanced per real second at 1x. ~197 months, so the full
 // race is ~1.5 min at 1x.
 export const DEFAULT_MONTHS_PER_SEC = 2
