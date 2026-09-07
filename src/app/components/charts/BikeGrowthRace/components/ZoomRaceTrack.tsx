@@ -3,7 +3,7 @@
 import { forwardRef, useImperativeHandle } from 'react'
 import { CITY_BIKE_CONFIG } from '@/app/components/Biker/cityBikeConfig'
 import { getGrowthAt, MonthKey, RaceCity } from '../timeline/buildRaceTimeline'
-import { barColorFor, BikerConfig } from '../render/barColor'
+import { BikerConfig, getCityBarColor } from '../render/barColor'
 import {
   computeZoomLayout,
   formatPct,
@@ -19,7 +19,6 @@ import ConnectorBand from './zoom/ConnectorBand'
 import PackPanel from './zoom/PackPanel'
 import PackRow from './zoom/PackRow'
 import DateReadout from './zoom/DateReadout'
-import HighlightArea from './zoom/HighlightArea'
 
 // The parent calls paint(time, morph) every frame; the imperative work lives in
 // paintZoomFrame (render/paintZoom.ts), driven through the refs bundled by useZoomRefs.
@@ -43,8 +42,6 @@ type Props = {
   playing: boolean
 }
 
-const getBarColor = (city: string) =>
-  barColorFor(CITY_BIKE_CONFIG[city] as BikerConfig | undefined)
 // A callback ref that registers/unregisters an element in a per-city map, so paint
 // can reach each pack row's DOM node by city id.
 const setRef =
@@ -127,7 +124,7 @@ const ZoomRaceTrack = forwardRef<ZoomTrackHandle, Props>(function ZoomRaceTrack(
     }))
   const rowLeft = `calc(${formatPct(geom.panelLeft)} + ${size.rowInset}px)`
   const rowRight = `calc(${formatPct(1 - geom.panelRight)} + ${size.rowInset}px)`
-  const rightColumnLeft = formatPct(geom.panelRight + 0.04)
+  const dateRight = `calc(${formatPct(1 - geom.panelRight)} + ${size.dateInset}px)`
 
   return (
     <div
@@ -139,7 +136,7 @@ const ZoomRaceTrack = forwardRef<ZoomTrackHandle, Props>(function ZoomRaceTrack(
         <ParisLeader
           size={size}
           metro={leaderMetro}
-          color={getBarColor(leaderCity)}
+          color={getCityBarColor(leaderCity)}
           biker={leaderBiker}
           nameRef={refs.leaderName}
           colNameRef={refs.leaderColName}
@@ -185,7 +182,7 @@ const ZoomRaceTrack = forwardRef<ZoomTrackHandle, Props>(function ZoomRaceTrack(
           size={size}
           reduceMotion={reduceMotion}
           metro={cityMap.get(city)?.metroArea}
-          color={getBarColor(city)}
+          color={getCityBarColor(city)}
           biker={getBikerProps(city)}
           rowLeft={rowLeft}
           rowRight={rowRight}
@@ -198,16 +195,23 @@ const ZoomRaceTrack = forwardRef<ZoomTrackHandle, Props>(function ZoomRaceTrack(
 
       <DateReadout
         dateRef={refs.date}
+        monthRef={refs.dateMonth}
         size={size}
-        left={rightColumnLeft}
+        right={dateRight}
         monthName={monthName}
         year={monthKey?.year}
       />
-      <HighlightArea
+
+      {/* Highlights are parked while the panel takes the full width; they'll come
+          back positioned inside it. */}
+      {/* <HighlightArea
         highlightRef={refs.highlight}
         size={size}
-        left={rightColumnLeft}
-      />
+        left={formatPct(geom.panelRight + 0.04)}
+        months={months}
+        monthTick={monthTick}
+        reduceMotion={reduceMotion}
+      /> */}
     </div>
   )
 })

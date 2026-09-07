@@ -41,6 +41,19 @@ const getMonthKey = (ordinal: number): MonthKey => ({
   month: (ordinal % 12) + 1,
 })
 
+// Where a calendar month lands on the race axis, or -1 when it falls outside it
+// (before the axis origin, or past the FINAL_MONTH cap). Derived from months[0]
+// rather than a fixed formula because the axis origin shifts — buildRaceTimeline
+// prepends an empty month ahead of the earliest data.
+export const getMonthIndex = (months: MonthKey[], key: MonthKey): number => {
+  const origin = months[0]
+  if (!origin) return -1
+  const index =
+    getMonthOrdinal(key.year, key.month) -
+    getMonthOrdinal(origin.year, origin.month)
+  return index >= 0 && index < months.length ? index : -1
+}
+
 // One city reduced to its trips grouped by absolute month ordinal — the only
 // coordinate available before the shared axis origin is known. buildCity converts
 // these onto the axis (month-index space).

@@ -23,12 +23,17 @@ export const SECOND_PLACE_PCT = 75 // #2 fills 75% of the pack's bar track
 // coordinates to the styles the render and paint apply.
 export const formatPct = (fraction: number) => `${fraction * 100}%`
 
+// Room kept to the right of Paris's bar tip for its tail (biker + value label).
+// The tail is sized in px and scales in fullscreen, but this reserve is a fraction
+// of the stage's *width*, which doesn't — so it's set for the worst case: a ~185px
+// tail at the fullscreen scale cap still fits a stage down to ~1030px wide.
+const TAIL_RESERVE = 0.18
+// Paris's bar pins here, not at 1.0, so the tail always has that reserve to sit in.
+const LEADER_MAX = 1 - TAIL_RESERVE
 const PANEL_LEFT = 0.03 // stage-fraction
-const PANEL_WIDTH = 0.63 // extends into the halved left padding (right edge unchanged)
-const PANEL_RIGHT = PANEL_LEFT + PANEL_WIDTH
-// Paris's bar pins here, not at 1.0, leaving room at the tip for its biker + value
-// tail.
-const LEADER_MAX = 0.88
+// The panel's right edge stops where Paris's bar pins, so the inset spans the same
+// track as the bar it magnifies instead of overshooting it.
+const PANEL_RIGHT = LEADER_MAX
 // Until Paris reaches this, its own bar races 0 → full — an opening act of Paris
 // climbing before it's the runaway giant. Mirrors the absolute view's 50M opening.
 const PARIS_INTRO_MAX = 50_000_000
@@ -74,13 +79,15 @@ export type ZoomSize = {
   nameColWidth: number // pack name gutter
   rowInset: number // pack row inset within the panel
   tailGap: number // bar↔biker↔value flex gap
-  dateTop: number // right column's y
+  dateInset: number // date readout's inset from the panel's right edge
   smallFont: number // Paris name, share tag
   packFont: number // pack names + values
   emphFont: number // Paris value, ×N
   capFont: number // panel caption
   monthFont: number
   yearFont: number
+  highlightTitleFont: number
+  highlightBodyFont: number
 }
 
 const BASE_ZOOM: ZoomSize = {
@@ -98,13 +105,15 @@ const BASE_ZOOM: ZoomSize = {
   nameColWidth: 104, // fits the longest metro labels (e.g. "Washington D.C.")
   rowInset: 12,
   tailGap: 6,
-  dateTop: 70,
+  dateInset: 12,
   smallFont: 11,
   packFont: 12,
   emphFont: 13,
   capFont: 10,
   monthFont: 15,
   yearFont: 44,
+  highlightTitleFont: 17,
+  highlightBodyFont: 14,
 }
 
 export const BASE_ZOOM_SIZE = BASE_ZOOM
@@ -124,13 +133,15 @@ export const makeZoomSize = (scale: number): ZoomSize => ({
   nameColWidth: BASE_ZOOM.nameColWidth * scale,
   rowInset: BASE_ZOOM.rowInset * scale,
   tailGap: BASE_ZOOM.tailGap * scale,
-  dateTop: BASE_ZOOM.dateTop * scale,
+  dateInset: BASE_ZOOM.dateInset * scale,
   smallFont: BASE_ZOOM.smallFont * scale,
   packFont: BASE_ZOOM.packFont * scale,
   emphFont: BASE_ZOOM.emphFont * scale,
   capFont: BASE_ZOOM.capFont * scale,
   monthFont: BASE_ZOOM.monthFont * scale,
   yearFont: BASE_ZOOM.yearFont * scale,
+  highlightTitleFont: BASE_ZOOM.highlightTitleFont * scale,
+  highlightBodyFont: BASE_ZOOM.highlightBodyFont * scale,
 })
 
 // The width for a bike ridden on Paris's bar — sized so its height matches the bar,

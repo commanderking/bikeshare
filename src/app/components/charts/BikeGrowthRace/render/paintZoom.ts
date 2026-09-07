@@ -5,7 +5,6 @@ import {
   formatPct,
   getBarFracOnLeader,
   getChaseBikerWidth,
-  getZoomStageHeight,
   RankedCity,
   SECOND_PLACE_PCT,
   ZoomLayout,
@@ -31,6 +30,9 @@ const ABS_FINAL_AXIS = 650_000_000
 // Coupling the entrance to Montreal's value (not a wall clock) keeps it scrub- and
 // pause-safe: land anywhere past it and the inset is already fully formed. Tune by eye.
 const INSET_INTRO = 750_000
+// How much faster the date's arrival runs than the pack's entrance it rides on: it
+// lands in the first third of that window rather than drifting the whole way in.
+const DATE_SLIDE_RATE = 3
 
 const lerp = (from: number, to: number, t: number) => from + (to - from) * t
 // A value's bar width as a stage-fraction on the absolute finale axis.
@@ -87,12 +89,13 @@ const readFrame = (
   }
 }
 
-// Runs every frame regardless of beat: value labels, the inset's fade opacities, and
-// the date's slide toward the bottom corner.
-const paintChrome = (refs: ZoomRefs, frame: Frame, size: ZoomSize) => {
-  const { ranked, layout, entrance, insetChrome, chrome, settle } = frame
+// Runs every frame regardless of beat: value labels and the inset's fade opacities.
+const paintChrome = (refs: ZoomRefs, frame: Frame) => {
+  const { ranked, layout, entrance, insetChrome, chrome } = frame
   if (refs.leaderValue.current)
-    refs.leaderValue.current.textContent = formatValue(layout.leader?.value ?? 0)
+    refs.leaderValue.current.textContent = formatValue(
+      layout.leader?.value ?? 0
+    )
   for (let rank = 1; rank < ranked.length; rank++) {
     const { city, value } = ranked[rank]
     const valueEl = refs.packValues.current.get(city)
@@ -108,10 +111,29 @@ const paintChrome = (refs: ZoomRefs, frame: Frame, size: ZoomSize) => {
   if (refs.panelBg.current) refs.panelBg.current.style.opacity = insetChrome
   if (refs.highlight.current)
     refs.highlight.current.style.opacity = String(chrome)
+}
+
+// The date's arrival, riding the pack's own entrance: the block travels from the
+// stage's left edge to its resting spot under the bar's right end, while within it the
+// month settles from flush-left under the year to flush-right with it. Both run on one
+// progress so they land on the same frame. Each uses the same trick — an element's
+// offsetLeft is its resting x (transforms don't move it), so it doubles as the distance
+// to travel, no text measured. Once landed they write 'none' and stop reading layout
+// for the rest of the race.
+const paintDateIntro = (refs: ZoomRefs, frame: Frame) => {
+  const { entrance, layout } = frame
+  const arrival = Math.min(entrance * DATE_SLIDE_RATE, 1)
+  const travelled = (el: HTMLElement) =>
+    arrival < 1 ? `translateX(${-el.offsetLeft * (1 - arrival)}px)` : 'none'
   if (refs.date.current) {
-    const target = getZoomStageHeight(size) - 80 * size.scale
-    refs.date.current.style.top = `${lerp(size.dateTop, target, settle)}px`
+    const dateEl = refs.date.current
+    // The axis opens on a blank month, so hold the date back until Paris's bar has
+    // something to show — same rule the chase bikers use to stay off an empty track.
+    dateEl.style.opacity = (layout.leader?.value ?? 0) > 0 ? '1' : '0'
+    dateEl.style.transform = travelled(dateEl)
   }
+  if (refs.dateMonth.current)
+    refs.dateMonth.current.style.transform = travelled(refs.dateMonth.current)
 }
 
 // Beat 0 (play): the live zoom widths — Paris's bar, the #2 shade/marker, the
@@ -122,8 +144,10 @@ const paintPlay = (refs: ZoomRefs, frame: Frame) => {
     refs.leaderBar.current.style.width = formatPct(layout.leaderWidth)
   if (refs.leaderTail.current)
     refs.leaderTail.current.style.left = formatPct(layout.leaderWidth)
-  if (refs.shade.current) refs.shade.current.style.width = formatPct(layout.markerX)
-  if (refs.marker.current) refs.marker.current.style.left = formatPct(layout.markerX)
+  if (refs.shade.current)
+    refs.shade.current.style.width = formatPct(layout.markerX)
+  if (refs.marker.current)
+    refs.marker.current.style.left = formatPct(layout.markerX)
   if (refs.rightLine.current)
     refs.rightLine.current.setAttribute('x1', String(layout.markerX * 100))
   if (refs.beam.current)
@@ -251,7 +275,7 @@ const paintMorph = (
   }
 }
 
-// The frame pipeline: read → chrome (always) → play or morph.
+// The frame pipeline: read → chrome + date (always) → play or morph.
 export const paintZoomFrame = (
   refs: ZoomRefs,
   inputs: ZoomPaintInputs,
@@ -259,7 +283,8 @@ export const paintZoomFrame = (
   morph = 0
 ) => {
   const frame = readFrame(inputs, time, morph)
-  paintChrome(refs, frame, inputs.size)
+  paintChrome(refs, frame)
+  paintDateIntro(refs, frame)
   paintChaseBikers(refs, inputs, frame, time)
   if (morph <= 0) {
     paintPlay(refs, frame)

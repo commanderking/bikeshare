@@ -1,6 +1,14 @@
 import { describe, it, expect } from 'vitest'
-import type { AllTimeCityTrips, VolumeByMonth } from '@/app/utils/fetchAllTimeTrips'
-import { buildRaceTimeline, getGrowthAt, getValueAt } from './buildRaceTimeline'
+import type {
+  AllTimeCityTrips,
+  VolumeByMonth,
+} from '@/app/utils/fetchAllTimeTrips'
+import {
+  buildRaceTimeline,
+  getGrowthAt,
+  getMonthIndex,
+  getValueAt,
+} from './buildRaceTimeline'
 
 const makeCity = (city: string, months: VolumeByMonth[]): AllTimeCityTrips => ({
   city,
@@ -82,11 +90,42 @@ describe('buildRaceTimeline', () => {
     expect(a.lastIndex).toBe(4)
     expect(a.cumulative).toEqual([0, 100, 150, 170])
     // C only launches in May, after the cap → not in the race at all.
-    expect(timeline.cities.find((raceCity) => raceCity.city === 'c')).toBeUndefined()
+    expect(
+      timeline.cities.find((raceCity) => raceCity.city === 'c')
+    ).toBeUndefined()
   })
 
   it('returns an empty timeline for empty / dataless input', () => {
     expect(buildRaceTimeline([])).toEqual({ months: [], cities: [] })
-    expect(buildRaceTimeline([makeCity('x', [])])).toEqual({ months: [], cities: [] })
+    expect(buildRaceTimeline([makeCity('x', [])])).toEqual({
+      months: [],
+      cities: [],
+    })
+  })
+})
+
+describe('getMonthIndex', () => {
+  const timeline = buildRaceTimeline(
+    [
+      makeCity('a', [
+        { year: 2019, month: 11, trips: 10 },
+        { year: 2019, month: 12, trips: 10 },
+        { year: 2020, month: 1, trips: 10 },
+      ]),
+    ],
+    { year: 2020, month: 1 }
+  )
+
+  it('places a calendar month on the axis, counting from the leading empty month', () => {
+    // months: Oct 2019 (the leading empty month), Nov, Dec, Jan 2020
+    expect(getMonthIndex(timeline.months, { year: 2019, month: 10 })).toBe(0)
+    expect(getMonthIndex(timeline.months, { year: 2019, month: 11 })).toBe(1)
+    expect(getMonthIndex(timeline.months, { year: 2020, month: 1 })).toBe(3)
+  })
+
+  it('returns -1 off the axis — before the origin, past the cap, or with no axis at all', () => {
+    expect(getMonthIndex(timeline.months, { year: 2019, month: 9 })).toBe(-1)
+    expect(getMonthIndex(timeline.months, { year: 2020, month: 2 })).toBe(-1)
+    expect(getMonthIndex([], { year: 2020, month: 1 })).toBe(-1)
   })
 })

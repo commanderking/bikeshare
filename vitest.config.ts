@@ -8,6 +8,10 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  // tsconfig sets jsx: "preserve" for Next to compile, which would leave JSX in
+  // place for Node to choke on — tests reach .tsx modules transitively (e.g. the
+  // race highlights' authored content).
+  esbuild: { jsx: 'automatic' },
   test: {
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     // Pure-function unit tests run in Node. To add React Testing Library later:

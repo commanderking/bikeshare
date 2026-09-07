@@ -9,6 +9,7 @@ import { scoreCities } from './timeline/buildRaceTimeline'
 import { useRaceData } from './hooks/useRaceData'
 import { useRaceClock } from './hooks/useRaceClock'
 import { useFullscreen } from './hooks/useFullscreen'
+import { useSpacebarPlayPause } from './hooks/useSpacebarPlayPause'
 import { useZoomFit } from './hooks/useZoomFit'
 import ZoomRaceTrack, { ZoomTrackHandle } from './components/ZoomRaceTrack'
 import Controls from './components/Controls'
@@ -143,6 +144,8 @@ const BikeGrowthRace = () => {
     }
   }
 
+  useSpacebarPlayPause(isFullscreen, handlePlayPause)
+
   const handleScrub = (time: number) => {
     clock.pause()
     if (ended) setEnded(false)
@@ -167,15 +170,19 @@ const BikeGrowthRace = () => {
           : undefined
       }
     >
-      <div className="flex justify-end pb-1">
-        <button
-          type="button"
-          onClick={toggleFullscreen}
-          className="text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-        >
-          {isFullscreen ? 'Exit full screen' : 'Full screen'}
-        </button>
-      </div>
+      {/* Hidden in fullscreen so the race art gets the whole screen; Esc exits, and
+          useFullscreen picks that up. */}
+      {!isFullscreen && (
+        <div className="flex justify-end pb-1">
+          <button
+            type="button"
+            onClick={toggleFullscreen}
+            className="text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          >
+            Full screen
+          </button>
+        </div>
+      )}
 
       {/* In fullscreen this fills the leftover height and centers the view; its
           measured height is what useZoomFit scales the layout against. */}

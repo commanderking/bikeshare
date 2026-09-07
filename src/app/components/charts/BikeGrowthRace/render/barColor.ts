@@ -4,6 +4,7 @@ import type {
   DownTubeCurve,
   SkirtGuard,
 } from '@/app/components/Biker'
+import { CITY_BIKE_CONFIG } from '@/app/components/Biker/cityBikeConfig'
 import { BAR_COLOR } from '../constants'
 
 // A city's Biker configuration as the race stores it (see cityBikeConfig) — the
@@ -45,3 +46,7 @@ export const barColorFor = (config?: BikerConfig): string => {
   if (outerGuard?.color && !isPale(outerGuard.color)) return outerGuard.color
   return config.colors?.frameDark ?? config.colors?.frame ?? BAR_COLOR
 }
+
+// The same fill by city id, for callers that only have the id (bars, highlight cards).
+export const getCityBarColor = (city: string): string =>
+  barColorFor(CITY_BIKE_CONFIG[city] as BikerConfig | undefined)
