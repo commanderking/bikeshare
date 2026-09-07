@@ -9,6 +9,7 @@ import { scoreCities } from './timeline/buildRaceTimeline'
 import { useRaceData } from './hooks/useRaceData'
 import { useRaceClock } from './hooks/useRaceClock'
 import { useFullscreen } from './hooks/useFullscreen'
+import { useSpacebarPlayPause } from './hooks/useSpacebarPlayPause'
 import { useZoomFit } from './hooks/useZoomFit'
 import ZoomRaceTrack, { ZoomTrackHandle } from './components/ZoomRaceTrack'
 import Controls from './components/Controls'
@@ -142,6 +143,8 @@ const BikeGrowthRace = () => {
       clock.play()
     }
   }
+
+  useSpacebarPlayPause(isFullscreen, handlePlayPause)
 
   const handleScrub = (time: number) => {
     clock.pause()

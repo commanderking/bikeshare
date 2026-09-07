@@ -52,12 +52,17 @@ export default function HighlightCard({
           can't legally nest inside a paragraph. The descendant styles put back what
           Tailwind's preflight resets, so entries can use plain <strong>/<ul> tags
           without repeating classes. */}
-      <div
-        className="text-gray-600 [&_li]:mt-0.5 [&_strong]:font-semibold [&_strong]:text-gray-800 [&_ul]:mt-1 [&_ul]:list-disc [&_ul]:pl-4 dark:text-gray-300 dark:[&_strong]:text-gray-100"
-        style={{ fontSize: size.highlightBodyFont, marginTop: 4 * size.scale }}
-      >
-        {content}
-      </div>
+      {content && (
+        <div
+          className="text-gray-600 [&_li]:mt-0.5 [&_strong]:font-semibold [&_strong]:text-gray-800 [&_ul]:mt-1 [&_ul]:list-disc [&_ul]:pl-4 dark:text-gray-300 dark:[&_strong]:text-gray-100"
+          style={{
+            fontSize: size.highlightBodyFont,
+            marginTop: 4 * size.scale,
+          }}
+        >
+          {content}
+        </div>
+      )}
       {image && (
         <Image
           src={image.src}

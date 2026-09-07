@@ -17,6 +17,7 @@ export type ZoomRefs = {
   rightLine: RefObject<SVGLineElement>
   panelBg: RefObject<HTMLDivElement>
   date: RefObject<HTMLDivElement>
+  dateMonth: RefObject<HTMLSpanElement>
   highlight: RefObject<HTMLDivElement>
   packRows: MutableRefObject<Map<string, HTMLDivElement>>
   packNames: MutableRefObject<Map<string, HTMLSpanElement>>
@@ -40,6 +41,7 @@ export const useZoomRefs = (): ZoomRefs => ({
   rightLine: useRef<SVGLineElement>(null),
   panelBg: useRef<HTMLDivElement>(null),
   date: useRef<HTMLDivElement>(null),
+  dateMonth: useRef<HTMLSpanElement>(null),
   highlight: useRef<HTMLDivElement>(null),
   packRows: useRef(new Map<string, HTMLDivElement>()),
   packNames: useRef(new Map<string, HTMLSpanElement>()),

@@ -6,8 +6,8 @@ import { getHighlightSlots, SLOT_COUNT } from '../../highlightStack'
 import { useRaceHighlights } from '../../hooks/useRaceHighlights'
 import HighlightCard from './HighlightCard'
 
-// Gap between the date readout above and the first slot.
-const TOP_GAP = 76
+// The column's y, from the top of the stage.
+const TOP = 146
 const SLOT_GAP = 8
 
 type Props = {
@@ -35,7 +35,7 @@ export default function HighlightArea({
 }: Props) {
   const highlights = useRaceHighlights(months)
   const placed = getHighlightSlots(highlights, monthTick)
-  const top = size.dateTop + TOP_GAP * size.scale
+  const top = TOP * size.scale
 
   return (
     <div
