@@ -2,6 +2,7 @@
 
 import { forwardRef, useImperativeHandle } from 'react'
 import { CITY_BIKE_CONFIG } from '@/app/components/Biker/cityBikeConfig'
+import { CITY_RIDER_OUTFIT } from '@/app/components/Biker/cityRiderConfig'
 import { getGrowthAt, MonthKey, RaceCity } from '../timeline/buildRaceTimeline'
 import { BikerConfig, getCityBarColor } from '../render/barColor'
 import {
@@ -32,6 +33,10 @@ type Props = {
   // Cities that ever reach the top-N — the only ones put on the chase path.
   everTopCities: Set<string>
   monthTick: number
+  // Cities that just overtook someone, and a counter that changes each time it
+  // happens — together they tell one rider to wave without re-triggering the rest.
+  wavers: string[]
+  passSeq: number
   months: MonthKey[]
   reduceMotion: boolean
   // Pixel sizing (scales in fullscreen).
@@ -57,6 +62,8 @@ const ZoomRaceTrack = forwardRef<ZoomTrackHandle, Props>(function ZoomRaceTrack(
     cityMap,
     everTopCities,
     monthTick,
+    wavers,
+    passSeq,
     months,
     reduceMotion,
     size,
@@ -95,8 +102,10 @@ const ZoomRaceTrack = forwardRef<ZoomTrackHandle, Props>(function ZoomRaceTrack(
     const growth = raceCity ? getGrowthAt(raceCity, monthTick) : 0
     return {
       config: CITY_BIKE_CONFIG[city] as BikerConfig | undefined,
+      outfit: CITY_RIDER_OUTFIT[city],
       speed: speedScale(growth),
       paused: !playing || growth <= 0,
+      waveNonce: wavers.includes(city) ? passSeq : 0,
     }
   }
   const leaderCity = order[0]
@@ -161,6 +170,7 @@ const ZoomRaceTrack = forwardRef<ZoomTrackHandle, Props>(function ZoomRaceTrack(
         panelRight={geom.panelRight}
         connectorRef={refs.connector}
         beamRef={refs.beam}
+        leftLineRef={refs.leftLine}
         rightLineRef={refs.rightLine}
       />
 

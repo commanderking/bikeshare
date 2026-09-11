@@ -21,10 +21,11 @@ export const REORDER_MS = 500
 // Highlight card fade in/out (ms). Real time, unlike the card's lifetime, which is
 // counted in race months.
 export const HIGHLIGHT_FADE_MS = 400
-// Clock pace: months advanced per real second at 1x. ~197 months, so the full
-// race is ~1.5 min at 1x.
-export const DEFAULT_MONTHS_PER_SEC = 1
-// Speed multipliers offered in the controls (relative to the 1x pace above).
+// Clock pace: months advanced per real second at 1x. The axis runs 223 months, so
+// the full race is ~1.9 min at 1x, ~3.7 min at 0.5x and ~28s at 4x.
+export const DEFAULT_MONTHS_PER_SEC = 2
+// Speed multipliers offered in the controls (relative to the 1x pace above), so
+// they all follow the pace above rather than needing to be restated.
 export const SPEED_OPTIONS = [0.5, 1, 2, 4] as const
 
 // Cap the race at a final month, inclusive: it runs only up to and including
@@ -34,6 +35,13 @@ export const FINAL_MONTH: { year: number; month: number } | null = {
   year: 2025,
   month: 12,
 }
+
+// A pass makes the overtaking biker wave. Short and brisk — it has to land while
+// the two bikes are still visibly alongside each other.
+export const PASS_WAVE_MS = 1000
+
+// Bell struck when one biker overtakes another (see hooks/useBell).
+export const BELL_SRC = '/audio/bell_toronto_bikeshare.m4a'
 
 // --- Number formatting ---
 const compact = new Intl.NumberFormat('en', {

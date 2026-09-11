@@ -11,6 +11,8 @@ type Props = {
   onSpeedChange: (mul: number) => void
   maxT: number
   onScrub: (time: number) => void
+  soundOn: boolean
+  onToggleSound: () => void
   scrubberRef: RefObject<HTMLInputElement>
   // Year labels + the month index each year starts at, for the timeline ticks.
   yearTicks: { year: number; monthIndex: number }[]
@@ -28,6 +30,8 @@ const Controls = ({
   onScrub,
   scrubberRef,
   yearTicks,
+  soundOn,
+  onToggleSound,
 }: Props) => (
   <div className="flex items-center gap-3 pt-3 pb-6">
     <button
@@ -68,6 +72,20 @@ const Controls = ({
           </div>
         ))}
     </div>
+
+    <button
+      type="button"
+      onClick={onToggleSound}
+      aria-pressed={soundOn}
+      title={soundOn ? 'Mute the pass bell' : 'Ring a bell on each pass'}
+      className={`shrink-0 rounded px-2 py-1 text-xs font-medium ${
+        soundOn
+          ? 'bg-blue-600 text-white'
+          : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
+      }`}
+    >
+      {soundOn ? 'Bell on' : 'Bell off'}
+    </button>
 
     <div className="flex shrink-0 items-center gap-1">
       {SPEED_OPTIONS.map((mul) => (
