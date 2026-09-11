@@ -11,17 +11,31 @@ import { useRaceClock } from './hooks/useRaceClock'
 import { useFullscreen } from './hooks/useFullscreen'
 import { useSpacebarPlayPause } from './hooks/useSpacebarPlayPause'
 import { useZoomFit } from './hooks/useZoomFit'
+import { useBell } from './hooks/useBell'
+import { getPassers } from './render/passes'
 import ZoomRaceTrack, { ZoomTrackHandle } from './components/ZoomRaceTrack'
 import Controls from './components/Controls'
 import EstimateNote from './components/EstimateNote'
-import { DEFAULT_MONTHS_PER_SEC, TOP_N } from './constants'
+import { BELL_SRC, DEFAULT_MONTHS_PER_SEC, TOP_N } from './constants'
 
 // Current-frame render state. Bar widths + value text are driven imperatively
 // every frame; React only re-renders when the rank order or the month changes.
-type Frame = { monthTick: number; order: string[] }
+type Frame = {
+  monthTick: number
+  order: string[]
+  // Who just overtook someone, plus a counter that changes on each pass so the
+  // same city waving twice in a row still reads as two separate waves.
+  wavers: string[]
+  passSeq: number
+}
 
 // Duration of the end-of-race morph into the full stacked layout.
 const MORPH_MS = 2500
+
+// A frame never advances the clock by more than a fraction of a month (0.13 at 4x),
+// so a bigger step is a seek: a replay, or a scrub the pause guard didn't cover.
+// The whole field reorders at once there, which nobody watched happen.
+const SEEK_JUMP_MONTHS = 2
 
 const BikeGrowthRace = () => {
   const {
@@ -44,10 +58,18 @@ const BikeGrowthRace = () => {
   const size = useZoomFit(trackAreaRef, isFullscreen)
 
   const [reduceMotion] = useState(prefersReducedMotion)
-  const [frame, setFrame] = useState<Frame>({ monthTick: 0, order: [] })
+  const [frame, setFrame] = useState<Frame>({
+    monthTick: 0,
+    order: [],
+    wavers: [],
+    passSeq: 0,
+  })
   const [ended, setEnded] = useState(false)
   const [speedMul, setSpeedMul] = useState(1)
   const speedMulRef = useRef(1)
+  const [soundOn, setSoundOn] = useState(false)
+  const soundOnRef = useRef(false)
+  const bell = useBell(BELL_SRC)
   // Bumped on replay to remount the view, clearing the morph's imperative styles so
   // it snaps cleanly back to the zoom layout.
   const [replayCount, setReplayCount] = useState(0)
@@ -60,6 +82,10 @@ const BikeGrowthRace = () => {
   // Change detection for setFrame.
   const lastMonthTick = useRef(-1)
   const lastOrder = useRef<string[]>([])
+  // Previous frame's clock time, to tell playback apart from a seek.
+  const lastTime = useRef(0)
+  // Cities already introduced, so each waves hello only on its debut.
+  const introduced = useRef(new Set<string>())
 
   // Score the field at t, paint the view imperatively, and sync the scrubber;
   // returns the top-N order. No React state is touched here.
@@ -80,13 +106,37 @@ const BikeGrowthRace = () => {
       const orderChanged =
         order.length !== lastOrder.current.length ||
         order.some((id, index) => id !== lastOrder.current[index])
+      // Only count overtakes that played out on screen: the clock has to be running
+      // (a paused scrub reorders the field too) and moving continuously.
+      const seeked = Math.abs(time - lastTime.current) > SEEK_JUMP_MONTHS
+      const playing = !seeked && Boolean(clockRef.current?.playing)
+      const passers =
+        orderChanged && playing ? getPassers(lastOrder.current, order) : []
+      // A seek reveals the field wholesale, so treat everyone on screen as already
+      // introduced rather than setting off a chorus of hellos.
+      if (seeked) introduced.current = new Set(order)
+      const debuts = playing
+        ? order.filter((city) => !introduced.current.has(city))
+        : []
+      for (const city of order) introduced.current.add(city)
+      // Only passes ring; an entrance is a wave alone.
+      if (passers.length > 0 && soundOnRef.current) bell.ring()
+      const wavers = debuts.length
+        ? [...new Set([...passers, ...debuts])]
+        : passers
+      lastTime.current = time
       if (monthTick !== lastMonthTick.current || orderChanged) {
         lastMonthTick.current = monthTick
         lastOrder.current = order
-        setFrame({ monthTick, order })
+        setFrame((previous) => ({
+          monthTick,
+          order,
+          wavers,
+          passSeq: wavers.length > 0 ? previous.passSeq + 1 : previous.passSeq,
+        }))
       }
     },
-    [scoreAndPaint]
+    [scoreAndPaint, bell]
   )
 
   const clock = useRaceClock({
@@ -152,6 +202,15 @@ const BikeGrowthRace = () => {
     clock.seek(time)
   }
 
+  const handleToggleSound = () => {
+    const next = !soundOn
+    soundOnRef.current = next
+    setSoundOn(next)
+    // Has to happen in the click itself — a browser will not start an AudioContext
+    // without a user gesture, and this race autoplays, so there is no other one.
+    if (next) bell.arm()
+  }
+
   const handleSpeedChange = (mul: number) => {
     speedMulRef.current = mul
     setSpeedMul(mul)
@@ -198,6 +257,8 @@ const BikeGrowthRace = () => {
           key={replayCount}
           ref={zoomTrackRef}
           order={frame.order}
+          wavers={frame.wavers}
+          passSeq={frame.passSeq}
           cityMap={cityMap}
           everTopCities={everTopCities}
           monthTick={frame.monthTick}
@@ -219,6 +280,8 @@ const BikeGrowthRace = () => {
           onSpeedChange={handleSpeedChange}
           maxT={maxT}
           onScrub={handleScrub}
+          soundOn={soundOn}
+          onToggleSound={handleToggleSound}
           scrubberRef={scrubberRef}
           yearTicks={yearTicks}
         />

@@ -1,6 +1,6 @@
 import { RefCallback } from 'react'
 import { REORDER_MS } from '../../constants'
-import { ZoomSize } from '../../render/zoomLayout'
+import { getPackBikerWidth, ZoomSize } from '../../render/zoomLayout'
 import RaceBiker, { BikerRender } from './RaceBiker'
 
 type Props = {
@@ -64,7 +64,7 @@ export default function PackRow({
           className="rounded"
           style={{ width: 0, height: size.barHeight, background: color }}
         />
-        <RaceBiker biker={biker} width={size.bikerWidth} />
+        <RaceBiker biker={biker} width={getPackBikerWidth(size)} />
         <span
           ref={valueRef}
           className="shrink-0 whitespace-nowrap font-semibold tabular-nums text-gray-700 dark:text-gray-200"
