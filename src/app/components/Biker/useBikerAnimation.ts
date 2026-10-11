@@ -10,7 +10,14 @@ import {
   BURST_RAMP_MS,
 } from './geometry'
 import { knee, pedals, armPose, ankleAbove } from './kinematics'
-import { advanceWave, createWave } from './handWave'
+import {
+  advanceWave,
+  createWave,
+  DEFAULT_WAVE_MS,
+  getWaveTiming,
+  triggerWave,
+  WaveState,
+} from './handWave'
 import { advanceSpeedBurst, createSpeedBurst } from './speedBurst'
 
 interface AnimationOptions {
@@ -19,6 +26,10 @@ interface AnimationOptions {
   wave: boolean
   waveInterval: [number, number]
   speedBursts: boolean
+  /** Bump to make the biker wave once, now. Ignored at 0 and while already waving. */
+  waveNonce: number
+  /** End-to-end length of one wave in ms. */
+  waveDurationMs: number
 }
 
 /**
@@ -33,12 +44,25 @@ export function useBikerAnimation({
   wave,
   waveInterval,
   speedBursts,
+  waveNonce,
+  waveDurationMs,
 }: AnimationOptions) {
   // Refs to the parts the loop mutates each frame, keyed by id.
   const els = useRef<Record<string, SVGElement | null>>({})
   const reg = (id: string) => (el: SVGElement | null) => {
     els.current[id] = el
   }
+
+  // The wave lives outside the rAF effect so an external trigger can reach it.
+  const waveStateRef = useRef<WaveState>()
+  if (!waveStateRef.current) waveStateRef.current = createWave(waveInterval)
+  const waveTimingRef = useRef(getWaveTiming(waveDurationMs))
+  useEffect(() => {
+    waveTimingRef.current = getWaveTiming(waveDurationMs)
+  }, [waveDurationMs])
+  useEffect(() => {
+    if (waveNonce > 0) triggerWave(waveStateRef.current as WaveState)
+  }, [waveNonce])
 
   const speedRef = useRef(speed)
   const pausedRef = useRef(paused)
@@ -67,7 +91,6 @@ export function useBikerAnimation({
     let wheelDeg = 0
     let lastT = performance.now()
     let effSpeed = speedRef.current // applied crank speed, eased toward the target
-    const waveState = createWave(waveIntervalRef.current)
     const burst = createSpeedBurst()
 
     const set = (id: string, attrs: Record<string, number | string>) => {
@@ -95,7 +118,13 @@ export function useBikerAnimation({
         // Wheel spin derives from the same crank increment, so pedals and
         // wheels can never drift out of sync at any speed.
         wheelDeg = (wheelDeg + effSpeed * GEAR_RATIO * DEG_PER_RAD) % 360
-        advanceWave(waveState, dt, waveRef.current, waveIntervalRef.current)
+        advanceWave(
+          waveStateRef.current as WaveState,
+          dt,
+          waveRef.current,
+          waveIntervalRef.current,
+          waveTimingRef.current
+        )
       }
 
       const { nearPedal, farPedal } = pedals(ang)
@@ -106,25 +135,51 @@ export function useBikerAnimation({
       set('rearSpokes', { transform: `rotate(${wheel})` })
       set('frontSpokes', { transform: `rotate(${wheel})` })
 
-      set('nearCrank', { x1: BOTTOM_BRACKET.x, y1: BOTTOM_BRACKET.y, x2: nearPedal.x, y2: nearPedal.y })
-      set('farCrank', { x1: BOTTOM_BRACKET.x, y1: BOTTOM_BRACKET.y, x2: farPedal.x, y2: farPedal.y })
+      set('nearCrank', {
+        x1: BOTTOM_BRACKET.x,
+        y1: BOTTOM_BRACKET.y,
+        x2: nearPedal.x,
+        y2: nearPedal.y,
+      })
+      set('farCrank', {
+        x1: BOTTOM_BRACKET.x,
+        y1: BOTTOM_BRACKET.y,
+        x2: farPedal.x,
+        y2: farPedal.y,
+      })
       set('nearPedal', { x: nearPedal.x - 3, y: nearPedal.y - 1.1 })
       set('farPedal', { x: farPedal.x - 3, y: farPedal.y - 1.1 })
 
       const [nearKneeX, nearKneeY] = knee(nearAnkle.x, nearAnkle.y)
       set('nearThigh', { x1: HIP.x, y1: HIP.y, x2: nearKneeX, y2: nearKneeY })
-      set('nearShin', { x1: nearKneeX, y1: nearKneeY, x2: nearAnkle.x, y2: nearAnkle.y })
+      set('nearShin', {
+        x1: nearKneeX,
+        y1: nearKneeY,
+        x2: nearAnkle.x,
+        y2: nearAnkle.y,
+      })
 
       const [farKneeX, farKneeY] = knee(farAnkle.x, farAnkle.y)
       set('farThigh', { x1: HIP.x, y1: HIP.y, x2: farKneeX, y2: farKneeY })
-      set('farShin', { x1: farKneeX, y1: farKneeY, x2: farAnkle.x, y2: farAnkle.y })
+      set('farShin', {
+        x1: farKneeX,
+        y1: farKneeY,
+        x2: farAnkle.x,
+        y2: farAnkle.y,
+      })
 
       // Arm: rest pose when raiseAmt is 0, raised/waving otherwise.
+      const waveState = waveStateRef.current as WaveState
       const { elbowX, elbowY, handX, handY } = armPose(
         waveState.raiseAmt,
         waveState.wavePhase
       )
-      set('upperArm', { x1: SHOULDER.x, y1: SHOULDER.y, x2: elbowX, y2: elbowY })
+      set('upperArm', {
+        x1: SHOULDER.x,
+        y1: SHOULDER.y,
+        x2: elbowX,
+        y2: elbowY,
+      })
       set('forearm', { x1: elbowX, y1: elbowY, x2: handX, y2: handY })
       set('hand', { cx: handX, cy: handY })
 

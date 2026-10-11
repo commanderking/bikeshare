@@ -2,6 +2,7 @@
 
 import { forwardRef, useImperativeHandle } from 'react'
 import { CITY_BIKE_CONFIG } from '@/app/components/Biker/cityBikeConfig'
+import { CITY_RIDER_OUTFIT } from '@/app/components/Biker/cityRiderConfig'
 import { getGrowthAt, MonthKey, RaceCity } from '../timeline/buildRaceTimeline'
 import { BikerConfig, getCityBarColor } from '../render/barColor'
 import {
@@ -32,6 +33,10 @@ type Props = {
   // Cities that ever reach the top-N — the only ones put on the chase path.
   everTopCities: Set<string>
   monthTick: number
+  // Cities that just overtook someone, and a counter that changes each time it
+  // happens — together they tell one rider to wave without re-triggering the rest.
+  wavers: string[]
+  passSeq: number
   months: MonthKey[]
   reduceMotion: boolean
   // Pixel sizing (scales in fullscreen).
@@ -57,6 +62,8 @@ const ZoomRaceTrack = forwardRef<ZoomTrackHandle, Props>(function ZoomRaceTrack(
     cityMap,
     everTopCities,
     monthTick,
+    wavers,
+    passSeq,
     months,
     reduceMotion,
     size,
@@ -89,14 +96,21 @@ const ZoomRaceTrack = forwardRef<ZoomTrackHandle, Props>(function ZoomRaceTrack(
       })
     : ''
   const pack = order.slice(1)
+  // A city's launch year: the calendar year of its first data month on the axis.
+  const getStartYear = (city: string): number | undefined => {
+    const raceCity = cityMap.get(city)
+    return raceCity ? months[raceCity.firstIndex]?.year : undefined
+  }
 
   const getBikerProps = (city: string) => {
     const raceCity = cityMap.get(city)
     const growth = raceCity ? getGrowthAt(raceCity, monthTick) : 0
     return {
       config: CITY_BIKE_CONFIG[city] as BikerConfig | undefined,
+      outfit: CITY_RIDER_OUTFIT[city],
       speed: speedScale(growth),
       paused: !playing || growth <= 0,
+      waveNonce: wavers.includes(city) ? passSeq : 0,
     }
   }
   const leaderCity = order[0]
@@ -136,6 +150,7 @@ const ZoomRaceTrack = forwardRef<ZoomTrackHandle, Props>(function ZoomRaceTrack(
         <ParisLeader
           size={size}
           metro={leaderMetro}
+          startYear={getStartYear(leaderCity)}
           color={getCityBarColor(leaderCity)}
           biker={leaderBiker}
           nameRef={refs.leaderName}
@@ -161,6 +176,7 @@ const ZoomRaceTrack = forwardRef<ZoomTrackHandle, Props>(function ZoomRaceTrack(
         panelRight={geom.panelRight}
         connectorRef={refs.connector}
         beamRef={refs.beam}
+        leftLineRef={refs.leftLine}
         rightLineRef={refs.rightLine}
       />
 
@@ -182,6 +198,7 @@ const ZoomRaceTrack = forwardRef<ZoomTrackHandle, Props>(function ZoomRaceTrack(
           size={size}
           reduceMotion={reduceMotion}
           metro={cityMap.get(city)?.metroArea}
+          startYear={getStartYear(city)}
           color={getCityBarColor(city)}
           biker={getBikerProps(city)}
           rowLeft={rowLeft}

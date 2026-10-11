@@ -14,6 +14,7 @@ export type ZoomRefs = {
   marker: RefObject<HTMLDivElement>
   connector: RefObject<SVGSVGElement>
   beam: RefObject<SVGPolygonElement>
+  leftLine: RefObject<SVGLineElement>
   rightLine: RefObject<SVGLineElement>
   panelBg: RefObject<HTMLDivElement>
   date: RefObject<HTMLDivElement>
@@ -38,6 +39,7 @@ export const useZoomRefs = (): ZoomRefs => ({
   marker: useRef<HTMLDivElement>(null),
   connector: useRef<SVGSVGElement>(null),
   beam: useRef<SVGPolygonElement>(null),
+  leftLine: useRef<SVGLineElement>(null),
   rightLine: useRef<SVGLineElement>(null),
   panelBg: useRef<HTMLDivElement>(null),
   date: useRef<HTMLDivElement>(null),

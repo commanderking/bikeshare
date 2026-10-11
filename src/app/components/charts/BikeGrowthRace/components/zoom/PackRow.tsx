@@ -1,13 +1,16 @@
 import { RefCallback } from 'react'
 import { REORDER_MS } from '../../constants'
-import { ZoomSize } from '../../render/zoomLayout'
+import { getPackBikerWidth, ZoomSize } from '../../render/zoomLayout'
 import RaceBiker, { BikerRender } from './RaceBiker'
+import CityNameLabel from './CityNameLabel'
 
 type Props = {
   rank: number
   size: ZoomSize
   reduceMotion: boolean
   metro: string | undefined
+  // Year the system launched, shown under the name.
+  startYear: number | undefined
   color: string
   biker: BikerRender
   rowLeft: string
@@ -25,6 +28,7 @@ export default function PackRow({
   size,
   reduceMotion,
   metro,
+  startYear,
   color,
   biker,
   rowLeft,
@@ -50,10 +54,10 @@ export default function PackRow({
     >
       <span
         ref={nameRef}
-        className="shrink-0 whitespace-nowrap text-right font-semibold text-gray-500 dark:text-gray-400"
+        className="flex shrink-0 justify-end whitespace-nowrap font-semibold text-gray-500 dark:text-gray-400"
         style={{ width: size.nameColWidth, fontSize: size.packFont }}
       >
-        {metro}
+        <CityNameLabel size={size} metro={metro} startYear={startYear} />
       </span>
       <div
         className="flex min-w-0 flex-1 items-center"
@@ -64,7 +68,7 @@ export default function PackRow({
           className="rounded"
           style={{ width: 0, height: size.barHeight, background: color }}
         />
-        <RaceBiker biker={biker} width={size.bikerWidth} />
+        <RaceBiker biker={biker} width={getPackBikerWidth(size)} />
         <span
           ref={valueRef}
           className="shrink-0 whitespace-nowrap font-semibold tabular-nums text-gray-700 dark:text-gray-200"

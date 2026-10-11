@@ -27,12 +27,15 @@ export default function ChasingBikers({ bikers, size, registerRef }: Props) {
         <div
           key={city}
           ref={registerRef(city)}
-          className="absolute flex items-center opacity-0"
+          className="absolute flex items-end opacity-0"
           style={{
             top: size.leaderTop - joinOrder * size.bikerStackStep,
             left: 0,
             width: bikerWidth,
-            height: size.leaderBarHeight, // items-center keeps the bike centered on Paris's bar
+            // items-end sits the first joiner's wheels on the bar's bottom edge and
+            // fans the rest up from there, rather than centring the stack and leaving
+            // the bar's lower edge empty.
+            height: size.leaderBarHeight,
             zIndex: 100 - joinOrder,
           }}
         >
