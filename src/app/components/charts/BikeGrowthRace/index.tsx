@@ -11,12 +11,11 @@ import { useRaceClock } from './hooks/useRaceClock'
 import { useFullscreen } from './hooks/useFullscreen'
 import { useSpacebarPlayPause } from './hooks/useSpacebarPlayPause'
 import { useZoomFit } from './hooks/useZoomFit'
-import { useBell } from './hooks/useBell'
 import { getPassers } from './render/passes'
 import ZoomRaceTrack, { ZoomTrackHandle } from './components/ZoomRaceTrack'
 import Controls from './components/Controls'
 import EstimateNote from './components/EstimateNote'
-import { BELL_SRC, DEFAULT_MONTHS_PER_SEC, TOP_N } from './constants'
+import { DEFAULT_MONTHS_PER_SEC, TOP_N } from './constants'
 
 // Current-frame render state. Bar widths + value text are driven imperatively
 // every frame; React only re-renders when the rank order or the month changes.
@@ -67,9 +66,6 @@ const BikeGrowthRace = () => {
   const [ended, setEnded] = useState(false)
   const [speedMul, setSpeedMul] = useState(1)
   const speedMulRef = useRef(1)
-  const [soundOn, setSoundOn] = useState(false)
-  const soundOnRef = useRef(false)
-  const bell = useBell(BELL_SRC)
   // Bumped on replay to remount the view, clearing the morph's imperative styles so
   // it snaps cleanly back to the zoom layout.
   const [replayCount, setReplayCount] = useState(0)
@@ -119,8 +115,6 @@ const BikeGrowthRace = () => {
         ? order.filter((city) => !introduced.current.has(city))
         : []
       for (const city of order) introduced.current.add(city)
-      // Only passes ring; an entrance is a wave alone.
-      if (passers.length > 0 && soundOnRef.current) bell.ring()
       const wavers = debuts.length
         ? [...new Set([...passers, ...debuts])]
         : passers
@@ -136,7 +130,7 @@ const BikeGrowthRace = () => {
         }))
       }
     },
-    [scoreAndPaint, bell]
+    [scoreAndPaint]
   )
 
   const clock = useRaceClock({
@@ -200,15 +194,6 @@ const BikeGrowthRace = () => {
     clock.pause()
     if (ended) setEnded(false)
     clock.seek(time)
-  }
-
-  const handleToggleSound = () => {
-    const next = !soundOn
-    soundOnRef.current = next
-    setSoundOn(next)
-    // Has to happen in the click itself — a browser will not start an AudioContext
-    // without a user gesture, and this race autoplays, so there is no other one.
-    if (next) bell.arm()
   }
 
   const handleSpeedChange = (mul: number) => {
@@ -280,8 +265,6 @@ const BikeGrowthRace = () => {
           onSpeedChange={handleSpeedChange}
           maxT={maxT}
           onScrub={handleScrub}
-          soundOn={soundOn}
-          onToggleSound={handleToggleSound}
           scrubberRef={scrubberRef}
           yearTicks={yearTicks}
         />

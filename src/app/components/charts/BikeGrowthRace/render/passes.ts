@@ -1,6 +1,6 @@
 /**
- * The cities that overtook someone between two ranked orders — the ones that ring a
- * bell and wave. Each appears once however many places it gained.
+ * The cities that overtook someone between two ranked orders — the ones that wave.
+ * Each appears once however many places it gained.
  *
  * Only cities in *both* orders count. A city entering or leaving the visible field
  * displaces someone, but no overtake was watched on screen: the newcomer simply

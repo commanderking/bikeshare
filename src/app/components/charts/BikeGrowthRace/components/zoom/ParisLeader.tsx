@@ -1,6 +1,7 @@
 import { RefObject } from 'react'
 import { getLeaderBikerWidth, ZoomSize } from '../../render/zoomLayout'
 import RaceBiker, { BikerRender } from './RaceBiker'
+import CityNameLabel from './CityNameLabel'
 
 // Gap between the eyebrow label and the top of the leader's bar. Unscaled, like the
 // value it replaces — it is breathing room, not part of the layout that grows.
@@ -9,6 +10,7 @@ const LABEL_BOTTOM_GAP = 7
 type Props = {
   size: ZoomSize
   metro: string | undefined
+  startYear: number | undefined
   color: string
   biker: BikerRender
   nameRef: RefObject<HTMLSpanElement>
@@ -26,6 +28,7 @@ type Props = {
 export default function ParisLeader({
   size,
   metro,
+  startYear,
   color,
   biker,
   nameRef,
@@ -52,7 +55,8 @@ export default function ParisLeader({
             sits among the pack's city names, where it would read as noise. */}
         {metro && `${metro} (Total Trips)`}
       </span>
-      {/* the name-column label Paris crossfades into during the morph */}
+      {/* The name-column label Paris crossfades into during the morph. Its launch
+          year arrives with it — the eyebrow above never carries one. */}
       <span
         ref={colNameRef}
         className="absolute flex items-center justify-end overflow-hidden whitespace-nowrap font-semibold text-gray-700 opacity-0 dark:text-gray-100"
@@ -64,7 +68,7 @@ export default function ParisLeader({
           fontSize: size.packFont,
         }}
       >
-        {metro}
+        <CityNameLabel size={size} metro={metro} startYear={startYear} />
       </span>
       <div
         ref={barRef}

@@ -96,6 +96,11 @@ const ZoomRaceTrack = forwardRef<ZoomTrackHandle, Props>(function ZoomRaceTrack(
       })
     : ''
   const pack = order.slice(1)
+  // A city's launch year: the calendar year of its first data month on the axis.
+  const getStartYear = (city: string): number | undefined => {
+    const raceCity = cityMap.get(city)
+    return raceCity ? months[raceCity.firstIndex]?.year : undefined
+  }
 
   const getBikerProps = (city: string) => {
     const raceCity = cityMap.get(city)
@@ -145,6 +150,7 @@ const ZoomRaceTrack = forwardRef<ZoomTrackHandle, Props>(function ZoomRaceTrack(
         <ParisLeader
           size={size}
           metro={leaderMetro}
+          startYear={getStartYear(leaderCity)}
           color={getCityBarColor(leaderCity)}
           biker={leaderBiker}
           nameRef={refs.leaderName}
@@ -192,6 +198,7 @@ const ZoomRaceTrack = forwardRef<ZoomTrackHandle, Props>(function ZoomRaceTrack(
           size={size}
           reduceMotion={reduceMotion}
           metro={cityMap.get(city)?.metroArea}
+          startYear={getStartYear(city)}
           color={getCityBarColor(city)}
           biker={getBikerProps(city)}
           rowLeft={rowLeft}

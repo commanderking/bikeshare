@@ -40,9 +40,6 @@ export const FINAL_MONTH: { year: number; month: number } | null = {
 // the two bikes are still visibly alongside each other.
 export const PASS_WAVE_MS = 1000
 
-// Bell struck when one biker overtakes another (see hooks/useBell).
-export const BELL_SRC = '/audio/bell_toronto_bikeshare.m4a'
-
 // --- Number formatting ---
 const compact = new Intl.NumberFormat('en', {
   notation: 'compact',
