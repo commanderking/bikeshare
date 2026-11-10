@@ -10,11 +10,13 @@ interface WheelProps {
 }
 
 /** One wheel: black outer tire, a thin colored inner rim (half the tire's
- *  width), four spokes (rotated each frame via `spokesRef`), and hub. */
+ *  width), six spokes (rotated each frame via `spokesRef`), and hub. */
 const Wheel: React.FC<WheelProps> = ({ cx, cy, spokesRef, colors }) => (
   <g transform={`translate(${cx},${cy})`}>
     <circle r="18" fill="none" stroke={colors.tire} strokeWidth="2.1" />
     <circle r="16.4" fill="none" stroke={colors.wheelRim} strokeWidth="1.5" />
+    {/* Three diameters 60° apart. Six rather than eight so the pattern repeats
+        every 60°, keeping top-speed spin clearly forward (see GEAR_RATIO). */}
     <g ref={spokesRef} style={{ transformOrigin: '0 0' }}>
       <line
         x1="0"
@@ -25,26 +27,18 @@ const Wheel: React.FC<WheelProps> = ({ cx, cy, spokesRef, colors }) => (
         strokeWidth="0.85"
       />
       <line
-        x1="-16"
-        y1="0"
-        x2="16"
-        y2="0"
+        x1="13.86"
+        y1="-8"
+        x2="-13.86"
+        y2="8"
         stroke={colors.spoke}
         strokeWidth="0.85"
       />
       <line
-        x1="-11.3"
-        y1="-11.3"
-        x2="11.3"
-        y2="11.3"
-        stroke={colors.spoke}
-        strokeWidth="0.85"
-      />
-      <line
-        x1="11.3"
-        y1="-11.3"
-        x2="-11.3"
-        y2="11.3"
+        x1="-13.86"
+        y1="-8"
+        x2="13.86"
+        y2="8"
         stroke={colors.spoke}
         strokeWidth="0.85"
       />
