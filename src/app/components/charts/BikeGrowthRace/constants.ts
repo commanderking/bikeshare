@@ -1,9 +1,10 @@
 // Number of cities visible at once.
 export const TOP_N = 10
 
-// --- Row / bar layout (the full stacked layout the finale morph settles into) ---
-export const BAR_HEIGHT = 36 // bar thickness; leaves a 6px gap within the row pitch
-export const ROW_HEIGHT = 42 // vertical pitch between rows (bar + gap)
+// --- Row / bar layout ---
+// Bar thickness as a share of the row pitch in the finale's stacked layout; the
+// rest is the gap between bars. The pitch itself is derived (see getFinaleRows).
+export const FINALE_BAR_FILL = 36 / 42
 // The default biker viewBox has ~45px of empty padding each side; crop to the
 // bike's horizontal bounds so it hugs the end of the bar (matches AllTimeTripsBar).
 export const BIKER_VIEWBOX = '44 0 116 112'

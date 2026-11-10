@@ -5,6 +5,7 @@ import type {
   SkirtGuard,
 } from '@/app/components/Biker'
 import { CITY_BIKE_CONFIG } from '@/app/components/Biker/cityBikeConfig'
+import { parseHexChannels } from '@/app/components/Biker/hexColor'
 import { BAR_COLOR } from '../constants'
 
 // A city's Biker configuration as the race stores it (see cityBikeConfig) — the
@@ -20,20 +21,8 @@ export type BikerConfig = {
 // is bright. This keys on paleness, not luminance, so saturated colors that
 // happen to be bright (Helsinki's yellow, cyans, oranges) are NOT rejected;
 // only washed-out panels (Mexico City gray, the Nordic near-whites) are.
-const isPale = (hex: string): boolean => {
-  const hexDigits = hex.replace('#', '')
-  const full =
-    hexDigits.length === 3
-      ? hexDigits
-          .split('')
-          .map((char) => char + char)
-          .join('')
-      : hexDigits
-  const red = parseInt(full.slice(0, 2), 16) / 255
-  const green = parseInt(full.slice(2, 4), 16) / 255
-  const blue = parseInt(full.slice(4, 6), 16) / 255
-  return Math.min(red, green, blue) > 0.62
-}
+const isPale = (hex: string): boolean =>
+  Math.min(...parseHexChannels(hex)) / 255 > 0.62
 
 // The bar fill for a city: its skirt-guard color — usually the most distinctive
 // part of the livery. When that panel is pale (Mexico City, Oslo, Trondheim,

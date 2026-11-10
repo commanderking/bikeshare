@@ -1,8 +1,8 @@
 import { MutableRefObject, RefObject, useRef } from 'react'
 
 // Every DOM node the zoom view paints imperatively, bundled so paintZoomFrame can
-// reach them by name. Element refs animate individually; the four maps hold the pack
-// rows keyed by city id (populated via callback refs in the render).
+// reach them by name. Element refs animate individually; the pack maps hold the pack
+// rows' parts keyed by city id (populated via callback refs in the render).
 export type ZoomRefs = {
   stage: RefObject<HTMLDivElement>
   leaderBar: RefObject<HTMLDivElement>
@@ -24,6 +24,7 @@ export type ZoomRefs = {
   packNames: MutableRefObject<Map<string, HTMLSpanElement>>
   packBars: MutableRefObject<Map<string, HTMLDivElement>>
   packValues: MutableRefObject<Map<string, HTMLSpanElement>>
+  packBikers: MutableRefObject<Map<string, HTMLDivElement>>
   // Pack bikers riding along Paris's own bar, keyed by city id.
   chasingBikers: MutableRefObject<Map<string, HTMLDivElement>>
 }
@@ -49,5 +50,6 @@ export const useZoomRefs = (): ZoomRefs => ({
   packNames: useRef(new Map<string, HTMLSpanElement>()),
   packBars: useRef(new Map<string, HTMLDivElement>()),
   packValues: useRef(new Map<string, HTMLSpanElement>()),
+  packBikers: useRef(new Map<string, HTMLDivElement>()),
   chasingBikers: useRef(new Map<string, HTMLDivElement>()),
 })

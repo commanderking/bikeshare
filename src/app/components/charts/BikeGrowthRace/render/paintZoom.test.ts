@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { paintZoomFrame } from './paintZoom'
 import type { ZoomRefs } from '../hooks/useZoomRefs'
-import { BASE_ZOOM_SIZE, getDateIntroTop } from './zoomLayout'
+import { BASE_ZOOM_SIZE, getDateIntroTop, getFinaleRows } from './zoomLayout'
 import type { RaceCity } from '../timeline/buildRaceTimeline'
 
 // Minimal stand-ins for the DOM nodes paint writes to: only `style` and the two
@@ -38,6 +38,7 @@ const makeRefs = () => {
     packNames: { current: new Map() },
     packBars: { current: new Map() },
     packValues: { current: new Map() },
+    packBikers: { current: new Map() },
     chasingBikers: { current: new Map() },
   } as unknown as ZoomRefs
   // Every other element ref is absent; paint null-checks each one.
@@ -116,14 +117,13 @@ describe('leader value label', () => {
 
 describe("the leader's bike through the finale morph", () => {
   const { leaderBarHeight } = BASE_ZOOM_SIZE
-  // The finale bar height the layout travels to (BAR_HEIGHT x scale 1).
-  const FINALE_BAR_HEIGHT = 36
+  const FINALE_BAR_HEIGHT = getFinaleRows(BASE_ZOOM_SIZE).barHeight
 
   it('is left unscaled while the race plays', () => {
     expect(paintAt(600_000_000, 0).leaderTail.style.transform).toBe('none')
   })
 
-  it('shrinks to the finale bar height once settled', () => {
+  it('scales to the finale bar height once settled', () => {
     const { transform } = paintAt(600_000_000, 1).leaderTail.style
     expect(transform).toBe(`scale(${FINALE_BAR_HEIGHT / leaderBarHeight})`)
   })

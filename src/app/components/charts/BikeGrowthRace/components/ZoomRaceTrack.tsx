@@ -207,6 +207,7 @@ const ZoomRaceTrack = forwardRef<ZoomTrackHandle, Props>(function ZoomRaceTrack(
           nameRef={setRef(refs.packNames.current, city)}
           barRef={setRef(refs.packBars.current, city)}
           valueRef={setRef(refs.packValues.current, city)}
+          bikerRef={setRef(refs.packBikers.current, city)}
         />
       ))}
 

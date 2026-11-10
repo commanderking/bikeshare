@@ -6,7 +6,7 @@ description: >-
   "add a city's bike", or "add a custom biker" for a system — NOT to add a city to
   the growth race (that needs trip data and is out of scope here). Encodes the exact
   files to touch (cities.ts, bikeImages.ts, city-bike-colors.csv, cityBikeConfig.ts,
-  and Skirt.tsx if a new guard is needed), the BikerColors part vocabulary, the
+  cityRiderConfig.ts, and Skirt.tsx if a new guard is needed), the BikerColors part vocabulary, the
   basket/skirt/down-tube enums, the CSV column order, and the color-derivation flow.
 ---
 
@@ -39,8 +39,9 @@ madrid: {
 }
 ```
 
-**Only bike parts are configured. The rider stays default** (shirt, pants, skin,
-helmet, shoe come from `DEFAULT_COLORS` — never set them). The `colors` object is a
+**Only bike parts go in `colors`.** Never set the rider keys (shirt, pants, skin,
+helmet, shoe) here — the rider is dressed separately by an outfit in
+`cityRiderConfig.ts` (see "Rider outfit" below). The `colors` object is a
 `Partial<BikerColors>`; every existing city overrides exactly these 11 bike-part
 keys:
 
@@ -85,11 +86,14 @@ the bike is a Lyft/Motivate design with a black rear rib.
    the `<city_id>: { ... }` object. Its position in the file = display order in the
    gallery/rotation (`CONFIGURED_CITY_IDS = Object.keys(...)`); append at the end
    unless the user wants otherwise.
-5. **[Skirt.tsx](../../../src/app/components/Biker/Skirt.tsx)** — _only if_ the rear
+5. **[cityRiderConfig.ts](../../../src/app/components/Biker/cityRiderConfig.ts)** —
+   add the city's `CITY_RIDER_OUTFIT` entry. See "Rider outfit" below. Without
+   it the city silently gets the default rider on `/bikers/all` and in the race.
+6. **[Skirt.tsx](../../../src/app/components/Biker/Skirt.tsx)** — _only if_ the rear
    panel doesn't match an existing `SkirtType`. See "Skirt guard" below.
 
 Use one `<city_id>` everywhere: lowercase `snake_case` (e.g. `mexico_city`,
-`new_york_city`). It's the key in all four maps.
+`new_york_city`). It's the key in all five maps.
 
 ## Deriving the livery from the photo
 
@@ -128,6 +132,31 @@ color: <fender> }` or `{ type: 'OUTER_GUARD_150', color: '#1a1a1a' }`, matching 
 
 If the construction is ambiguous, **ask** (AskUserQuestion) rather than guess.
 
+## Rider outfit
+
+Each entry in `CITY_RIDER_OUTFIT` is a `RiderOutfit`
+([outfit.ts](../../../src/app/components/Biker/outfit.ts)):
+
+```ts
+madrid: {
+  top: { sleeves: 'long', color: '#2f3e56' },       // 'long' | 'short'
+  legwear: { type: 'pants', color: '#33415c' },     // 'pants' | 'shorts' | 'skirt'
+  helmet: { type: 'commuter', color: '#1c1c1c' },   // 'cap' | 'road' | 'commuter'
+  skinTone: 'olive',  // 'light' | 'tan' | 'olive' | 'brown' | 'deep'
+},
+```
+
+Follow the rules in the file's header comment:
+
+- **Garments:** pick sleeve, legwear and helmet variants that keep the counts
+  across cities roughly balanced. The top must stay clearly distinct from white
+  and from the city's frame color, since the torso sits against the page.
+- **`skinTone`:** not a free choice. Use the modal skin tone of the city's
+  residents, from the plurality group in a cited figure. Put the figures and the
+  source in a comment above the entry, matching the existing ones. Mark it
+  `ESTIMATE` or `UNSOURCED` when no official figure exists. If it's unclear,
+  **ask** rather than guess.
+
 ## CSV row format
 
 Column order (header is the first line of the file):
@@ -159,5 +188,6 @@ city_id,city,system_name,operator,image_type,source_url,confidence,basket_type,f
    configured.
 2. **View the image** and derive livery colors, `basketType`, `downTube`, and the
    skirt guard per the sections above. Describe your reading back to the user.
-3. Edit the four core files (+ `Skirt.tsx` only if a new guard type is needed).
+3. Edit the five core files (+ `Skirt.tsx` only if a new guard type is needed),
+   including the rider outfit and its sourced `skinTone`.
 4. Run `npx tsc --noEmit`; offer to open `/bikes/all` to verify visually.

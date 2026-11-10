@@ -36,7 +36,11 @@ const MORPH_MS = 2500
 // The whole field reorders at once there, which nobody watched happen.
 const SEEK_JUMP_MONTHS = 2
 
-const BikeGrowthRace = () => {
+type Props = {
+  autoplay?: boolean
+}
+
+const BikeGrowthRace = ({ autoplay = true }: Props) => {
   const {
     loading,
     months,
@@ -161,11 +165,12 @@ const BikeGrowthRace = () => {
     return () => cancelAnimationFrame(raf)
   }, [ended, maxT])
 
-  // Initialize (and, unless reduced motion, auto-play) once the data is in.
+  // Initialize (and, unless autoplay is off or reduced motion, auto-play) once the
+  // data is in.
   useIsomorphicLayoutEffect(() => {
     if (loading || months.length === 0) return
     clock.seek(0)
-    if (!reduceMotion) clock.play()
+    if (autoplay && !reduceMotion) clock.play()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, months.length])
 

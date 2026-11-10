@@ -134,10 +134,9 @@ const Biker: React.FC<BikerProps> = ({
         y1={HIP.y}
         x2={INIT.farKnee.x}
         y2={INIT.farKnee.y}
-        stroke={c.thighBack}
+        stroke={c.thigh}
         strokeWidth="4.0"
         strokeLinecap="round"
-        opacity="0.65"
       />
       <line
         ref={reg('farShin')}
@@ -145,10 +144,9 @@ const Biker: React.FC<BikerProps> = ({
         y1={INIT.farKnee.y}
         x2={INIT.farAnkle.x}
         y2={INIT.farAnkle.y}
-        stroke={c.shinBack}
+        stroke={c.shin}
         strokeWidth="4.0"
         strokeLinecap="round"
-        opacity="0.65"
       />
       <line
         ref={reg('farCrank')}

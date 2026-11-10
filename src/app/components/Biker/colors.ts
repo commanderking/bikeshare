@@ -13,13 +13,10 @@ export interface BikerColors {
   forearmBack: string
   /** Hip joint — always the legwear color, since every garment covers the seat. */
   hip: string
-  /** Near thigh — skin when the rider wears a skirt, whose hem stops at mid-thigh. */
+  /** Both thighs — skin when the rider wears a skirt, whose hem stops at mid-thigh. */
   thigh: string
-  thighBack: string
-  /** Near shin — skin when the rider wears shorts or a skirt, else `thigh`. */
+  /** Both shins — skin when the rider wears shorts or a skirt, else `thigh`. */
   shin: string
-  /** Far shin — skin when the rider wears shorts or a skirt, else `thighBack`. */
-  shinBack: string
   shoe: string
   skin: string
   helmet: string
@@ -56,12 +53,10 @@ export const DEFAULT_COLORS: BikerColors = {
   forearm: '#3b6ea5',
   forearmBack: '#2f5985',
   // Black legs read clearly against every livery, so the pedaling stroke stays
-  // legible even at small sizes. The far leg (thighBack) is drawn muted.
+  // legible even at small sizes.
   hip: '#1c1c1c',
   thigh: '#1c1c1c',
-  thighBack: '#2a2a2a',
   shin: '#1c1c1c',
-  shinBack: '#2a2a2a',
   shoe: '#2b2b2b',
   skin: '#caa07a',
   helmet: '#d9534f',

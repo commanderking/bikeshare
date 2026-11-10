@@ -8,7 +8,6 @@ import {
   RAISE_MS,
   WAVE_MS,
   LOWER_MS,
-  WAVE_FREQ,
   smoothstep,
 } from './geometry'
 
@@ -60,10 +59,10 @@ export const getWaveTiming = (totalMs: number): WaveTiming => {
  * Start a wave now, bypassing the idle countdown. Ignored if one is already
  * playing, so a burst of triggers cannot restart the arm mid-gesture.
  */
-export function triggerWave(s: WaveState): void {
-  if (s.phase !== 'idle') return
-  s.phase = 'raise'
-  s.phaseT = 0
+export function triggerWave(wave: WaveState): void {
+  if (wave.phase !== 'idle') return
+  wave.phase = 'raise'
+  wave.phaseT = 0
 }
 
 export function createWave(_interval: Interval): WaveState {
@@ -78,50 +77,50 @@ export function createWave(_interval: Interval): WaveState {
   }
 }
 
-/** Advance the wave by `dt` ms. Mutates `s`. */
+/** Advance the wave by `dt` ms. Mutates `wave`. */
 export function advanceWave(
-  s: WaveState,
+  wave: WaveState,
   dt: number,
   enabled: boolean,
   interval: Interval,
   timing: WaveTiming
 ): void {
-  if (!enabled && s.phase === 'idle') return
-  switch (s.phase) {
+  if (!enabled && wave.phase === 'idle') return
+  switch (wave.phase) {
     case 'idle':
-      s.nextWave -= dt
-      if (s.nextWave <= 0) {
-        s.phase = 'raise'
-        s.phaseT = 0
+      wave.nextWave -= dt
+      if (wave.nextWave <= 0) {
+        wave.phase = 'raise'
+        wave.phaseT = 0
       }
       break
     case 'raise':
-      s.phaseT += dt
-      s.raiseAmt = smoothstep(Math.min(s.phaseT / timing.raiseMs, 1))
-      if (s.phaseT >= timing.raiseMs) {
-        s.phase = 'wave'
-        s.phaseT = 0
+      wave.phaseT += dt
+      wave.raiseAmt = smoothstep(Math.min(wave.phaseT / timing.raiseMs, 1))
+      if (wave.phaseT >= timing.raiseMs) {
+        wave.phase = 'wave'
+        wave.phaseT = 0
       }
       break
     case 'wave':
-      s.phaseT += dt
-      s.raiseAmt = 1
-      s.wavePhase += dt * timing.stepPerMs
-      if (s.phaseT >= timing.waveMs) {
-        s.phase = 'lower'
-        s.phaseT = 0
+      wave.phaseT += dt
+      wave.raiseAmt = 1
+      wave.wavePhase += dt * timing.stepPerMs
+      if (wave.phaseT >= timing.waveMs) {
+        wave.phase = 'lower'
+        wave.phaseT = 0
       }
       break
     case 'lower':
-      s.phaseT += dt
-      s.raiseAmt = smoothstep(1 - Math.min(s.phaseT / timing.lowerMs, 1))
-      s.wavePhase += dt * timing.stepPerMs // keep swinging as it fades
-      if (s.phaseT >= timing.lowerMs) {
-        s.phase = 'idle'
-        s.phaseT = 0
-        s.raiseAmt = 0
-        s.wavePhase = 0
-        s.nextWave = randDelay(interval)
+      wave.phaseT += dt
+      wave.raiseAmt = smoothstep(1 - Math.min(wave.phaseT / timing.lowerMs, 1))
+      wave.wavePhase += dt * timing.stepPerMs // keep swinging as it fades
+      if (wave.phaseT >= timing.lowerMs) {
+        wave.phase = 'idle'
+        wave.phaseT = 0
+        wave.raiseAmt = 0
+        wave.wavePhase = 0
+        wave.nextWave = randDelay(interval)
       }
       break
   }

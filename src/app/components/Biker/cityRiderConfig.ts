@@ -43,7 +43,7 @@ export const CITY_RIDER_OUTFIT: Record<string, RiderOutfit> = {
   // Source: Wikipedia "Immigration to Norway".
   bergen: {
     top: { sleeves: 'long', color: '#2f3e56' },
-    legwear: { type: 'skirt', color: '#d9d4c5' },
+    legwear: { type: 'skirt', color: '#9c927a' },
     helmet: { type: 'road', color: '#d97ba0' },
     skinTone: 'light',
   },
@@ -68,7 +68,7 @@ export const CITY_RIDER_OUTFIT: Record<string, RiderOutfit> = {
   // Source: Wikipedia "Demographics of Chicago".
   chicago: {
     top: { sleeves: 'long', color: '#2f3e56' },
-    legwear: { type: 'pants', color: '#d9d4c5' },
+    legwear: { type: 'pants', color: '#9c927a' },
     helmet: { type: 'cap', color: '#b8543a' },
     skinTone: 'light',
   },
@@ -112,7 +112,7 @@ export const CITY_RIDER_OUTFIT: Record<string, RiderOutfit> = {
   // Source: Wikipedia "Demographics of Toronto".
   toronto: {
     top: { sleeves: 'long', color: '#6b7f9e' },
-    legwear: { type: 'shorts', color: '#d9d4c5' },
+    legwear: { type: 'shorts', color: '#9c927a' },
     helmet: { type: 'road', color: '#59b3c4' },
     skinTone: 'light',
   },
@@ -157,7 +157,7 @@ export const CITY_RIDER_OUTFIT: Record<string, RiderOutfit> = {
   // Source: Wikipedia "Jersey City, New Jersey".
   jersey_city: {
     top: { sleeves: 'short', color: '#8c5a3c' },
-    legwear: { type: 'shorts', color: '#d9d4c5' },
+    legwear: { type: 'shorts', color: '#9c927a' },
     helmet: { type: 'commuter', color: '#8e5ea8' },
     skinTone: 'olive',
   },

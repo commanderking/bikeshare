@@ -8,6 +8,7 @@ import {
   INIT_CRANK_ANGLE,
   BURST_MULTIPLIER,
   BURST_RAMP_MS,
+  SPEED_FRAME_MS,
 } from './geometry'
 import { knee, pedals, armPose, ankleAbove } from './kinematics'
 import {
@@ -114,10 +115,11 @@ export function useBikerAnimation({
           : speedRef.current
         effSpeed += (targetSpeed - effSpeed) * Math.min(1, dt / BURST_RAMP_MS)
 
-        ang += effSpeed
+        const crankStep = effSpeed * (dt / SPEED_FRAME_MS)
+        ang += crankStep
         // Wheel spin derives from the same crank increment, so pedals and
         // wheels can never drift out of sync at any speed.
-        wheelDeg = (wheelDeg + effSpeed * GEAR_RATIO * DEG_PER_RAD) % 360
+        wheelDeg = (wheelDeg + crankStep * GEAR_RATIO * DEG_PER_RAD) % 360
         advanceWave(
           waveStateRef.current as WaveState,
           dt,

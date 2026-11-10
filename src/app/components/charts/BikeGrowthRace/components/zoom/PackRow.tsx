@@ -19,6 +19,7 @@ type Props = {
   nameRef: RefCallback<HTMLSpanElement>
   barRef: RefCallback<HTMLDivElement>
   valueRef: RefCallback<HTMLSpanElement>
+  bikerRef: RefCallback<HTMLDivElement>
 }
 
 // One pack member: name | bar | biker | value. A rank swap slides the row via a CSS
@@ -37,6 +38,7 @@ export default function PackRow({
   nameRef,
   barRef,
   valueRef,
+  bikerRef,
 }: Props) {
   return (
     <div
@@ -68,7 +70,9 @@ export default function PackRow({
           className="rounded"
           style={{ width: 0, height: size.barHeight, background: color }}
         />
-        <RaceBiker biker={biker} width={getPackBikerWidth(size)} />
+        <div ref={bikerRef} className="shrink-0">
+          <RaceBiker biker={biker} width={getPackBikerWidth(size)} />
+        </div>
         <span
           ref={valueRef}
           className="shrink-0 whitespace-nowrap font-semibold tabular-nums text-gray-700 dark:text-gray-200"

@@ -1,4 +1,4 @@
-import { BIKER_ASPECT, TOP_N } from '../constants'
+import { BIKER_ASPECT, FINALE_BAR_FILL, TOP_N } from '../constants'
 
 // Pure geometry for the zoom view. Horizontal positions are fractions [0..1] of
 // the track width (fluid); pixel sizing lives in ZoomSize below and scales in
@@ -112,7 +112,7 @@ const BASE_ZOOM: ZoomSize = {
   // 1.5x the pack bars' presence: the leader's bike is sized off this, so the
   // leader and chase bikes grow with it.
   leaderBarHeight: 75,
-  // 34 in a 37 pitch: a 3px gap between pack bars, half the 6 it was, with the
+  // 38 in a 41 pitch: a 3px gap between pack bars, half the 6 it was, with the
   // reclaimed height going to the bars themselves.
   barHeight: 38,
   bikerStackStep: 1.5,
@@ -189,6 +189,28 @@ export const getLeaderBikerWidth = (size: ZoomSize): number =>
 // bike on the bar.
 export const getChaseBikerWidth = (size: ZoomSize): number =>
   getLeaderBikerWidth(size) * 0.8
+
+// Room above Paris's row in the finale's stacked layout.
+const FINALE_TOP = 30
+
+// The finale's stacked rows (px): the first row's top, the row pitch, and the bar
+// thickness. Sized so the last bar's bottom lands where the pack's last row sat all
+// race — level with the date — so the chart fills the stage instead of stopping
+// short above it. The bars thicken to fill the room rather than spreading apart.
+export type FinaleRows = { top: number; pitch: number; barHeight: number }
+
+export const getFinaleRows = (size: ZoomSize): FinaleRows => {
+  const top = FINALE_TOP * size.scale
+  // The pack shows ranks 1..TOP_N-1, so its last row sits at index TOP_N-2.
+  const lastPackRowBottom =
+    size.panelTop +
+    size.panelPadTop +
+    (TOP_N - 2) * size.rowPitch +
+    size.barHeight
+  // TOP_N rows: TOP_N-1 pitches down to the last row's top, then its bar.
+  const pitch = (lastPackRowBottom - top) / (TOP_N - 1 + FINALE_BAR_FILL)
+  return { top, pitch, barHeight: pitch * FINALE_BAR_FILL }
+}
 
 export const getZoomPanelHeight = (size: ZoomSize): number =>
   size.panelPadTop + (TOP_N - 1) * size.rowPitch + size.panelPadBottom
