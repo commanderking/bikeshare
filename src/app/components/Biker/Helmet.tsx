@@ -48,10 +48,10 @@ const Helmet: React.FC<HelmetProps> = ({ type, color, ventColor }) => {
     <>
       <path d={shell} fill={color} />
       {visor && <path d={visor} fill={color} />}
-      {VENTS[type]?.map((d) => (
+      {VENTS[type]?.map((ventPath) => (
         <path
-          key={d}
-          d={d}
+          key={ventPath}
+          d={ventPath}
           fill="none"
           stroke={ventColor}
           strokeWidth="0.9"

@@ -17,6 +17,8 @@
 
 import { spawn } from 'node:child_process'
 import { once } from 'node:events'
+import { mkdir } from 'node:fs/promises'
+import { dirname } from 'node:path'
 import { chromium } from 'playwright'
 
 // autoplay=0 so we can start the race ourselves (via spacebar), making frame 0
@@ -187,6 +189,9 @@ const recordFrames = async (page, ffmpeg) => {
 }
 
 const main = async () => {
+  // ffmpeg won't create missing folders, and recordings/ is gitignored, so it
+  // doesn't exist on a fresh clone.
+  await mkdir(dirname(OUT_PATH), { recursive: true })
   const browser = await chromium.launch()
   const ffmpeg = startFfmpeg()
   try {
