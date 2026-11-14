@@ -19,7 +19,8 @@ const lyftOuterGuard: OuterGuard = { endDeg: 150, color: '#1a1a1a' }
  * bicycle. See `docs/city-bike-colors.csv` for sources, confidence, and livery
  * notes. Keys match the ids in `constants/cities.ts`.
  *
- * Bike parts only — the rider (shirt/pants/skin/helmet) keeps the defaults.
+ * Bike parts only — the rider (shirt/pants/skin/helmet) comes from
+ * CITY_RIDER_OUTFIT in `cityRiderConfig.ts`.
  * `skirtGuard` is the branded panel over the rear wheel; `basketType` selects
  * the front-carrier shape (shared across cities with similar hardware).
  */

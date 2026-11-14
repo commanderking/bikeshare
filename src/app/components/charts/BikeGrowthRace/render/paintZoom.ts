@@ -1,10 +1,12 @@
 import { getValueAt, RaceCity } from '../timeline/buildRaceTimeline'
-import { BAR_HEIGHT, BAR_MAX_PCT, formatValue, ROW_HEIGHT } from '../constants'
+import { BAR_MAX_PCT, formatValue } from '../constants'
 import {
   computeZoomLayout,
   formatPct,
   getBarFracOnLeader,
   getChaseBikerWidth,
+  getDateIntroTop,
+  getFinaleRows,
   RankedCity,
   SECOND_PLACE_PCT,
   ZoomLayout,
@@ -113,27 +115,37 @@ const paintChrome = (refs: ZoomRefs, frame: Frame) => {
     refs.highlight.current.style.opacity = String(chrome)
 }
 
-// The date's arrival, riding the pack's own entrance: the block travels from the
-// stage's left edge to its resting spot under the bar's right end, while within it the
-// month settles from flush-left under the year to flush-right with it. Both run on one
-// progress so they land on the same frame. Each uses the same trick — an element's
-// offsetLeft is its resting x (transforms don't move it), so it doubles as the distance
-// to travel, no text measured. Once landed they write 'none' and stop reading layout
-// for the rest of the race.
-const paintDateIntro = (refs: ZoomRefs, frame: Frame) => {
+// The date's arrival, riding the pack's own entrance: the block travels from under
+// the leader's bar at the stage's left edge down to its resting spot in the pack's
+// bottom-right, while within it the month settles from flush-left under the year to
+// flush-right with it. Both run on one progress so they land on the same frame. Each
+// uses the same trick — an element's offsetLeft/offsetTop is its resting position
+// (transforms don't move it), so it doubles as the distance to travel, no text
+// measured. Once landed they write 'none' and stop reading layout for the rest of
+// the race.
+const paintDateIntro = (refs: ZoomRefs, frame: Frame, size: ZoomSize) => {
   const { entrance, layout } = frame
   const arrival = Math.min(entrance * DATE_SLIDE_RATE, 1)
-  const travelled = (el: HTMLElement) =>
-    arrival < 1 ? `translateX(${-el.offsetLeft * (1 - arrival)}px)` : 'none'
+  const remaining = 1 - arrival
   if (refs.date.current) {
     const dateEl = refs.date.current
     // The axis opens on a blank month, so hold the date back until Paris's bar has
     // something to show — same rule the chase bikers use to stay off an empty track.
     dateEl.style.opacity = (layout.leader?.value ?? 0) > 0 ? '1' : '0'
-    dateEl.style.transform = travelled(dateEl)
+    // The block rests low now, so the entrance carries a drop as well as a slide;
+    // it still starts where it used to sit, under the bar.
+    dateEl.style.transform =
+      arrival < 1
+        ? `translate(${-dateEl.offsetLeft * remaining}px, ${
+            -(dateEl.offsetTop - getDateIntroTop(size)) * remaining
+          }px)`
+        : 'none'
   }
   if (refs.dateMonth.current)
-    refs.dateMonth.current.style.transform = travelled(refs.dateMonth.current)
+    refs.dateMonth.current.style.transform =
+      arrival < 1
+        ? `translateX(${-refs.dateMonth.current.offsetLeft * remaining}px)`
+        : 'none'
 }
 
 // Beat 0 (play): the live zoom widths — Paris's bar, the #2 shade/marker, the
@@ -142,18 +154,27 @@ const paintPlay = (refs: ZoomRefs, frame: Frame) => {
   const { layout, ranked, second, entrance } = frame
   if (refs.leaderBar.current)
     refs.leaderBar.current.style.width = formatPct(layout.leaderWidth)
-  if (refs.leaderTail.current)
+  if (refs.leaderTail.current) {
     refs.leaderTail.current.style.left = formatPct(layout.leaderWidth)
+    refs.leaderTail.current.style.transform = 'none'
+  }
+  if (refs.leaderValue.current) {
+    const style = refs.leaderValue.current.style
+    style.left = formatPct(layout.leaderWidth)
+    style.opacity = layout.showLeaderValue ? '1' : '0'
+  }
   if (refs.shade.current)
     refs.shade.current.style.width = formatPct(layout.markerX)
   if (refs.marker.current)
     refs.marker.current.style.left = formatPct(layout.markerX)
+  if (refs.leftLine.current)
+    refs.leftLine.current.setAttribute('x1', String(layout.lastPlaceX * 100))
   if (refs.rightLine.current)
     refs.rightLine.current.setAttribute('x1', String(layout.markerX * 100))
   if (refs.beam.current)
     refs.beam.current.setAttribute(
       'points',
-      `0,0 ${layout.markerX * 100},0 ${layout.panelRight * 100},100 ${layout.panelLeft * 100},100`
+      `${layout.lastPlaceX * 100},0 ${layout.markerX * 100},0 ${layout.panelRight * 100},100 ${layout.panelLeft * 100},100`
     )
   for (let rank = 1; rank < ranked.length; rank++) {
     const { city, value } = ranked[rank]
@@ -196,45 +217,54 @@ const paintMorph = (
   stageW: number
 ) => {
   const { ranked, layout, second, settle } = frame
-  const absRowPitch = ROW_HEIGHT * size.scale
-  const absBarH = BAR_HEIGHT * size.scale
-  const axisSpace = 30 * size.scale
+  const finale = getFinaleRows(size)
   const rowBaseTop = size.panelTop + size.panelPadTop
 
   // Paris (rank 0): standalone top bar → row 0 of the unified list.
-  const lTop = lerp(size.leaderTop, axisSpace, settle)
+  const lTop = lerp(size.leaderTop, finale.top, settle)
   const lWidth = lerp(
     layout.leaderWidth,
     getAbsBarFrac(layout.leader?.value ?? 0),
     settle
   )
-  const lHeight = lerp(size.leaderBarHeight, absBarH, settle)
+  const lHeight = lerp(size.leaderBarHeight, finale.barHeight, settle)
   // Bar left = name column + a tailGap (the same gap the pack rows put between their
   // name and bar), so Paris lines up with them at the finish.
   const barLeftPx = ABS_NAME_FRAC * stageW * settle + size.tailGap * settle
   if (refs.leaderBar.current) {
-    const s = refs.leaderBar.current.style
-    s.top = `${lTop}px`
-    s.left = `${barLeftPx}px`
-    s.width = formatPct(lWidth)
-    s.height = `${lHeight}px`
+    const style = refs.leaderBar.current.style
+    style.top = `${lTop}px`
+    style.left = `${barLeftPx}px`
+    style.width = formatPct(lWidth)
+    style.height = `${lHeight}px`
   }
   if (refs.leaderTail.current) {
-    refs.leaderTail.current.style.top = `${lTop}px`
-    refs.leaderTail.current.style.left = `${barLeftPx + lWidth * stageW}px`
-    refs.leaderTail.current.style.height = `${lHeight}px`
+    const style = refs.leaderTail.current.style
+    style.top = `${lTop}px`
+    style.left = `${barLeftPx + lWidth * stageW}px`
+    style.height = `${lHeight}px`
+    // The bike's px width is fixed at render from the zoom-sized bar, so it has to be
+    // scaled down to land on the finale's much shorter bar. Deriving the factor from
+    // the bar's own travel keeps the bike exactly bar-height the whole way across.
+    style.transform = `scale(${lHeight / size.leaderBarHeight})`
+  }
+  if (refs.leaderValue.current) {
+    const style = refs.leaderValue.current.style
+    style.top = `${lTop}px`
+    style.left = `${barLeftPx + lWidth * stageW}px`
+    style.height = `${lHeight}px`
   }
   // Crossfade "PARIS" (above) → "Paris" (in the name column).
   if (refs.leaderName.current)
     refs.leaderName.current.style.opacity = String(1 - settle)
   if (refs.leaderColName.current) {
-    const s = refs.leaderColName.current.style
-    s.opacity = String(settle)
-    s.top = `${lTop}px`
-    s.height = `${lHeight}px` // match the bar so items-center vertically centers it
+    const style = refs.leaderColName.current.style
+    style.opacity = String(settle)
+    style.top = `${lTop}px`
+    style.height = `${lHeight}px` // match the bar so items-center vertically centers it
     // Right edge a tailGap short of the bar's left, matching the pack rows.
-    s.right = `${stageW - barLeftPx + size.tailGap}px`
-    s.width = `${ABS_NAME_FRAC * stageW}px`
+    style.right = `${stageW - barLeftPx + size.tailGap}px`
+    style.width = `${ABS_NAME_FRAC * stageW}px`
   }
 
   // Pack: inset rows → the stacked list beneath Paris.
@@ -249,18 +279,18 @@ const paintMorph = (
     )
     const translateY = lerp(
       packIndex * size.rowPitch,
-      axisSpace + rank * absRowPitch - rowBaseTop,
+      finale.top + rank * finale.pitch - rowBaseTop,
       settle
     )
-    const rowHeight = lerp(size.barHeight, absBarH, settle)
+    const rowHeight = lerp(size.barHeight, finale.barHeight, settle)
     const row = refs.packRows.current.get(city)
     if (row) {
-      const s = row.style
-      s.left = `${rowLeft}px`
-      s.right = `${rowRight}px`
-      s.height = `${rowHeight}px`
-      s.transform = `translateY(${translateY}px)`
-      s.transition = 'none'
+      const style = row.style
+      style.left = `${rowLeft}px`
+      style.right = `${rowRight}px`
+      style.height = `${rowHeight}px`
+      style.transform = `translateY(${translateY}px)`
+      style.transition = 'none'
     }
     const nameEl = refs.packNames.current.get(city)
     if (nameEl)
@@ -272,6 +302,12 @@ const paintMorph = (
       bar.style.width = `${lerp(zoomPct, absPct, settle)}%`
       bar.style.height = `${rowHeight}px`
     }
+    // The bike was sized to the zoom bar, so it grows with the row. `zoom` rather
+    // than a transform: the bike's layout box grows too, pushing the value label
+    // along instead of the scaled bike overlapping it.
+    const biker = refs.packBikers.current.get(city)
+    if (biker)
+      biker.style.setProperty('zoom', String(rowHeight / size.barHeight))
   }
 }
 
@@ -284,7 +320,7 @@ export const paintZoomFrame = (
 ) => {
   const frame = readFrame(inputs, time, morph)
   paintChrome(refs, frame)
-  paintDateIntro(refs, frame)
+  paintDateIntro(refs, frame, inputs.size)
   paintChaseBikers(refs, inputs, frame, time)
   if (morph <= 0) {
     paintPlay(refs, frame)

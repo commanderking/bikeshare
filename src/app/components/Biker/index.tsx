@@ -5,12 +5,17 @@ import { BikerColors, DEFAULT_COLORS } from './colors'
 import { BOTTOM_BRACKET, HIP, SHOULDER, DEFAULT_SPEED } from './geometry'
 import { INIT } from './kinematics'
 import { useBikerAnimation } from './useBikerAnimation'
+import { DEFAULT_WAVE_MS } from './handWave'
 import Wheel from './Wheel'
 import Frame, { DownTubeCurve } from './Frame'
 import Basket, { BasketType } from './Basket'
 import Skirt, { SkirtGuard } from './Skirt'
+import RiderSkirt from './RiderSkirt'
+import Helmet, { HelmetType } from './Helmet'
+import { RiderOutfit, getOutfitColors, getHelmetVentColor } from './outfit'
 
 export type { BikerColors, BasketType, SkirtGuard, DownTubeCurve }
+export type { HelmetType, RiderOutfit }
 
 interface BikerProps {
   /** Crank angular velocity in radians per animation frame. Higher = faster pedalling. */
@@ -23,6 +28,13 @@ interface BikerProps {
   wave?: boolean
   /** Random idle delay between waves, in milliseconds: [min, max]. */
   waveInterval?: [number, number]
+  /**
+   * Bump to make the biker wave once, now — independent of `wave`, which only
+   * governs the idle waves it plays on its own. Ignored at 0 and mid-wave.
+   */
+  waveNonce?: number
+  /** End-to-end length of one wave in ms. */
+  waveDurationMs?: number
   /** Occasionally sprint for a couple of seconds. */
   speedBursts?: boolean
   /** Override any subset of the default colors. */
@@ -31,6 +43,8 @@ interface BikerProps {
   basketType?: BasketType
   /** Rear dress/skirt guard shape + color. */
   skirtGuard?: SkirtGuard
+  /** What the rider wears. Omitted, they keep the default long sleeves + pants. */
+  outfit?: RiderOutfit
   /** Down-tube sweep profile; varies with the bike's frame dimensions. */
   downTube?: DownTubeCurve
   width?: number | string
@@ -47,10 +61,13 @@ const Biker: React.FC<BikerProps> = ({
   showGround = false,
   wave = true,
   waveInterval = [5000, 10000],
+  waveNonce = 0,
+  waveDurationMs = DEFAULT_WAVE_MS,
   speedBursts = true,
   colors,
   basketType = 'rack',
   skirtGuard = { type: 'halfDisc', color: '#f5e79e' },
+  outfit,
   downTube = 'default',
   width = 200,
   height,
@@ -64,8 +81,16 @@ const Biker: React.FC<BikerProps> = ({
     wave,
     waveInterval,
     speedBursts,
+    waveNonce,
+    waveDurationMs,
   })
-  const c = { ...DEFAULT_COLORS, ...colors }
+  // `colors` is applied last so a caller can still pin an individual part.
+  const resolvedColors = {
+    ...DEFAULT_COLORS,
+    ...(outfit && getOutfitColors(outfit)),
+    ...colors,
+  }
+  const helmetType = outfit?.helmet.type ?? 'cap'
 
   return (
     <svg
@@ -83,13 +108,23 @@ const Biker: React.FC<BikerProps> = ({
           y1="105"
           x2="190"
           y2="105"
-          stroke={c.ground}
+          stroke={resolvedColors.ground}
           strokeWidth="1"
         />
       )}
 
-      <Wheel cx={66} cy={87} spokesRef={reg('rearSpokes')} colors={c} />
-      <Wheel cx={137} cy={87} spokesRef={reg('frontSpokes')} colors={c} />
+      <Wheel
+        cx={66}
+        cy={87}
+        spokesRef={reg('rearSpokes')}
+        colors={resolvedColors}
+      />
+      <Wheel
+        cx={137}
+        cy={87}
+        spokesRef={reg('frontSpokes')}
+        colors={resolvedColors}
+      />
 
       {/* REAR skirt/dress guard (shape + color via the skirtGuard prop) */}
       <Skirt guard={skirtGuard} />
@@ -97,7 +132,7 @@ const Biker: React.FC<BikerProps> = ({
       <path
         d="M116.5 87.7 A20.5 20.5 0 0 1 137.7 66.5"
         fill="none"
-        stroke={c.frontFender}
+        stroke={resolvedColors.frontFender}
         strokeWidth="2.2"
         strokeLinecap="round"
       />
@@ -109,10 +144,9 @@ const Biker: React.FC<BikerProps> = ({
         y1={HIP.y}
         x2={INIT.farKnee.x}
         y2={INIT.farKnee.y}
-        stroke={c.pantsBack}
+        stroke={resolvedColors.thigh}
         strokeWidth="4.0"
         strokeLinecap="round"
-        opacity="0.65"
       />
       <line
         ref={reg('farShin')}
@@ -120,10 +154,9 @@ const Biker: React.FC<BikerProps> = ({
         y1={INIT.farKnee.y}
         x2={INIT.farAnkle.x}
         y2={INIT.farAnkle.y}
-        stroke={c.pantsBack}
+        stroke={resolvedColors.shin}
         strokeWidth="4.0"
         strokeLinecap="round"
-        opacity="0.65"
       />
       <line
         ref={reg('farCrank')}
@@ -131,7 +164,7 @@ const Biker: React.FC<BikerProps> = ({
         y1={BOTTOM_BRACKET.y}
         x2={INIT.farPedal.x}
         y2={INIT.farPedal.y}
-        stroke={c.crank}
+        stroke={resolvedColors.crank}
         strokeWidth="1.4"
         strokeLinecap="round"
         opacity="0.5"
@@ -143,12 +176,12 @@ const Biker: React.FC<BikerProps> = ({
         width="6"
         height="2.2"
         rx="1"
-        fill={c.shoe}
+        fill={resolvedColors.shoe}
         opacity="0.5"
       />
 
       {/* MAIN FRAME — step-through, drawn as labeled tubes (see Frame.tsx) */}
-      <Frame colors={c} downTube={downTube} />
+      <Frame colors={resolvedColors} downTube={downTube} />
 
       {/* HANDLEBAR, near seat height */}
       <line
@@ -156,14 +189,14 @@ const Biker: React.FC<BikerProps> = ({
         y1="44.5"
         x2="122"
         y2="44.5"
-        stroke={c.frameDark}
+        stroke={resolvedColors.frameDark}
         strokeWidth="2.4"
         strokeLinecap="round"
       />
-      <circle cx="118" cy="44.5" r="1.6" fill={c.frameDark} />
+      <circle cx="118" cy="44.5" r="1.6" fill={resolvedColors.frameDark} />
 
       {/* FRONT CARGO CARRIER — shape varies by city (wire / box / rack / none) */}
-      <Basket type={basketType} colors={c} />
+      <Basket type={basketType} colors={resolvedColors} />
 
       {/* chainring — smaller than the crank so the pedals sweep outside it */}
       <circle
@@ -171,10 +204,10 @@ const Biker: React.FC<BikerProps> = ({
         cy="87"
         r="5"
         fill="none"
-        stroke={c.ring}
+        stroke={resolvedColors.ring}
         strokeWidth="1.4"
       />
-      <circle cx="92" cy="87" r="1.8" fill={c.ring} />
+      <circle cx="92" cy="87" r="1.8" fill={resolvedColors.ring} />
 
       {/* saddle */}
       <line
@@ -182,7 +215,7 @@ const Biker: React.FC<BikerProps> = ({
         y1="50.5"
         x2="88"
         y2="51"
-        stroke={c.saddle}
+        stroke={resolvedColors.saddle}
         strokeWidth="5"
         strokeLinecap="round"
       />
@@ -194,7 +227,7 @@ const Biker: React.FC<BikerProps> = ({
         y1={BOTTOM_BRACKET.y}
         x2={INIT.nearPedal.x}
         y2={INIT.nearPedal.y}
-        stroke={c.crank}
+        stroke={resolvedColors.crank}
         strokeWidth="1.7"
         strokeLinecap="round"
       />
@@ -205,7 +238,7 @@ const Biker: React.FC<BikerProps> = ({
         width="6"
         height="2.2"
         rx="1"
-        fill={c.shoe}
+        fill={resolvedColors.shoe}
       />
       <line
         ref={reg('nearThigh')}
@@ -213,7 +246,7 @@ const Biker: React.FC<BikerProps> = ({
         y1={HIP.y}
         x2={INIT.nearKnee.x}
         y2={INIT.nearKnee.y}
-        stroke={c.pants}
+        stroke={resolvedColors.thigh}
         strokeWidth="4.4"
         strokeLinecap="round"
       />
@@ -223,13 +256,13 @@ const Biker: React.FC<BikerProps> = ({
         y1={INIT.nearKnee.y}
         x2={INIT.nearAnkle.x}
         y2={INIT.nearAnkle.y}
-        stroke={c.pants}
+        stroke={resolvedColors.shin}
         strokeWidth="4.4"
         strokeLinecap="round"
       />
 
       {/* HIP / BUTT joint */}
-      <circle cx="86" cy="47" r="3.4" fill={c.pants} />
+      <circle cx="86" cy="47" r="3.4" fill={resolvedColors.hip} />
 
       {/* FAR ARM (his left) — driven by the hand-wave state machine (rest pose =
           hand on bar); drawn behind the torso and muted for depth */}
@@ -240,7 +273,7 @@ const Biker: React.FC<BikerProps> = ({
           y1={SHOULDER.y}
           x2={INIT.arm.elbowX}
           y2={INIT.arm.elbowY}
-          stroke={c.shirtBack}
+          stroke={resolvedColors.shirtBack}
           strokeWidth="2.8"
           strokeLinecap="round"
         />
@@ -250,7 +283,7 @@ const Biker: React.FC<BikerProps> = ({
           y1={INIT.arm.elbowY}
           x2={INIT.arm.handX}
           y2={INIT.arm.handY}
-          stroke={c.shirtBack}
+          stroke={resolvedColors.forearmBack}
           strokeWidth="2.8"
           strokeLinecap="round"
         />
@@ -259,7 +292,7 @@ const Biker: React.FC<BikerProps> = ({
           cx={INIT.arm.handX}
           cy={INIT.arm.handY}
           r="2.1"
-          fill={c.skin}
+          fill={resolvedColors.skin}
         />
       </g>
 
@@ -269,10 +302,15 @@ const Biker: React.FC<BikerProps> = ({
         y1="47"
         x2="100"
         y2="19"
-        stroke={c.shirt}
+        stroke={resolvedColors.shirt}
         strokeWidth="4.2"
         strokeLinecap="round"
       />
+
+      {/* RIDER'S SKIRT — over the torso, so the top reads as tucked into it */}
+      {outfit?.legwear.type === 'skirt' && (
+        <RiderSkirt color={outfit.legwear.color} />
+      )}
 
       {/* NEAR ARM (his right) — static, always gripping the bar; drawn in front */}
       <line
@@ -280,7 +318,7 @@ const Biker: React.FC<BikerProps> = ({
         y1="20.5"
         x2="103"
         y2="34.5"
-        stroke={c.shirt}
+        stroke={resolvedColors.shirt}
         strokeWidth="2.8"
         strokeLinecap="round"
       />
@@ -289,18 +327,21 @@ const Biker: React.FC<BikerProps> = ({
         y1="34.5"
         x2="119.5"
         y2="44.5"
-        stroke={c.shirt}
+        stroke={resolvedColors.forearm}
         strokeWidth="2.8"
         strokeLinecap="round"
       />
-      <circle cx="119.5" cy="44.5" r="2.1" fill={c.skin} />
+      <circle cx="119.5" cy="44.5" r="2.1" fill={resolvedColors.skin} />
 
       {/* HEAD */}
-      <circle cx="103" cy="14" r="7" fill={c.skin} />
+      <circle cx="103" cy="14" r="7" fill={resolvedColors.skin} />
 
-      {/* HELMET — shallow cap over the top ~1/3 of the head with a small forward visor */}
-      <path d="M95.5 11.5 A8 8 0 0 1 110.5 11.5 Z" fill={c.helmet} />
-      <path d="M109 10 L114 11.3 L109 12 Z" fill={c.helmet} />
+      {/* HELMET — shell shape varies by rider (see Helmet.tsx) */}
+      <Helmet
+        type={helmetType}
+        color={resolvedColors.helmet}
+        ventColor={getHelmetVentColor(resolvedColors.helmet)}
+      />
     </svg>
   )
 }

@@ -1,9 +1,10 @@
 // Number of cities visible at once.
 export const TOP_N = 10
 
-// --- Row / bar layout (the full stacked layout the finale morph settles into) ---
-export const BAR_HEIGHT = 36 // bar thickness; leaves a 6px gap within the row pitch
-export const ROW_HEIGHT = 42 // vertical pitch between rows (bar + gap)
+// --- Row / bar layout ---
+// Bar thickness as a share of the row pitch in the finale's stacked layout; the
+// rest is the gap between bars. The pitch itself is derived (see getFinaleRows).
+export const FINALE_BAR_FILL = 36 / 42
 // The default biker viewBox has ~45px of empty padding each side; crop to the
 // bike's horizontal bounds so it hugs the end of the bar (matches AllTimeTripsBar).
 export const BIKER_VIEWBOX = '44 0 116 112'
@@ -21,10 +22,11 @@ export const REORDER_MS = 500
 // Highlight card fade in/out (ms). Real time, unlike the card's lifetime, which is
 // counted in race months.
 export const HIGHLIGHT_FADE_MS = 400
-// Clock pace: months advanced per real second at 1x. ~197 months, so the full
-// race is ~1.5 min at 1x.
-export const DEFAULT_MONTHS_PER_SEC = 1
-// Speed multipliers offered in the controls (relative to the 1x pace above).
+// Clock pace: months advanced per real second at 1x. The axis runs 223 months, so
+// the full race is ~1.9 min at 1x, ~3.7 min at 0.5x and ~28s at 4x.
+export const DEFAULT_MONTHS_PER_SEC = 2
+// Speed multipliers offered in the controls (relative to the 1x pace above), so
+// they all follow the pace above rather than needing to be restated.
 export const SPEED_OPTIONS = [0.5, 1, 2, 4] as const
 
 // Cap the race at a final month, inclusive: it runs only up to and including
@@ -34,6 +36,10 @@ export const FINAL_MONTH: { year: number; month: number } | null = {
   year: 2025,
   month: 12,
 }
+
+// A pass makes the overtaking biker wave. Short and brisk — it has to land while
+// the two bikes are still visibly alongside each other.
+export const PASS_WAVE_MS = 1000
 
 // --- Number formatting ---
 const compact = new Intl.NumberFormat('en', {

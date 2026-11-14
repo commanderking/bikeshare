@@ -7,12 +7,14 @@ type Props = {
   panelRight: number
   connectorRef: RefObject<SVGSVGElement>
   beamRef: RefObject<SVGPolygonElement>
+  leftLineRef: RefObject<SVGLineElement>
   rightLineRef: RefObject<SVGLineElement>
 }
 
-// The magnifier "beam": dashed lines from Paris's #2 marker down to the inset
-// panel's edges, with a faint fill between. The beam polygon and the right line
-// track the live marker position (set in paint); the left line is static.
+// The magnifier "beam": dashed lines from the span of Paris's bar the panel is
+// showing down to that panel's edges, with a faint fill between. Both lines and the
+// beam polygon track live positions (set in paint) — the right one the #2 marker,
+// the left one the last-place city still on screen.
 export default function ConnectorBand({
   top,
   height,
@@ -20,6 +22,7 @@ export default function ConnectorBand({
   panelRight,
   connectorRef,
   beamRef,
+  leftLineRef,
   rightLineRef,
 }: Props) {
   return (
@@ -37,6 +40,7 @@ export default function ConnectorBand({
         fill="rgba(133,191,66,0.12)"
       />
       <line
+        ref={leftLineRef}
         x1="0"
         y1="0"
         x2={panelLeft * 100}

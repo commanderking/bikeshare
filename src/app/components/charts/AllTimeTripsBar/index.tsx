@@ -55,10 +55,6 @@ export const AllTimeTripsBar = ({
 
   const [rootRef, trackWidth] = useTrackWidth()
 
-  // Reorder (FLIP): after each render, animate any row that changed vertical
-  // position from its previous spot to its new one. Row width transitions run
-  // in parallel (see CityRow), so a ranking change slides the rows and resizes
-  // the bars together in one synchronized phase.
   const [reduceMotion] = useState(prefersReducedMotion)
   const prevTops = useRef<Map<string, number>>(new Map())
   const flipRaf = useRef<number | null>(null)
@@ -68,7 +64,7 @@ export const AllTimeTripsBar = ({
     if (flipRaf.current) cancelAnimationFrame(flipRaf.current)
 
     const rows = Array.from(
-      container.querySelectorAll<HTMLElement>('[data-city]'),
+      container.querySelectorAll<HTMLElement>('[data-city]')
     )
     // Clear any in-flight transform so we measure true resting positions.
     for (const row of rows) {
@@ -80,7 +76,10 @@ export const AllTimeTripsBar = ({
     // that makes the next reorder animate the scroll distance instead of the swap.
     const tops = new Map<string, number>()
     for (const row of rows) {
-      tops.set(row.dataset.city!, row.getBoundingClientRect().top + window.scrollY)
+      tops.set(
+        row.dataset.city!,
+        row.getBoundingClientRect().top + window.scrollY
+      )
     }
 
     let moved = false

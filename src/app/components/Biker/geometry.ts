@@ -9,9 +9,16 @@ export const CRANK_LEN = 8 // crank arm length
 export const THIGH_LEN = 23.5 // lengthened so the leg still reaches the lower pedal
 export const SHIN_LEN = 22.5
 export const ANKLE_LIFT = 3.2 // shin ends this far above the pedal center, so its rounded end just meets the pedal's top
-export const GEAR_RATIO = 2.4 // wheel rotations per crank rotation — locks wheel & pedal speed
+// Wheel rotations per crank rotation — locks wheel & pedal speed. Low, like a
+// heavy bikeshare bike's easy gear, so legs can spin fast while the wheels stay
+// readable at 60 fps: the 6-spoke pattern repeats every 60°, so spin past
+// 30°/frame strobes backwards, and it reads clearly forward under ~20°/frame.
+export const GEAR_RATIO = 1.4
 export const INIT_CRANK_ANGLE = 0.4 // starting crank angle
-export const DEFAULT_SPEED = 0.032 // base crank angular velocity (radians/frame)
+export const DEFAULT_SPEED = 0.032 // base crank angular velocity (radians per SPEED_FRAME_MS)
+// Speeds are quoted per 60 fps frame, but the loop scales each step by elapsed
+// time — so cadence matches on 60Hz, 120Hz, and the recorder's fake clock.
+export const SPEED_FRAME_MS = 1000 / 60
 
 export const DEG_PER_RAD = 180 / Math.PI
 export const RAD_PER_DEG = Math.PI / 180
